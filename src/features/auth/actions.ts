@@ -1,10 +1,11 @@
 "use server";
 
 import { isAuthApiError } from "@supabase/supabase-js";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { returnServerError, returnValidationErrors } from "next-safe-action";
 
+import { profileTag } from "@/features/profiles/server/get-public-profile";
 import { safeNextPath } from "@/lib/auth/redirect";
 import { env } from "@/lib/env";
 import { actionClient, authActionClient } from "@/lib/safe-action";
@@ -66,6 +67,10 @@ export const signUpAction = actionClient
           throw error;
       }
     }
+
+    // If anyone visited /<username> before it existed, a cached "not found"
+    // could hide the new profile; expire it.
+    updateTag(profileTag(username));
 
     return { email };
   });

@@ -9,6 +9,7 @@ export function UsernameStatus({ status }: { status: Status }) {
   return (
     <span aria-live="polite" className="flex min-h-5 items-center gap-1.5">
       {status.state === "idle" && "Letters, numbers, periods and underscores."}
+      {status.state === "current" && "This is your current username."}
       {status.state === "checking" && (
         <>
           <Spinner aria-hidden className="size-3.5" />

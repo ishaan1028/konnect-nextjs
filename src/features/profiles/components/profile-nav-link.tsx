@@ -8,6 +8,7 @@ import { isNavItemActive } from "@/components/layout/nav-items";
 import { SideNavLinkView, TabBarLinkView } from "@/components/layout/nav-link";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { avatarUrl } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
 import { useCurrentUser } from "../hooks";
@@ -40,6 +41,7 @@ export function ProfileNavLink({ variant }: { variant: Variant }) {
       icon={
         <UserAvatar
           name={user.fullName}
+          src={avatarUrl(user.avatarPath)}
           size="sm"
           className={cn(
             "size-6.5",

@@ -11,6 +11,7 @@ import {
 
 import { Field, FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type TextFieldProps<TValues extends FieldValues> = {
   form: UseFormReturn<TValues>;
@@ -22,6 +23,9 @@ type TextFieldProps<TValues extends FieldValues> = {
    * spread so registration, label, error and description stay wired.
    */
   renderInput?: (inputProps: ComponentProps<"input">) => ReactNode;
+  /** Render a <textarea> instead of an <input>. */
+  multiline?: boolean;
+  rows?: number;
 } & Omit<ComponentProps<"input">, "name" | "form" | "children">;
 
 /**
@@ -42,6 +46,8 @@ export function TextField<TValues extends FieldValues>({
   label,
   description,
   renderInput,
+  multiline = false,
+  rows,
   ...inputProps
 }: TextFieldProps<TValues>) {
   const id = useId();
@@ -65,7 +71,14 @@ export function TextField<TValues extends FieldValues>({
   return (
     <Field data-invalid={error ? true : undefined}>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      {renderInput ? renderInput(props) : <Input {...props} />}
+      {renderInput ? (
+        renderInput(props)
+      ) : multiline ? (
+        // register() works the same on a textarea; only the element type differs.
+        <Textarea {...(props as ComponentProps<"textarea">)} rows={rows} />
+      ) : (
+        <Input {...props} />
+      )}
       {typeof description === "string" ? (
         <FieldDescription id={descriptionId}>{description}</FieldDescription>
       ) : (

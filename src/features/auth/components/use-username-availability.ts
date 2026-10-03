@@ -8,6 +8,7 @@ import { usernameSchema } from "../schemas";
 
 export type UsernameStatus =
   | { state: "idle" }
+  | { state: "current"; username: string }
   | { state: "checking"; username: string }
   | { state: "available" | "unavailable" | "error"; username: string };
 
@@ -26,9 +27,15 @@ const DEBOUNCE_MS = 400;
  *   during render or synchronously inside the effect.
  * - It's a hint for the user. The Server Action and the database decide.
  */
-export function useUsernameAvailability(rawUsername: string): UsernameStatus {
+export function useUsernameAvailability(
+  rawUsername: string,
+  /** The signed-in user's own username: unchanged, so no need to check it. */
+  currentUsername?: string,
+): UsernameStatus {
   const parsed = usernameSchema.safeParse(rawUsername);
-  const username = parsed.success ? parsed.data : null;
+  const normalized = parsed.success ? parsed.data : null;
+  const isCurrent = normalized !== null && normalized === currentUsername;
+  const username = isCurrent ? null : normalized;
   const [result, setResult] = useState<Result | null>(null);
 
   useEffect(() => {
@@ -50,6 +57,7 @@ export function useUsernameAvailability(rawUsername: string): UsernameStatus {
     };
   }, [username]);
 
+  if (isCurrent) return { state: "current", username: normalized };
   if (!username) return { state: "idle" };
   if (result?.username === username) return result;
   return { state: "checking", username };

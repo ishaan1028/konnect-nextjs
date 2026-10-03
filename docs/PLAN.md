@@ -393,7 +393,16 @@ For each phase I'll explain the concepts first, then build it with you in small 
     - Empty states
   - **Avatar:** change (crop with react-easy-crop → compress → upload to `avatars/<uid>/<uuid>.webp` → action updates `avatar_path` and deletes the old object) and remove (back to a generated initials avatar; no hard-coded default image URL needed).
   - **`/settings/profile`** form (RHF + Zod; username uniqueness handled both by a pre-check and the DB constraint error), with a sticky save bar.
-- **Done when:** you can view any profile, edit your own (it reflects instantly), and social-share previews render.
+- **Done when:** you can view any profile, edit your own (it reflects instantly), and social-share previews render. ✅
+- **Notes from the build:**
+  - Migration `avatars_storage`: a public `avatars` bucket (2 MB, image MIME allow-list) with RLS on `storage.objects` limiting each user to `avatars/<uid>/…`. pgTAP covers uploads and visibility. Storage blocks direct SQL deletes, so deletion is tested end to end.
+  - `getPublicProfile()` uses `"use cache"` + `cacheTag(profile:<username>)` + `cacheLife("hours")` with a cookie-less `createPublicClient()`. It serves the page, `generateMetadata` and the OG image. Edits call `updateTag` (old and new username on rename); sign-up expires a cached "not found" for the new username.
+  - The profile page is a cached public header, plus a streamed, viewer-specific "Edit profile" button (`ProfileActions` in a CurrentUserBoundary). It does a canonical lowercase `permanentRedirect`, `notFound()`, a canonical link and `og:type=profile`.
+  - Metadata streams into `<body>` for browsers; crawlers (bot user agents) get it in `<head>`.
+  - The avatar is cropped (react-easy-crop) to a 512² WebP in the browser (JPEG fallback) and uploaded **directly** to Storage with a random immutable name. A Server Action verifies the path prefix and that the file exists, saves it, and deletes the old file. The nav updates via `setQueryData`.
+  - `next.config` images: `remotePatterns` locked to our Storage public path, AVIF/WebP, `qualities: [75]`, `dangerouslyAllowLocalIP` only when Supabase is local. `UserAvatar` uses `getImageProps`.
+  - Settings form: server-rendered `defaultValue`s, so fields are never empty before hydration; Save is disabled until something changes; the username check knows your current name; a live bio counter.
+  - axe found a Phase 2 contrast bug (inactive settings tabs at 4.34:1), now fixed. e2e covers the profile and settings pages with axe and the console-error check.
 
 ### Phase 7: Social graph (follow, unfollow, remove follower, suggestions)
 
@@ -542,5 +551,5 @@ For each phase I'll explain the concepts first, then build it with you in small 
 ## 6. Progress tracker
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
-- [x] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
+- [x] 5 Query infra · [x] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

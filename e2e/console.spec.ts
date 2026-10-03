@@ -44,7 +44,13 @@ test.describe("signed in", () => {
     // Only listen from here on: full page loads of signed-in pages, where the
     // user-specific parts stream in and must hydrate cleanly.
     const errors = collectErrors(page);
-    for (const path of ["/", "/explore", "/settings/appearance", "/alex.demo"]) {
+    for (const path of [
+      "/",
+      "/explore",
+      "/settings/profile",
+      "/settings/appearance",
+      "/alex.demo",
+    ]) {
       await expectCleanLoad(page, path, errors);
     }
   });
