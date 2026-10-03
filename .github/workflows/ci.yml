@@ -16,8 +16,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      SKIP_ENV_VALIDATION: "1"
       NEXT_TELEMETRY_DISABLED: "1"
+      # Non-secret values so the build validates its config exactly like production.
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
     steps:
       - uses: actions/checkout@v7
 

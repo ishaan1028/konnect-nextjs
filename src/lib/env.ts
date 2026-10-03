@@ -23,6 +23,7 @@ export const env = createEnv({
   },
   // Treat `FOO=` in a .env file as unset so defaults/required checks apply.
   emptyStringAsUndefined: true,
-  // Lets CI lint/typecheck without real secrets: SKIP_ENV_VALIDATION=1 pnpm build
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  // No skipValidation escape hatch on purpose: skipping also drops the defaults
+  // above, so a "skipped" build crashes later with less helpful errors. CI and
+  // tests provide explicit non-secret values instead.
 });

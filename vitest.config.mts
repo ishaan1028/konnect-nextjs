@@ -12,7 +12,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     include: ["src/**/*.test.{ts,tsx}"],
     // Vitest doesn't load Next's .env files; give tests a predictable env instead.
-    env: { SKIP_ENV_VALIDATION: "1" },
+    env: { NEXT_PUBLIC_SITE_URL: "http://localhost:3000" },
     css: false,
   },
 });
