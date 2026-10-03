@@ -1,0 +1,2 @@
+-- Local development seed data. Runs after migrations on `pnpm db:reset`.
+-- Demo users and sample content are added in phase 4.

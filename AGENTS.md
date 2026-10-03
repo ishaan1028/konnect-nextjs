@@ -18,3 +18,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - shadcn components use **Base UI**: compose with the `render` prop (not Radix's `asChild`). Base UI's own docs ship in `node_modules/@base-ui/react/docs/`.
 - Props passed from Server to Client Components must be serializable: pass rendered elements (`icon={<Icon />}`), never component functions.
 - With Cache Components, anything reading request/URL data (`params`, `cookies()`, `usePathname()` under a dynamic route) belongs inside `<Suspense>` so the static shell can prerender.
+- Supabase: browser code uses `@/lib/supabase/client`, server code `@/lib/supabase/server`; `@/lib/supabase/admin` bypasses RLS and is for trusted server jobs only. Identify users with `getClaims()` via `@/lib/dal` (never `getSession()` on the server).
+- Every schema change is a migration (`pnpm db:new <name>`) that ships with RLS, grants and pgTAP tests, followed by `pnpm db:types`. Check with `pnpm db:lint && pnpm db:advisors && pnpm db:test`.

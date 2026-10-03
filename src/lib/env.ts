@@ -8,18 +8,23 @@ import { z } from "zod";
  *   component throws, so secrets can't leak into the browser bundle.
  * - `client` vars must start with NEXT_PUBLIC_ and are inlined at build time,
  *   which is why each one is listed explicitly in `experimental__runtimeEnv`.
- *
- * Supabase keys get added here in Phase 3.
  */
 export const env = createEnv({
   server: {
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+    // Bypasses Row Level Security. Only for trusted server code (lib/supabase/admin.ts).
+    SUPABASE_SECRET_KEY: z.string().startsWith("sb_secret_"),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),
+    NEXT_PUBLIC_SUPABASE_URL: z.url(),
+    // Safe to expose: it can only do what Row Level Security policies allow.
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().startsWith("sb_publishable_"),
   },
   experimental__runtimeEnv: {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
   },
   // Treat `FOO=` in a .env file as unset so defaults/required checks apply.
   emptyStringAsUndefined: true,

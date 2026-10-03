@@ -18,7 +18,11 @@ jobs:
     env:
       NEXT_TELEMETRY_DISABLED: "1"
       # Non-secret values so the build validates its config exactly like production.
+      # The build never contacts Supabase, so placeholders are enough here.
       NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_ci-placeholder
+      SUPABASE_SECRET_KEY: sb_secret_ci-placeholder
     steps:
       - uses: actions/checkout@v7
 
@@ -46,3 +50,39 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+  database:
+    name: Database (migrations, lint, advisors, RLS tests, types)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Only Postgres, not the whole stack: applies every migration from scratch,
+      # which proves they run cleanly on an empty database.
+      - name: Start Postgres and apply migrations
+        run: pnpm exec supabase db start
+
+      - name: Lint SQL
+        run: pnpm db:lint
+
+      - name: Security and performance advisors
+        run: pnpm db:advisors
+
+      - name: RLS and schema tests (pgTAP)
+        run: pnpm db:test
+
+      - name: Generated types match the schema
+        run: |
+          pnpm db:types
+          git diff --exit-code -- src/types/database.types.ts \
+            || (echo "::error::Database types are stale. Run 'pnpm db:types' and commit the result." && exit 1)

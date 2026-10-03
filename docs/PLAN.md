@@ -178,7 +178,7 @@ konnect-nextjs/
 ### 3.3 Data model (Postgres)
 
 ```sql
-profiles      (id uuid PK → auth.users ON DELETE CASCADE, username citext UNIQUE CHECK (~ '^[a-z0-9._]{3,20}$'),
+profiles      (id uuid PK → auth.users ON DELETE CASCADE, username text UNIQUE (stored lowercase) CHECK (private.is_valid_username),
                full_name, bio, avatar_path, followers_count, following_count, posts_count, created_at, updated_at)
 follows       (follower_id, following_id, created_at, PK(follower_id, following_id), CHECK follower_id <> following_id)
 posts         (id uuid PK, author_id, image_path, image_width, image_height, thumbhash, alt_text,
@@ -309,15 +309,17 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - `cookies()` is async and makes a route dynamic
   - `import "server-only"`
   - Generated DB types
-- **Build:**
-  - `supabase init`, `supabase start`
-  - Migration `0001_profiles.sql`: profiles, `handle_new_user` trigger, reserved usernames, RLS, `is_username_available`
-  - `pnpm db:types` script
-  - `lib/supabase/*` clients using the new **publishable / secret keys**
-  - `proxy.ts` refreshes the session with `supabase.auth.getClaims()` (verified locally against asymmetric JWT signing keys) and optimistically redirects
-  - `lib/dal.ts`: `verifySession = cache(...)`, `requireUser()`. The proxy isn't a security boundary; the DAL and RLS are.
-  - pgTAP test: a user can't update someone else's profile.
-- **Done when:** migrations apply from scratch (`supabase db reset`), types are generated, and the RLS test passes.
+- **Build (done):**
+  - Supabase CLI as a dev dependency (pinned in `package.json`); `pnpm db:*` scripts for start/stop/reset/new/lint/advisors/test/types.
+  - `config.toml`: `localhost` site URL, passwords ≥8 with letters + digits, email confirmation required, recent login needed to change password. Local Auth signs tokens with **ES256** by default.
+  - Migration `profiles`: table, `private` schema for helpers, `is_valid_username()` (format, reserved names), `handle_new_user` trigger, `updated_at` trigger, RLS (public read, owner update), **column-level grants** so counters can't be written, `is_username_available()` RPC. Username is lowercase `text` instead of `citext` (no extension needed).
+  - `pnpm db:types` generates and Prettier-formats `src/types/database.types.ts`; CI fails if it's stale.
+  - Clients: `lib/supabase/client.ts` (browser), `server.ts` (cookies, `server-only`), `admin.ts` (secret key, `server-only`), `proxy.ts` (`updateSession`).
+  - `src/proxy.ts` refreshes the session via `getClaims()` on every request, prefetches included (skipping them can burn single-use refresh tokens). Optimistic redirects arrive in phase 4.
+  - `lib/dal.ts`: `getSessionUser = cache(...)` and `requireUser()`. `"use cache: private"` will be evaluated in phase 5.
+  - pgTAP: 18 tests (trigger, validation, RLS, grants, cascade). Verified they fail when RLS is disabled.
+  - CI `database` job: migrations from scratch, SQL lint, security/performance advisors, pgTAP, generated-types drift check.
+- **Done when:** migrations apply from scratch (`supabase db reset`), types are generated, and the RLS test passes. ✅
 
 ### Phase 4: Authentication
 
@@ -521,6 +523,6 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ## 6. Progress tracker
 
-- [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [ ] 3 Supabase foundation · [ ] 4 Auth
+- [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [ ] 4 Auth
 - [ ] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus
