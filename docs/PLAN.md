@@ -23,62 +23,65 @@ Both old repos have a committed `.env`. `connect-api/.env` holds the **MongoDB U
 I read every model, route, service and component. Everything below must exist in Konnect.
 
 ### Backend: 6 models, 26 endpoints, 1 socket server
-| Area | Old endpoints / behaviour |
-|---|---|
-| **Auth** | `POST /auth/register` (fullName, userName, email, password; uniqueness checks) · `POST /auth/login` (returns a JWT and the user) · `PUT /auth/forgotpassword` (emails a reset link) · `PUT /auth/resetpassword` |
-| **Users** | `GET /users/profile` (me) · `GET /users/suggestions` (everyone I don't follow) · `PUT /users/edit` (fullName, userName, bio; username must be unique) · `PUT /users/editpic` (set or remove the avatar; deletes the old one from Cloudinary) · `DELETE /users/delete` (cascades posts, images, comments, likes and follow edges) · `PUT /users/follow/:id` · `PUT /users/unfollow/:id` · `PUT /users/remove/:id` (remove a follower) · `GET /users/following/:id` · `GET /users/followers/:id` |
-| **Posts** | `POST /posts/create` (photo, caption ≤100, location ≤30) · `GET /posts/user` (my grid) · `GET /posts/explore` (others' posts, newest first) · `GET /posts/feed` (me + following, with likes and comments) · `GET /posts/:id` · `PUT /posts/update/:id` (caption, location) · `PUT /posts/like/:id` (like/unlike) · `DELETE /posts/delete/:id` (also deletes the image and comments) |
-| **Comments** | `POST /comments/add/:postid` (≤100 chars) · `DELETE /comments/delete/:postid/:commentid` |
-| **Chat** | `POST /conversations` · `GET /conversations` · `POST /messages` · `GET /messages/:conversationId` · Socket.io `addUser` / `sendMessage` / `getMessage` with an in-memory user→socket map |
+
+| Area         | Old endpoints / behaviour                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Auth**     | `POST /auth/register` (fullName, userName, email, password; uniqueness checks) · `POST /auth/login` (returns a JWT and the user) · `PUT /auth/forgotpassword` (emails a reset link) · `PUT /auth/resetpassword`                                                                                                                                                                                                                                                                                |
+| **Users**    | `GET /users/profile` (me) · `GET /users/suggestions` (everyone I don't follow) · `PUT /users/edit` (fullName, userName, bio; username must be unique) · `PUT /users/editpic` (set or remove the avatar; deletes the old one from Cloudinary) · `DELETE /users/delete` (cascades posts, images, comments, likes and follow edges) · `PUT /users/follow/:id` · `PUT /users/unfollow/:id` · `PUT /users/remove/:id` (remove a follower) · `GET /users/following/:id` · `GET /users/followers/:id` |
+| **Posts**    | `POST /posts/create` (photo, caption ≤100, location ≤30) · `GET /posts/user` (my grid) · `GET /posts/explore` (others' posts, newest first) · `GET /posts/feed` (me + following, with likes and comments) · `GET /posts/:id` · `PUT /posts/update/:id` (caption, location) · `PUT /posts/like/:id` (like/unlike) · `DELETE /posts/delete/:id` (also deletes the image and comments)                                                                                                            |
+| **Comments** | `POST /comments/add/:postid` (≤100 chars) · `DELETE /comments/delete/:postid/:commentid`                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Chat**     | `POST /conversations` · `GET /conversations` · `POST /messages` · `GET /messages/:conversationId` · Socket.io `addUser` / `sendMessage` / `getMessage` with an in-memory user→socket map                                                                                                                                                                                                                                                                                                       |
 
 ### Frontend: 15 screens and components
+
 Login (prefilled demo credentials) · Register · Forgot password · Reset password · Home (feed + my mini-profile + "Suggestions for you" with Follow) · Post card (like, comment, likes modal, last 3 comments, "view all N comments", delete own comment, owner edit/delete, relative time) · Explore grid · New post (file, caption, location) · View post (full post, edit modal, delete modal, comments, likes modal) · Profile (avatar change/remove modal, post/follower/following counts, bio, posts grid, disabled IGTV/Reels/**Saved** tabs, logout) · Profile edit (+ delete account modal) · Followers (remove) · Following (unfollow) · Messenger (conversation list, "New chat" modal listing followed users without a chat yet, messages, auto-scroll, Enter to send, real-time) · 404 · Toasts · Loader.
 
 ### Problems in the old code (Konnect fixes all of these)
+
 These make a good "what I learned" story for interviews.
 
-| # | Problem | Fix in Konnect |
-|---|---|---|
-| 1 | Secrets committed (see §0) | Validated env plus `.env.example`; secrets only on the server |
-| 2 | The JWT contains the **whole user document, including the password hash**, and never expires | Supabase Auth: short-lived JWTs, refresh tokens, httpOnly cookies |
-| 3 | **No authorization:** anyone can delete or edit any post or comment; `createMessage` trusts `sender` from the body; any user can read any conversation (IDOR) | Postgres **Row Level Security** on every table, plus server-side checks in a data access layer |
-| 4 | Follows and likes use `$push`, so duplicates are possible and you can follow yourself | Composite primary keys and a `CHECK (follower_id <> following_id)` |
-| 5 | Forgot-password overwrites the **password field** with the token, locking the user out. The token never expires. A 404 response reveals which emails are registered | Supabase recovery flow (one-time, expiring `token_hash`, PKCE) with a generic "if that email exists…" message |
-| 6 | Account deletion loads **all posts** and loops queries without a transaction | `ON DELETE CASCADE` plus one admin call; storage cleaned by prefix |
-| 7 | Socket.io keeps an in-memory map, so it breaks on Vercel or with more than one instance. Sockets are unauthenticated. Messages to offline users are lost | Supabase Realtime: private channels authorized by RLS, persisted messages, presence |
-| 8 | No pagination; the feed populates everything | Keyset (cursor) pagination plus infinite scroll |
-| 9 | Token in `localStorage` (readable by XSS); state mutated in place (`post.comments.push`); a `filter` used where `map` was meant; `isLiked` never resets; one global spinner covers the whole page during a like; duplicate conversations | httpOnly cookies, immutable TanStack Query cache updates, optimistic UI, a `dm_key` unique constraint |
-| 10 | You can only view **your own** profile | Public `/[username]` profiles for everyone |
-| 11 | Clickable `<svg>` icons and `<span>`s; images without dimensions or meaningful alt text; Enter sends empty messages | Real `<button>`s with `aria-label`/`aria-pressed`, `next/image` with width and height, user-written alt text, zod-validated input |
-| 12 | Unsigned Cloudinary preset in the client with no size or type limits | Storage buckets with an RLS folder policy, a 5 MB limit and a MIME allow-list; images compressed client-side to WebP |
+| #   | Problem                                                                                                                                                                                                                                  | Fix in Konnect                                                                                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Secrets committed (see §0)                                                                                                                                                                                                               | Validated env plus `.env.example`; secrets only on the server                                                                     |
+| 2   | The JWT contains the **whole user document, including the password hash**, and never expires                                                                                                                                             | Supabase Auth: short-lived JWTs, refresh tokens, httpOnly cookies                                                                 |
+| 3   | **No authorization:** anyone can delete or edit any post or comment; `createMessage` trusts `sender` from the body; any user can read any conversation (IDOR)                                                                            | Postgres **Row Level Security** on every table, plus server-side checks in a data access layer                                    |
+| 4   | Follows and likes use `$push`, so duplicates are possible and you can follow yourself                                                                                                                                                    | Composite primary keys and a `CHECK (follower_id <> following_id)`                                                                |
+| 5   | Forgot-password overwrites the **password field** with the token, locking the user out. The token never expires. A 404 response reveals which emails are registered                                                                      | Supabase recovery flow (one-time, expiring `token_hash`, PKCE) with a generic "if that email exists…" message                     |
+| 6   | Account deletion loads **all posts** and loops queries without a transaction                                                                                                                                                             | `ON DELETE CASCADE` plus one admin call; storage cleaned by prefix                                                                |
+| 7   | Socket.io keeps an in-memory map, so it breaks on Vercel or with more than one instance. Sockets are unauthenticated. Messages to offline users are lost                                                                                 | Supabase Realtime: private channels authorized by RLS, persisted messages, presence                                               |
+| 8   | No pagination; the feed populates everything                                                                                                                                                                                             | Keyset (cursor) pagination plus infinite scroll                                                                                   |
+| 9   | Token in `localStorage` (readable by XSS); state mutated in place (`post.comments.push`); a `filter` used where `map` was meant; `isLiked` never resets; one global spinner covers the whole page during a like; duplicate conversations | httpOnly cookies, immutable TanStack Query cache updates, optimistic UI, a `dm_key` unique constraint                             |
+| 10  | You can only view **your own** profile                                                                                                                                                                                                   | Public `/[username]` profiles for everyone                                                                                        |
+| 11  | Clickable `<svg>` icons and `<span>`s; images without dimensions or meaningful alt text; Enter sends empty messages                                                                                                                      | Real `<button>`s with `aria-label`/`aria-pressed`, `next/image` with width and height, user-written alt text, zod-validated input |
+| 12  | Unsigned Cloudinary preset in the client with no size or type limits                                                                                                                                                                     | Storage buckets with an RLS folder policy, a 5 MB limit and a MIME allow-list; images compressed client-side to WebP              |
 
 ---
 
 ## 2. Stack (versions as of Oct 2026) and why
 
-| Concern | Choice | Why |
-|---|---|---|
-| Framework | **Next.js 16.3** (App Router, Turbopack, `cacheComponents`, React Compiler, `typedRoutes`) | Current major. Cache Components gives Partial Prerendering: a static shell plus streamed dynamic parts |
-| UI runtime | **React 19.x** | Actions, `useOptimistic`, `useEffectEvent`, `<Activity>` |
-| Language | **TypeScript**, strict + `noUncheckedIndexedAccess` | Pinned to whatever `create-next-app` 16.3 ships |
-| Backend | **Supabase**: Postgres, Auth, Storage, Realtime; CLI for local dev, migrations and type generation | Everything in one place, as you asked. RLS replaces hand-written authorization middleware |
-| Supabase SDK | `@supabase/supabase-js` 2.x + `@supabase/ssr` | Cookie-based sessions for Server Components, Actions, Route Handlers and the proxy |
-| Server state | **TanStack Query v5** (+ Devtools) | Server prefetch → `HydrationBoundary` → client cache; optimistic updates; infinite queries; realtime cache patches |
-| Forms | **React Hook Form** + `@hookform/resolvers` + **Zod 4** | One schema validates on both the client and the server |
-| Mutations | **next-safe-action 8** | Typed Server Actions with Zod input, an auth middleware and consistent error shapes |
-| UI kit | **shadcn/ui** (CLI v4) + Tailwind CSS v4 + `tw-animate-css` + **lucide-react** | Accessible Radix primitives that you own as source code |
-| Theming | **next-themes** (light/dark/system) + a custom accent preset (`green` default, `violet`) | See Phase 2 |
-| Toasts | **sonner** (shadcn's toast) | |
-| Motion | **motion** (`LazyMotion` + `m`) | Like-heart burst, page transitions; respects `prefers-reduced-motion` |
-| URL state | **nuqs** | Typed search params (`/explore?q=`, profile tabs) |
-| Dates | **date-fns 4** (replaces moment) | Tree-shakable; moment is deprecated |
-| Images | `next/image`, **browser-image-compression**, **react-easy-crop**, **thumbhash** | Resize to ≤1080px WebP before upload, crop like Instagram, stored blur placeholders (no layout shift) |
-| Lists | `react-intersection-observer` (infinite scroll), `@tanstack/react-virtual` (long chats) | |
-| Env | `@t3-oss/env-nextjs` | Build fails if an environment variable is missing or invalid |
-| Quality | ESLint (`eslint-config-next`), Prettier + `prettier-plugin-tailwindcss`, husky + lint-staged | |
-| Tests | **Vitest** + Testing Library + happy-dom · **Playwright** + `@axe-core/playwright` · **pgTAP** (`supabase test db`) for RLS | Reviewers look for RLS tests |
-| Observability | `@vercel/analytics`, `@vercel/speed-insights`; optional `@sentry/nextjs` | |
-| Hosting | **Vercel** (app) + **Supabase Cloud** (backend) | |
+| Concern       | Choice                                                                                                                  | Why                                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Framework     | **Next.js 16.3** (App Router, Turbopack, `cacheComponents`, React Compiler, `typedRoutes`)                              | Current major. Cache Components gives Partial Prerendering: a static shell plus streamed dynamic parts             |
+| UI runtime    | **React 19.x**                                                                                                          | Actions, `useOptimistic`, `useEffectEvent`, `<Activity>`                                                           |
+| Language      | **TypeScript**, strict + `noUncheckedIndexedAccess`                                                                     | Pinned to whatever `create-next-app` 16.3 ships                                                                    |
+| Backend       | **Supabase**: Postgres, Auth, Storage, Realtime; CLI for local dev, migrations and type generation                      | Everything in one place, as you asked. RLS replaces hand-written authorization middleware                          |
+| Supabase SDK  | `@supabase/supabase-js` 2.x + `@supabase/ssr`                                                                           | Cookie-based sessions for Server Components, Actions, Route Handlers and the proxy                                 |
+| Server state  | **TanStack Query v5** (+ Devtools)                                                                                      | Server prefetch → `HydrationBoundary` → client cache; optimistic updates; infinite queries; realtime cache patches |
+| Forms         | **React Hook Form** + `@hookform/resolvers` + **Zod 4**                                                                 | One schema validates on both the client and the server                                                             |
+| Mutations     | **next-safe-action 8**                                                                                                  | Typed Server Actions with Zod input, an auth middleware and consistent error shapes                                |
+| UI kit        | **shadcn/ui** (CLI v4) + Tailwind CSS v4 + `tw-animate-css` + **lucide-react**                                          | Accessible Radix primitives that you own as source code                                                            |
+| Theming       | **next-themes** (light/dark/system) + a custom accent preset (`green` default, `violet`)                                | See Phase 2                                                                                                        |
+| Toasts        | **sonner** (shadcn's toast)                                                                                             |                                                                                                                    |
+| Motion        | **motion** (`LazyMotion` + `m`)                                                                                         | Like-heart burst, page transitions; respects `prefers-reduced-motion`                                              |
+| URL state     | **nuqs**                                                                                                                | Typed search params (`/explore?q=`, profile tabs)                                                                  |
+| Dates         | **date-fns 4** (replaces moment)                                                                                        | Tree-shakable; moment is deprecated                                                                                |
+| Images        | `next/image`, **browser-image-compression**, **react-easy-crop**, **thumbhash**                                         | Resize to ≤1080px WebP before upload, crop like Instagram, stored blur placeholders (no layout shift)              |
+| Lists         | `react-intersection-observer` (infinite scroll), `@tanstack/react-virtual` (long chats)                                 |                                                                                                                    |
+| Env           | `@t3-oss/env-nextjs`                                                                                                    | Build fails if an environment variable is missing or invalid                                                       |
+| Quality       | ESLint (`eslint-config-next`), Prettier + `prettier-plugin-tailwindcss`, husky + lint-staged                            |                                                                                                                    |
+| Tests         | **Vitest** + Testing Library + jsdom · **Playwright** + `@axe-core/playwright` · **pgTAP** (`supabase test db`) for RLS | Reviewers look for RLS tests                                                                                       |
+| Observability | `@vercel/analytics`, `@vercel/speed-insights`; optional `@sentry/nextjs`                                                |                                                                                                                    |
+| Hosting       | **Vercel** (app) + **Supabase Cloud** (backend)                                                                         |                                                                                                                    |
 
 ### Decisions I made, and alternatives I considered
 
@@ -95,7 +98,7 @@ These make a good "what I learned" story for interviews.
    - **Upstash Ratelimit** on comment and post actions.
    - **Sentry** for errors.
    - Note: free Supabase projects **pause after 7 days of inactivity**. For a portfolio that recruiters open at random times, use a small cron ping or the Pro plan.
-7. **Product rules kept from the old app:** you can only *start* a chat with someone you follow; Explore shows other people's posts newest-first; suggestions are people you don't follow.
+7. **Product rules kept from the old app:** you can only _start_ a chat with someone you follow; Explore shows other people's posts newest-first; suggestions are people you don't follow.
 8. **Product improvements** (each marked ★ in the phases):
    - Public profiles for any user, user search, and real routes for post and follower modals
    - Alt text, cropping, blur placeholders, and a double-tap like
@@ -107,13 +110,14 @@ These make a good "what I learned" story for interviews.
    - Username: 3–20 characters of `[a-z0-9._]`, stored lowercase, with a reserved list such as `explore` and `settings`
    - Bio ≤150, caption ≤2,200, comment ≤500, message ≤2,000, location ≤50
    - Password ≥8 (set in Supabase Auth config)
-10. **Package manager:** pnpm (installed: 9.6; upgrade to 10). **Node:** 22 LTS (installed: 22.12).
+10. **Package manager:** pnpm 12. **Node:** 24 LTS (pinned in `.nvmrc`; needed for native TypeScript in `next.config.ts`). The project is `"type": "module"`.
 
 ---
 
 ## 3. Architecture
 
 ### 3.1 Folder structure (feature-based)
+
 ```
 konnect-nextjs/
 ├─ src/
@@ -153,24 +157,26 @@ konnect-nextjs/
 ```
 
 ### 3.2 Route map: old → new
-| Old (react-router) | New (App Router) | Notes |
-|---|---|---|
-| `/user/login` | `/login` | `?next=` return path |
-| `/user/register` | `/signup` | live username availability check |
-| `/user/forgotpassword` | `/forgot-password` | |
-| `/user/resetpassword/:jwt` | `/auth/confirm` → `/reset-password` | Route Handler + PKCE |
-| `/` `/home` | `/` | feed + suggestions rail |
-| `/newpost` | `/create` | crop, alt text, preview |
-| `/explore` | `/explore?q=` | ★ user search |
-| `/messenger` | `/messages`, `/messages/[conversationId]` | deep-linkable chats |
-| `/posts/:id`, `/posts/:id/:op` | `/p/[postId]` (+ modal over feed/grid) | edit/delete via a dropdown, not a URL segment |
-| `/profile` | `/[username]` | ★ any user's profile |
-| `/profile/edit` | `/settings/profile`, `/settings/account` | delete account in the danger zone |
-| `/profile/followers/:id`, `/profile/following/:id` | `/[username]/followers`, `/[username]/following` | intercepted modals |
-| `*` | `not-found.tsx` | |
-| — | `/settings/appearance`, `/saved` | ★ new |
+
+| Old (react-router)                                 | New (App Router)                                 | Notes                                         |
+| -------------------------------------------------- | ------------------------------------------------ | --------------------------------------------- |
+| `/user/login`                                      | `/login`                                         | `?next=` return path                          |
+| `/user/register`                                   | `/signup`                                        | live username availability check              |
+| `/user/forgotpassword`                             | `/forgot-password`                               |                                               |
+| `/user/resetpassword/:jwt`                         | `/auth/confirm` → `/reset-password`              | Route Handler + PKCE                          |
+| `/` `/home`                                        | `/`                                              | feed + suggestions rail                       |
+| `/newpost`                                         | `/create`                                        | crop, alt text, preview                       |
+| `/explore`                                         | `/explore?q=`                                    | ★ user search                                 |
+| `/messenger`                                       | `/messages`, `/messages/[conversationId]`        | deep-linkable chats                           |
+| `/posts/:id`, `/posts/:id/:op`                     | `/p/[postId]` (+ modal over feed/grid)           | edit/delete via a dropdown, not a URL segment |
+| `/profile`                                         | `/[username]`                                    | ★ any user's profile                          |
+| `/profile/edit`                                    | `/settings/profile`, `/settings/account`         | delete account in the danger zone             |
+| `/profile/followers/:id`, `/profile/following/:id` | `/[username]/followers`, `/[username]/following` | intercepted modals                            |
+| `*`                                                | `not-found.tsx`                                  |                                               |
+| —                                                  | `/settings/appearance`, `/saved`                 | ★ new                                         |
 
 ### 3.3 Data model (Postgres)
+
 ```sql
 profiles      (id uuid PK → auth.users ON DELETE CASCADE, username citext UNIQUE CHECK (~ '^[a-z0-9._]{3,20}$'),
                full_name, bio, avatar_path, followers_count, following_count, posts_count, created_at, updated_at)
@@ -184,6 +190,7 @@ conversations (id uuid PK, dm_key text UNIQUE, last_message_at, last_message_pre
 conversation_participants (conversation_id, user_id, last_read_at, PK)
 messages      (id uuid PK, conversation_id, sender_id, body CHECK 1..2000, created_at)
 ```
+
 - **Indexes:** `posts(author_id, created_at desc, id desc)`, `posts(created_at desc, id desc)`, `follows(following_id)`, `post_likes(user_id)`, `comments(post_id, created_at)`, `messages(conversation_id, created_at desc)`, `conversation_participants(user_id)`, and `pg_trgm` on `profiles.username/full_name` for search.
 - **Triggers:**
   - `handle_new_user` (auth.users → profiles, from signup metadata)
@@ -200,7 +207,7 @@ messages      (id uuid PK, conversation_id, sender_id, body CHECK 1..2000, creat
 - **RLS** (using `(select auth.uid())` for performance):
   - profiles, posts, comments, follows and likes are readable by everyone; writes only on your own rows
   - `posts` UPDATE is column-restricted (`grant update (caption, location, alt_text)`) so counters can't be tampered with
-  - follows DELETE is allowed when you're either side of the edge (unfollow *or* remove a follower)
+  - follows DELETE is allowed when you're either side of the edge (unfollow _or_ remove a follower)
   - comments DELETE: comment author **or** post owner
   - chat tables: participants only, via a security-definer `is_participant()` to avoid policy recursion
   - `realtime.messages`: participants only, for topic `conversation:<id>`
@@ -209,6 +216,7 @@ messages      (id uuid PK, conversation_id, sender_id, body CHECK 1..2000, creat
   - insert/update/delete only where `(storage.foldername(name))[1] = auth.uid()::text`
 
 ### 3.4 Data flow pattern used everywhere
+
 ```
 Server Component (page)                 Client Component
 ───────────────────────                 ─────────────────
@@ -219,6 +227,7 @@ void qc.prefetchQuery(        │  dehydrate  ┌─> useSuspenseQuery(feedOptio
 <HydrationBoundary>           │             │   realtime event → qc.setQueryData(...)
   <Suspense fallback=Skeleton>┘             └─> invalidate / updateTag on settle
 ```
+
 - One `queryOptions()` factory per query (`features/*/queries.ts`) with a central key factory (`lib/query/keys.ts`).
 - `getQueryClient()` creates a new client per request on the server and a singleton in the browser. `shouldDehydrateQuery` includes pending queries, so prefetches can **stream**.
 - Defaults: `staleTime: 60s`; `refetchOnWindowFocus` on for feed and chat lists.
@@ -228,6 +237,7 @@ void qc.prefetchQuery(        │  dehydrate  ┌─> useSuspenseQuery(feedOptio
 ## 4. Build plan, phase by phase
 
 Every phase has four parts:
+
 - **Learn:** the Next.js concepts it teaches
 - **Build:** the tasks
 - **Done when:** the acceptance check
@@ -236,12 +246,14 @@ Every phase has four parts:
 For each phase I'll explain the concepts first, then build it with you in small commits, explaining every file. You can ask to write any piece yourself and have me review it.
 
 ### Phase 0: Prep (½ day)
+
 - Rotate the secrets (§0). Create Supabase, Vercel and GitHub (`konnect-nextjs`) accounts and a project.
 - Install **Docker Desktop or OrbStack**; the local Supabase stack needs it, and Docker isn't currently on your PATH.
 - Upgrade the Supabase CLI (you have 2.90; latest is 2.119) and pnpm.
 - **Done when:** `supabase --version` and `docker info` both work.
 
 ### Phase 1: Scaffold and tooling
+
 - **Learn:**
   - App Router mental model: `app/` file conventions (`layout`, `page`, `loading`, `error`, `not-found`)
   - Server Components by default; `"use client"` boundaries
@@ -259,6 +271,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** `pnpm dev`, `pnpm build`, `pnpm test` and CI are all green.
 
 ### Phase 2: Design system, themes and app shell
+
 - **Learn:**
   - Root layout and the `<html>`/`<body>` contract
   - `next/font` (zero-CLS self-hosted fonts)
@@ -288,6 +301,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** you can click every route, light/dark/system × green/violet all work with no flash on reload, and Lighthouse a11y is 100 on the shell.
 
 ### Phase 3: Supabase foundation
+
 - **Learn:**
   - **`proxy.ts`** (Next 16's name for middleware): what it should and shouldn't do; `matcher`
   - The three Supabase clients and why: browser, server (cookies), and admin (`server-only`, secret key)
@@ -305,6 +319,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** migrations apply from scratch (`supabase db reset`), types are generated, and the RLS test passes.
 
 ### Phase 4: Authentication
+
 - **Learn:**
   - Server Actions (`"use server"`), next-safe-action middleware (auth context)
   - React Hook Form + Zod shared schemas
@@ -324,6 +339,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** the whole auth loop works locally, including password reset, and e2e is green.
 
 ### Phase 5: TanStack Query infrastructure and the current user
+
 - **Learn:**
   - Server vs client data fetching, and when to use each
   - The `HydrationBoundary` / `dehydrate` pattern
@@ -339,6 +355,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** the shell shows the real user with no loading flash, and Devtools shows the hydrated cache.
 
 ### Phase 6: Profiles and settings
+
 - **Learn:**
   - Dynamic segments (`[username]`) and async `params`
   - `notFound()`
@@ -358,6 +375,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** you can view any profile, edit your own (it reflects instantly), and social-share previews render.
 
 ### Phase 7: Social graph (follow, unfollow, remove follower, suggestions)
+
 - **Learn:**
   - **Parallel routes (`@modal`) + intercepting routes (`(.)`)**: followers open as a modal on soft navigation and as a full page on refresh or share
   - `useMutation` with **optimistic updates** and rollback
@@ -371,6 +389,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** counts stay correct under rapid clicking, the modal routes work with back and refresh, and the RLS tests pass.
 
 ### Phase 8: Creating, editing and deleting posts
+
 - **Learn:**
   - Heavy client work in client components
   - `next/dynamic` for code-splitting (the cropper only loads on `/create`)
@@ -389,6 +408,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** posting is quick on mobile, images never shift layout, and you can't edit someone else's post even by calling the API directly.
 
 ### Phase 9: Feed, Explore, post detail and likes
+
 - **Learn:**
   - `useInfiniteQuery` + `prefetchInfiniteQuery`
   - Keyset pagination
@@ -409,6 +429,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** the feed scrolls endlessly with 60fps-feeling interactions, the first image is the LCP and is preloaded, and Lighthouse performance is ≥95 on mobile for `/p/[id]`.
 
 ### Phase 10: Comments
+
 - **Learn:** optimistic inserts with temporary IDs, focus management, `aria-live` for new content.
 - **Build:**
   - Migration `0006_comments.sql`: table, counters, RLS (author or post owner can delete).
@@ -417,6 +438,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** commenting feels instant, deleting works for both roles, and the RLS tests pass.
 
 ### Phase 11: Real-time chat
+
 - **Learn:**
   - Where client-only side effects belong (`useEffect` + cleanup)
   - `useEffectEvent` for stable handlers
@@ -440,6 +462,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** two browsers chat instantly; a refresh keeps the history; a user can't subscribe to or read someone else's conversation (pgTAP plus a manual check).
 
 ### Phase 12: Account deletion and danger zone
+
 - **Learn:** the admin client (secret key) only in `server-only` modules; why the delete happens server-side; sign-out and cache purge.
 - **Build:** `/settings/account`:
   - Type your username to confirm
@@ -448,6 +471,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Done when:** after deletion, no rows or objects with that UID remain (verified by a SQL check in tests).
 
 ### Phase 13: Polish, accessibility, SEO and performance pass
+
 - **SEO and PWA:** `sitemap.ts` (public profiles and posts), `robots.ts`, `manifest.ts` + icons, canonical URLs, per-page titles via a `title.template`.
 - **Accessibility audit:**
   - Keyboard-only walkthrough; focus rings; Radix dialogs restore focus
@@ -464,6 +488,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - **Optional:** Upstash rate limiting on comment, post and follow actions.
 
 ### Phase 14: Production deploy
+
 - Supabase Cloud project:
   - `supabase link`, `supabase db push`
   - Auth: Site URL, redirect URLs, **custom SMTP (Resend)**, email templates, min password length, enable asymmetric JWT keys
@@ -475,6 +500,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - A README with an architecture diagram, decisions (from §2), Lighthouse scores, a test matrix and screenshots for both themes. Reviewers read this first.
 
 ### Bonus phases (after parity)
+
 - **Saved posts** (the old UI's disabled "Saved" tab), using `saved_posts` and a bookmark toggle.
 - **Notifications:** likes, comments and follows written by triggers into a `notifications` table, with a realtime badge and an activity page.
 - **OAuth** sign-in (Google or GitHub) through Supabase.
@@ -483,6 +509,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 ---
 
 ## 5. Conventions I'll follow throughout
+
 - Server Components by default; client components are small leaves (buttons, forms, realtime).
 - Never `select('*')` in app code; select explicit columns that match a typed DTO.
 - Zod schemas live in `features/*/schemas.ts` and are imported by both the form and the action.
@@ -492,6 +519,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - Conventional Commits; one commit or PR per phase step.
 
 ## 6. Progress tracker
-- [ ] 0 Prep · [ ] 1 Scaffold · [ ] 2 Design system & themes · [ ] 3 Supabase foundation · [ ] 4 Auth
+
+- [x] 0 Prep · [x] 1 Scaffold · [ ] 2 Design system & themes · [ ] 3 Supabase foundation · [ ] 4 Auth
 - [ ] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

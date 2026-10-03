@@ -7,3 +7,11 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+# Konnect project conventions
+
+- The roadmap, architecture and decisions live in `docs/PLAN.md`; follow its phase order and §5 conventions.
+- Package manager: pnpm. Before committing run `pnpm check` (typecheck, lint, format, unit tests).
+- Server Components by default; add `"use client"` only on small interactive leaves.
+- Environment variables are read only through `@/lib/env`, never `process.env` directly in app code.
+- Feature code lives in `src/features/<feature>/`; shared primitives in `src/components/` and `src/lib/`.
