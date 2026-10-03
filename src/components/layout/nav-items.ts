@@ -1,12 +1,4 @@
-import {
-  Bookmark,
-  CircleUserRound,
-  Compass,
-  House,
-  type LucideIcon,
-  MessageCircle,
-  SquarePlus,
-} from "lucide-react";
+import { Bookmark, Compass, House, type LucideIcon, MessageCircle, SquarePlus } from "lucide-react";
 import type { Route } from "next";
 
 export type NavItem = {
@@ -15,10 +7,8 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
-// TODO(phase 5): point Profile at the signed-in user's /[username].
-// `satisfies Route<…>` still validates the literal against our routes; `as Route`
-// then widens it so it can sit in a list typed as NavItem (per the Next.js docs).
-const PROFILE_HREF = "/demo" satisfies Route<"/demo"> as Route;
+// "Profile" isn't listed here: its link depends on who's signed in, so it's
+// rendered separately by ProfileNavLink (features/profiles).
 
 export const primaryNavItems = [
   { href: "/", label: "Home", icon: House },
@@ -26,16 +16,14 @@ export const primaryNavItems = [
   { href: "/messages", label: "Messages", icon: MessageCircle },
   { href: "/create", label: "Create", icon: SquarePlus },
   { href: "/saved", label: "Saved", icon: Bookmark },
-  { href: PROFILE_HREF, label: "Profile", icon: CircleUserRound },
 ] as const satisfies readonly NavItem[];
 
-// Instagram-style bottom bar: five thumb-reachable destinations.
+// Instagram-style bottom bar: four destinations, plus Profile at the end.
 export const mobileTabItems = [
   { href: "/", label: "Home", icon: House },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/create", label: "Create", icon: SquarePlus },
   { href: "/messages", label: "Messages", icon: MessageCircle },
-  { href: PROFILE_HREF, label: "Profile", icon: CircleUserRound },
 ] as const satisfies readonly NavItem[];
 
 /** "/" matches only itself; other items also match their sub-routes. */

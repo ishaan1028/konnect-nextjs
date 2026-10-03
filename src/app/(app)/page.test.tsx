@@ -1,7 +1,13 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import HomePage from "./page";
+
+// The greeting is an async Server Component that reads the session; Vitest
+// can't render those, so it's stubbed here and covered by e2e/shell.spec.ts.
+vi.mock("@/features/profiles/components/current-user-boundary", () => ({
+  CurrentUserBoundary: () => null,
+}));
 
 describe("HomePage", () => {
   it("has a single, accessible main heading", () => {

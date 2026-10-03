@@ -1,11 +1,14 @@
 import { Compass, ImagePlus, Images, UsersRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { ComingSoon } from "@/components/shared/coming-soon";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
+import { WelcomeGreeting } from "@/features/profiles/components/welcome-greeting";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -26,7 +29,15 @@ export default function HomePage() {
             aria-hidden
             className="absolute -top-20 -right-16 size-64 rounded-full bg-brand-vivid opacity-80 blur-3xl"
           />
-          <p className="relative text-sm font-medium text-white/80">Welcome to Konnect</p>
+          <p className="relative text-sm font-medium text-white/80">
+            {/* Partial Prerendering in one line: the hero is static, only the
+                name streams in, and the fallback occupies the same space. */}
+            <Suspense fallback="Welcome to Konnect">
+              <CurrentUserBoundary>
+                <WelcomeGreeting />
+              </CurrentUserBoundary>
+            </Suspense>
+          </p>
           <h2 className="relative mt-1 text-4xl font-extrabold">Your people, your moments.</h2>
           <p className="relative mt-2 max-w-sm text-white/85">
             Share photos, follow friends and chat in real time.

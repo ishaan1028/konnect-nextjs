@@ -7,6 +7,7 @@ import { ThemeSync } from "@/components/theme/theme-sync";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@/lib/env";
+import { QueryProvider } from "@/lib/query/provider";
 
 import "./globals.css";
 
@@ -51,7 +52,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full">
         <SkipLink />
-        <TooltipProvider>{children}</TooltipProvider>
+        <QueryProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </QueryProvider>
         <Toaster position="top-center" />
         <ThemeSync />
       </body>

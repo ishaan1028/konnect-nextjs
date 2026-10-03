@@ -22,6 +22,9 @@ export default defineConfig({
   retries: isCI ? 2 : 0,
   workers: isCI ? 2 : undefined,
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : [["list"]],
+  // The dev server compiles each route on its first visit, which can exceed the
+  // default 5s under parallel load. Production responds fast, so keep it strict.
+  expect: { timeout: useProductionServer ? 5_000 : 15_000 },
   use: {
     baseURL,
     trace: "on-first-retry",

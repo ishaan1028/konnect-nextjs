@@ -364,7 +364,16 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - `meQueryOptions` + `useCurrentUser()`
   - User menu (avatar, theme switcher, logout) in the shell, prefetched on the server
   - Global mutation error → sonner toast
-- **Done when:** the shell shows the real user with no loading flash, and Devtools shows the hydrated cache.
+- **Done when:** the shell shows the real user with no loading flash, and Devtools shows the hydrated cache. ✅
+- **Notes from the build:**
+  - `lib/query/`: shared `makeQueryClient` (60s staleTime, dehydrates pending queries), a request-scoped server client (`React.cache`), a browser singleton with a global mutation-error toast, lazy dev-only Devtools, and a key factory.
+  - `features/profiles/queries.ts` defines `currentUserQueryOptions(supabase)`, used by both server prefetch and client read. `CurrentUserBoundary` (server) prefetches it, dehydrates it and wraps a `<HydrationBoundary>`; `useCurrentUser()` reads it with `useSuspenseQuery`.
+  - Small Suspense boundaries stream only the user-specific UI (nav profile avatar, More-menu account items, home greeting). Every app route remains ◐ Partial Prerender.
+  - **Bug 1:** reading the prefetched query _outside_ its HydrationBoundary during SSR created an empty cache entry, so hydration was deferred to an effect that never runs on the server, and the server and client rendered different users. Rule: only read boundary-hydrated queries inside the boundary. `e2e/console.spec.ts` now also loads signed-in pages.
+  - **Bug 2:** swapping a fallback More menu for the "real" one closed a menu the user had just opened. Rule: stream _slots inside_ interactive components, never swap the component itself.
+  - Logging out runs `queryClient.clear()`; an e2e test switches accounts and asserts no stale data.
+  - `"use cache: private"` was evaluated and not adopted: the TanStack cache already keeps the user in the browser across navigations.
+  - Hidden/background tabs don't run animation frames, and React 19.2 reveals streamed Suspense content on the next frame, so a hidden preview pane can look "stuck". That isn't an app bug.
 
 ### Phase 6: Profiles and settings
 
@@ -533,5 +542,5 @@ For each phase I'll explain the concepts first, then build it with you in small 
 ## 6. Progress tracker
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
-- [ ] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
+- [x] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

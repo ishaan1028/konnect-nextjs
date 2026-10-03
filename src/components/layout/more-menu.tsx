@@ -1,8 +1,8 @@
 "use client";
 
-import { Bookmark, LogOut, Menu, Settings } from "lucide-react";
+import { Bookmark, Menu, Settings } from "lucide-react";
 import Link from "next/link";
-import { useAction } from "next-safe-action/hooks";
+import type { ReactNode } from "react";
 
 import { ModeIcon } from "@/components/theme/mode-icon";
 import {
@@ -20,23 +20,28 @@ import {
   DropdownMenuGroup,
   DropdownMenuLabel,
   DropdownMenuLinkItem,
-  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { signOutAction } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 
 type MoreMenuProps = {
   /** "rail": full-width row in the side nav. "icon": compact button for the mobile header. */
   variant: "rail" | "icon";
+  /**
+   * The account section (who's signed in, Log in / Log out). It's a *slot*
+   * filled by Server Components so that only these items stream in: the menu
+   * itself is always the same instance, so its open state survives the moment
+   * the user's data arrives. (Swapping a whole fallback menu for a "real" one
+   * would close a menu someone had just opened.)
+   */
+  account?: ReactNode;
 };
 
-export function MoreMenu({ variant }: MoreMenuProps) {
+export function MoreMenu({ variant, account }: MoreMenuProps) {
   const { mode, accent, setMode, setAccent } = useTheme();
-  const signOut = useAction(signOutAction);
 
   return (
     <DropdownMenu>
@@ -107,18 +112,12 @@ export function MoreMenu({ variant }: MoreMenuProps) {
           </DropdownMenuRadioGroup>
         </DropdownMenuGroup>
 
-        <DropdownMenuSeparator />
-
-        {/* The Server Action signs out on the server (revoking the refresh
-            token), clears cached pages, and redirects to /login. */}
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={signOut.isPending}
-          onClick={() => signOut.execute()}
-        >
-          <LogOut aria-hidden />
-          {signOut.isPending ? "Logging out…" : "Log out"}
-        </DropdownMenuItem>
+        {account && (
+          <>
+            <DropdownMenuSeparator />
+            {account}
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

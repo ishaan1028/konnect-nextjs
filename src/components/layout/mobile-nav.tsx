@@ -1,6 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Logo } from "@/components/brand/logo";
+import { AccountMenuItems } from "@/features/auth/components/account-menu-items";
+import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
+import {
+  ProfileNavLink,
+  ProfileNavLinkSkeleton,
+} from "@/features/profiles/components/profile-nav-link";
 
 import { MoreMenu } from "./more-menu";
 import { mobileTabItems } from "./nav-items";
@@ -17,7 +24,17 @@ export function MobileHeader() {
       >
         <Logo />
       </Link>
-      <MoreMenu variant="icon" />
+      <MoreMenu
+        variant="icon"
+        account={
+          // Only the account items stream in; the menu stays the same instance.
+          <Suspense fallback={null}>
+            <CurrentUserBoundary>
+              <AccountMenuItems />
+            </CurrentUserBoundary>
+          </Suspense>
+        }
+      />
     </header>
   );
 }
@@ -35,6 +52,13 @@ export function BottomTabBar() {
             <TabBarLink href={href} label={label} icon={<Icon aria-hidden />} />
           </li>
         ))}
+        <li>
+          <Suspense fallback={<ProfileNavLinkSkeleton variant="tab" />}>
+            <CurrentUserBoundary>
+              <ProfileNavLink variant="tab" />
+            </CurrentUserBoundary>
+          </Suspense>
+        </li>
       </ul>
     </nav>
   );

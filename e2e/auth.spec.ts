@@ -1,20 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
+import { logIn, logOut } from "./support/auth";
 import { getEmailLink } from "./support/mailpit";
 import { createConfirmedUser, demoUser, uniqueUser } from "./support/users";
-
-async function logIn(page: Page, email: string, password: string) {
-  await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Log in" }).click();
-}
-
-async function logOut(page: Page) {
-  await page.getByRole("button", { name: "More", exact: true }).click();
-  await page.getByRole("menuitem", { name: "Log out" }).click();
-  await expect(page).toHaveURL("/login");
-}
 
 test.describe("sign up", () => {
   test("creates an account, confirms it by email and lands on the feed", async ({ page }) => {

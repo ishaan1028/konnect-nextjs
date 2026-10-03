@@ -21,13 +21,13 @@ type NavLinkProps = {
   icon: ReactNode;
 };
 
-type NavLinkViewProps = NavLinkProps & { active: boolean };
+export type NavLinkViewProps = NavLinkProps & { active: boolean };
 
 // The active page gets a heavier icon stroke, driven by aria-current, so
 // accessibility state and visual state can never disagree.
 const activeIcon = "[&[aria-current=page]_svg]:stroke-[2.6]";
 
-function SideNavLinkView({ href, label, icon, active }: NavLinkViewProps) {
+export function SideNavLinkView({ href, label, icon, active }: NavLinkViewProps) {
   return (
     <Tooltip>
       <TooltipTrigger
@@ -57,7 +57,7 @@ function SideNavLinkView({ href, label, icon, active }: NavLinkViewProps) {
   );
 }
 
-function TabBarLinkView({ href, label, icon, active }: NavLinkViewProps) {
+export function TabBarLinkView({ href, label, icon, active }: NavLinkViewProps) {
   return (
     <Link
       href={href}

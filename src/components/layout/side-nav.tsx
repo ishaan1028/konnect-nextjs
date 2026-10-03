@@ -1,6 +1,13 @@
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { Logo, LogoMark } from "@/components/brand/logo";
+import { AccountMenuItems } from "@/features/auth/components/account-menu-items";
+import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
+import {
+  ProfileNavLink,
+  ProfileNavLinkSkeleton,
+} from "@/features/profiles/components/profile-nav-link";
 
 import { MoreMenu } from "./more-menu";
 import { primaryNavItems } from "./nav-items";
@@ -31,10 +38,29 @@ export function SideNav() {
               <SideNavLink href={href} label={label} icon={<Icon aria-hidden />} />
             </li>
           ))}
+          <li>
+            {/* The only user-specific part of the rail: it streams in, while
+                everything else here is part of the prerendered static shell. */}
+            <Suspense fallback={<ProfileNavLinkSkeleton variant="rail" />}>
+              <CurrentUserBoundary>
+                <ProfileNavLink variant="rail" />
+              </CurrentUserBoundary>
+            </Suspense>
+          </li>
         </ul>
       </nav>
 
-      <MoreMenu variant="rail" />
+      <MoreMenu
+        variant="rail"
+        account={
+          // Only the account items stream in; the menu stays the same instance.
+          <Suspense fallback={null}>
+            <CurrentUserBoundary>
+              <AccountMenuItems />
+            </CurrentUserBoundary>
+          </Suspense>
+        }
+      />
     </header>
   );
 }

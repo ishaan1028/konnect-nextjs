@@ -23,3 +23,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Forms: React Hook Form + `useHookFormAction` + shared Zod schema in `features/*/schemas.ts`; use `@/components/forms/text-field` (uncontrolled `register`, no `defaultValues`). Never put block elements inside `FieldDescription` (it's a `<p>`); hydration errors wipe user input.
 - Server Actions are built from `@/lib/safe-action` (`actionClient` / `authActionClient`) with `.metadata({ actionName })`; return expected failures with `returnServerError` / `returnValidationErrors`.
 - E2E: `pnpm test:e2e` (dev server) or `pnpm test:e2e:prod`; needs `pnpm db:start`.
+- TanStack Query: shared `queryOptions` in `features/*/queries.ts` take the Supabase client as a parameter; keys only from `@/lib/query/keys`. Prefetch on the server inside a small `<Suspense>` + boundary (`CurrentUserBoundary` pattern), read with `useSuspenseQuery` *inside* that boundary only, never from components rendered outside it.
+- Don't swap interactive components between a Suspense fallback and resolved content (state like an open menu is lost); stream a slot *inside* them instead.
