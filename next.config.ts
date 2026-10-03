@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   // <Link href> and router.push() are type-checked against real routes.
   typedRoutes: true,
   poweredByHeader: false,
+  // Dev-only badge; bottom-left would cover the side rail's "More" button.
+  devIndicators: { position: "bottom-right" },
+  // Handled before rendering (no page needed): /settings opens its first tab.
+  async redirects() {
+    return [{ source: "/settings", destination: "/settings/profile", permanent: false }];
+  },
 };
 
 export default nextConfig;

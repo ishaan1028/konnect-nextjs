@@ -1,27 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
 
+import { SkipLink } from "@/components/layout/skip-link";
+import { ThemeScript } from "@/components/theme/theme-script";
+import { ThemeSync } from "@/components/theme/theme-sync";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@/lib/env";
 
 import "./globals.css";
 
-// next/font downloads the fonts at build time and self-hosts them: no request
-// to Google at runtime and no layout shift while the font loads.
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+// next/font downloads fonts at build time and self-hosts them: no runtime
+// request to Google, and fallback metrics are adjusted so text doesn't shift.
+const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+// Display face for headings and the wordmark.
+const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  // Lets pages use relative URLs for canonical links and OG images.
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
   title: {
-    // A child page that exports `title: "Explore"` renders as "Explore · Konnect".
     template: "%s · Konnect",
     default: "Konnect",
   },
@@ -32,12 +30,31 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Mobile browser chrome follows the OS scheme (matches our background tokens).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    // suppressHydrationWarning: the inline theme script adds the `dark` class and
+    // `data-accent` before React hydrates. This only silences <html> itself.
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} ${bricolage.variable} h-full antialiased`}
+    >
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full">
+        <SkipLink />
+        <TooltipProvider>{children}</TooltipProvider>
+        <Toaster position="top-center" />
+        <ThemeSync />
+      </body>
     </html>
   );
 }

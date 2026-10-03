@@ -15,3 +15,6 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Server Components by default; add `"use client"` only on small interactive leaves.
 - Environment variables are read only through `@/lib/env`, never `process.env` directly in app code.
 - Feature code lives in `src/features/<feature>/`; shared primitives in `src/components/` and `src/lib/`.
+- shadcn components use **Base UI**: compose with the `render` prop (not Radix's `asChild`). Base UI's own docs ship in `node_modules/@base-ui/react/docs/`.
+- Props passed from Server to Client Components must be serializable: pass rendered elements (`icon={<Icon />}`), never component functions.
+- With Cache Components, anything reading request/URL data (`params`, `cookies()`, `usePathname()` under a dynamic route) belongs inside `<Suspense>` so the static shell can prerender.

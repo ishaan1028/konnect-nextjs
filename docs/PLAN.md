@@ -69,8 +69,8 @@ These make a good "what I learned" story for interviews.
 | Server state  | **TanStack Query v5** (+ Devtools)                                                                                      | Server prefetch → `HydrationBoundary` → client cache; optimistic updates; infinite queries; realtime cache patches |
 | Forms         | **React Hook Form** + `@hookform/resolvers` + **Zod 4**                                                                 | One schema validates on both the client and the server                                                             |
 | Mutations     | **next-safe-action 8**                                                                                                  | Typed Server Actions with Zod input, an auth middleware and consistent error shapes                                |
-| UI kit        | **shadcn/ui** (CLI v4) + Tailwind CSS v4 + `tw-animate-css` + **lucide-react**                                          | Accessible Radix primitives that you own as source code                                                            |
-| Theming       | **next-themes** (light/dark/system) + a custom accent preset (`green` default, `violet`)                                | See Phase 2                                                                                                        |
+| UI kit        | **shadcn/ui** (CLI v4, `base-luma` style) + **Base UI** + Tailwind CSS v4 + `tw-animate-css` + **lucide-react**         | Accessible Base UI primitives (shadcn's current default) that you own as source code                               |
+| Theming       | Custom pre-paint theme script + `useSyncExternalStore` store (light/dark/system × `green`/`violet` accents)             | Follows the Next 16 "preventing flash" guide; avoids next-themes' client `<script>` warning. See Phase 2           |
 | Toasts        | **sonner** (shadcn's toast)                                                                                             |                                                                                                                    |
 | Motion        | **motion** (`LazyMotion` + `m`)                                                                                         | Like-heart burst, page transitions; respects `prefers-reduced-motion`                                              |
 | URL state     | **nuqs**                                                                                                                | Typed search params (`/explore?q=`, profile tabs)                                                                  |
@@ -281,12 +281,13 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - `<Link>` prefetching; `usePathname` for the active nav
   - `loading.tsx` vs `<Suspense>`
 - **Build:**
-  - `pnpm dlx shadcn@latest init`, neutral base. Add: button, input, textarea, label, form/field, card, avatar, dialog, alert-dialog, drawer (mobile dialogs), dropdown-menu, sheet, tabs, skeleton, sonner, tooltip, scroll-area, separator, badge, command, toggle-group, radio-group.
-  - **Theme system:**
-    - Mode: `next-themes` (`attribute="class"`, light/dark/system).
-    - **Accent presets:** shadcn's **Green** (default) and **Violet** OKLCH palettes in `globals.css` under `:root[data-theme="green"]`, `:root.dark[data-theme="green"]`, and the same for violet. Only `--primary`, `--ring`, `--chart-*` and `--sidebar-primary` change; neutrals stay shared.
-    - A ~15-line inline `<script>` in `<head>` reads `localStorage` and sets `data-theme` **before first paint**, so there's no flash. This avoids reading cookies in the root layout, which would make every route dynamic.
-    - An `AccentProvider` context, plus a Theme switcher (mode + accent swatches) in the user menu and on `/settings/appearance`. Adding more presets later is one CSS block.
+  - `shadcn init --preset b2pjIZz7o --base base`: Base UI, **Luma** style ("fluid, luminous and soft"), neutral base, Green theme, Geist, Lucide, large radius. Components are added as each phase needs them.
+  - **Theme system** (`src/components/theme/`), built per the Next 16 "Preventing flash before hydration" guide instead of `next-themes`:
+    - One self-contained `syncThemeToDom()` function is inlined into `<head>` (via `.toString()`) and also called by the client store, so the pre-paint path and the click path can't diverge.
+    - **Accent presets:** shadcn's **Green** (default, in `:root`/`.dark`) and **Violet** (`:root[data-accent="violet"]`, `:root.dark[data-accent="violet"]`). Only `--primary(-foreground)`, `--chart-*` and `--sidebar-primary(-foreground)` change. Adding a preset is two CSS blocks plus one entry in `ACCENTS`.
+    - The store is read with `useSyncExternalStore` (server snapshot = defaults, so there's no hydration mismatch). It syncs across tabs (`storage` event) and follows OS changes in System mode.
+    - `ThemeSync` re-applies the theme after React's dev-mode remount resets `<html>`.
+    - Controls live in the "More" menu and on `/settings/appearance` (radio groups with previews).
   - **Visual language (Gen-Z, still professional):**
     - Fonts: Geist Sans for UI, **Bricolage Grotesque** for the Konnect wordmark and headings
     - `--radius: 1rem`; soft cards, generous spacing, a glassy sticky header (`backdrop-blur`)
@@ -520,6 +521,6 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ## 6. Progress tracker
 
-- [x] 0 Prep · [x] 1 Scaffold · [ ] 2 Design system & themes · [ ] 3 Supabase foundation · [ ] 4 Auth
+- [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [ ] 3 Supabase foundation · [ ] 4 Auth
 - [ ] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus
