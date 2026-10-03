@@ -1,20 +1,48 @@
-import type { NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
+import { isAuthPage, isProtectedPath } from "@/lib/auth/routes";
 import { updateSession } from "@/lib/supabase/proxy";
 
 /**
  * Next.js 16 Proxy (formerly "middleware"): runs before every matched request.
  *
- * For now it only keeps the Supabase session fresh. Phase 4 adds *optimistic*
- * redirects (e.g. signed-out users away from the feed). Those are a UX nicety,
- * not security: real authorization happens in the Data Access Layer
- * (lib/dal.ts) and in Postgres Row Level Security.
+ * 1. Keeps the Supabase session fresh (see lib/supabase/proxy.ts).
+ * 2. Optimistic redirects: signed-out visitors away from personal pages, and
+ *    signed-in users away from the login/sign-up pages. A UX nicety, not
+ *    security: authorization happens in the DAL and in Postgres RLS.
  */
 export async function proxy(request: NextRequest) {
-  const { response } = await updateSession(request);
+  const { response, userId } = await updateSession(request);
+  const { pathname, search } = request.nextUrl;
+
+  if (!userId && isProtectedPath(pathname)) {
+    const login = new URL("/login", request.url);
+    // Remember where they were going; login sends them back (sanitized there).
+    if (pathname !== "/") login.searchParams.set("next", `${pathname}${search}`);
+    return redirectKeepingSession(login, response);
+  }
+
+  if (userId && isAuthPage(pathname)) {
+    return redirectKeepingSession(new URL("/", request.url), response);
+  }
+
   // Always return the response updateSession built: any other response would
   // drop the refreshed cookies and sign the user out on the next request.
   return response;
+}
+
+/**
+ * A redirect that still carries the refreshed auth cookies and the no-store
+ * cache headers from updateSession, per Supabase's SSR guidance.
+ */
+function redirectKeepingSession(url: URL, sessionResponse: NextResponse) {
+  const redirect = NextResponse.redirect(url);
+  for (const cookie of sessionResponse.cookies.getAll()) redirect.cookies.set(cookie);
+  for (const header of ["cache-control", "expires", "pragma"]) {
+    const value = sessionResponse.headers.get(header);
+    if (value) redirect.headers.set(header, value);
+  }
+  return redirect;
 }
 
 export const config = {

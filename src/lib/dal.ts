@@ -44,7 +44,8 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
 /** For pages and actions that only make sense signed in. */
 export async function requireUser(): Promise<SessionUser> {
   const user = await getSessionUser();
-  // TODO(phase 4): preserve the current path as ?next= so login can return here.
+  // The proxy already redirects signed-out visitors with ?next=; this is the
+  // safety net for anything it doesn't cover (it must never be the only check).
   if (!user) redirect("/login");
   return user;
 }

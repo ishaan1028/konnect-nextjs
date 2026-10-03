@@ -86,3 +86,60 @@ jobs:
           pnpm db:types
           git diff --exit-code -- src/types/database.types.ts \
             || (echo "::error::Database types are stale. Run 'pnpm db:types' and commit the result." && exit 1)
+
+  e2e:
+    name: End-to-end (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+      # The local seed creates this account (see supabase/seed.sql).
+      DEMO_USER_EMAIL: demo@konnect.dev
+      DEMO_USER_PASSWORD: konnect-demo-2026
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      # Only what the auth flows need: Postgres, Auth, the API gateway, REST and
+      # Mailpit (to read confirmation emails). Skipping the rest saves minutes.
+      - name: Start Supabase
+        run: >
+          pnpm exec supabase start
+          -x studio,imgproxy,edge-runtime,logflare,vector,realtime,storage-api,postgres-meta,supavisor
+
+      - name: Export Supabase connection details
+        run: |
+          pnpm exec supabase status -o json > supabase-status.json
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$(jq -r .API_URL supabase-status.json)"
+            echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$(jq -r .PUBLISHABLE_KEY supabase-status.json)"
+            echo "SUPABASE_SECRET_KEY=$(jq -r .SECRET_KEY supabase-status.json)"
+            echo "MAILPIT_URL=$(jq -r .MAILPIT_URL supabase-status.json)"
+          } >> "$GITHUB_ENV"
+          rm supabase-status.json
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run end-to-end tests
+        run: pnpm test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

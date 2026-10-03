@@ -2,6 +2,7 @@
 
 import { Bookmark, LogOut, Menu, Settings } from "lucide-react";
 import Link from "next/link";
+import { useAction } from "next-safe-action/hooks";
 
 import { ModeIcon } from "@/components/theme/mode-icon";
 import {
@@ -25,6 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { signOutAction } from "@/features/auth/actions";
 import { cn } from "@/lib/utils";
 
 type MoreMenuProps = {
@@ -34,6 +36,7 @@ type MoreMenuProps = {
 
 export function MoreMenu({ variant }: MoreMenuProps) {
   const { mode, accent, setMode, setAccent } = useTheme();
+  const signOut = useAction(signOutAction);
 
   return (
     <DropdownMenu>
@@ -106,10 +109,15 @@ export function MoreMenu({ variant }: MoreMenuProps) {
 
         <DropdownMenuSeparator />
 
-        {/* Wired up in Phase 4 (authentication). */}
-        <DropdownMenuItem disabled>
+        {/* The Server Action signs out on the server (revoking the refresh
+            token), clears cached pages, and redirects to /login. */}
+        <DropdownMenuItem
+          variant="destructive"
+          disabled={signOut.isPending}
+          onClick={() => signOut.execute()}
+        >
           <LogOut aria-hidden />
-          Log out
+          {signOut.isPending ? "Logging out…" : "Log out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

@@ -6,3 +6,5 @@ next-env.d.ts
 AGENTS.md
 
 supabase/.temp
+test-results
+playwright-report

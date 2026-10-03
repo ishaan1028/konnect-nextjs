@@ -14,6 +14,10 @@ export const env = createEnv({
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
     // Bypasses Row Level Security. Only for trusted server code (lib/supabase/admin.ts).
     SUPABASE_SECRET_KEY: z.string().startsWith("sb_secret_"),
+    // Optional shared demo account behind the "Continue as demo user" button.
+    // Credentials stay on the server; the button is hidden when they're unset.
+    DEMO_USER_EMAIL: z.email().optional(),
+    DEMO_USER_PASSWORD: z.string().min(8).optional(),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),

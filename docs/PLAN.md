@@ -339,7 +339,16 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - Custom Supabase email templates in `supabase/templates`, wired to `/auth/confirm`.
   - Authenticated users are redirected away from `(auth)` pages.
   - Playwright e2e for signup → confirm (via the local Inbucket/Mailpit inbox) → login → logout.
-- **Done when:** the whole auth loop works locally, including password reset, and e2e is green.
+- **Done when:** the whole auth loop works locally, including password reset, and e2e is green. ✅
+- **Notes from the build:**
+  - `lib/safe-action.ts`: one action client (metadata + server-error masking) and an `authActionClient` whose middleware puts the verified user in `ctx`.
+  - `useHookFormAction` (next-safe-action RHF adapter) maps server field errors back onto inputs.
+  - Inputs are **uncontrolled** (`register`, no `defaultValues`), so text typed before hydration survives; each field subscribes via `useFormState`.
+  - A `<ul>` inside shadcn's `FieldDescription` (`<p>`) caused a hydration error that re-rendered the form and wiped typed input, which was the real cause of a flaky e2e test. `e2e/console.spec.ts` now fails on any console error.
+  - `safeNextPath()` blocks open redirects and is the only place an untrusted path becomes a typed `Route`.
+  - The proxy redirects signed-out users from personal pages to `/login?next=…` and signed-in users away from auth pages, carrying refreshed cookies and cache headers.
+  - Seeded demo account `@alex.demo`; its credentials are server-only env. The demo account must be protected from password change and deletion (phase 12).
+  - CI `e2e` job: a slim Supabase stack, the production build, Playwright with an uploaded report on failure. 16 e2e tests, including axe on the auth pages.
 
 ### Phase 5: TanStack Query infrastructure and the current user
 
@@ -523,6 +532,6 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ## 6. Progress tracker
 
-- [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [ ] 4 Auth
+- [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
 - [ ] 5 Query infra · [ ] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

@@ -115,8 +115,10 @@ select is(public.is_username_available('explore'), false, 'a reserved username i
 -- -----------------------------------------------------------------------------
 -- RLS: reading
 -- -----------------------------------------------------------------------------
+-- Count only this test's users, so seed data (e.g. the demo account) can't affect it.
 select is(
-  (select count(*)::int from public.profiles),
+  (select count(*)::int from public.profiles
+   where id in ('11111111-1111-1111-1111-111111111111', '22222222-2222-2222-2222-222222222222')),
   2,
   'anonymous visitors can read public profiles'
 );
