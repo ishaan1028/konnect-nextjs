@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
+import { isDemoClaims } from "@/lib/auth/demo";
 import { createClient } from "@/lib/supabase/server";
 
 /**
@@ -17,6 +18,8 @@ import { createClient } from "@/lib/supabase/server";
 export type SessionUser = {
   id: string;
   email: string | null;
+  /** The shared demo account: its profile is read-only. */
+  isDemo: boolean;
 };
 
 /**
@@ -38,6 +41,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   return {
     id: data.claims.sub,
     email: typeof data.claims.email === "string" ? data.claims.email : null,
+    isDemo: isDemoClaims(data.claims),
   };
 });
 

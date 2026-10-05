@@ -4,7 +4,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { ComingSoon } from "@/components/shared/coming-soon";
-import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
+import { ViewerFollowBoundary } from "@/features/follows/components/viewer-follow-boundary";
 import { ProfileActions } from "@/features/profiles/components/profile-actions";
 import {
   ProfileHeader,
@@ -62,9 +62,9 @@ async function Profile({ params }: Pick<PageProps<"/[username]">, "params">) {
         actions={
           // Public header from cache; only the viewer-specific button streams in.
           <Suspense fallback={null}>
-            <CurrentUserBoundary>
-              <ProfileActions profileId={profile.id} />
-            </CurrentUserBoundary>
+            <ViewerFollowBoundary profileId={profile.id}>
+              <ProfileActions profileId={profile.id} username={profile.username} />
+            </ViewerFollowBoundary>
           </Suspense>
         }
       />

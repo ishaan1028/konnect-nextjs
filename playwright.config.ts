@@ -4,7 +4,9 @@ import { defineConfig, devices } from "@playwright/test";
 // Load .env.local exactly like Next does, so tests and app share one config.
 nextEnv.loadEnvConfig(process.cwd());
 
-const PORT = 3000;
+// E2E_PORT lets tests run a production build alongside a dev server on 3000.
+// (Email-link tests assume 3000: Supabase's site_url points there.)
+const PORT = Number(process.env.E2E_PORT ?? 3000);
 const baseURL = `http://localhost:${PORT}`;
 const isCI = !!process.env.CI;
 // CI (and `pnpm test:e2e:prod`) tests the production build that users get;

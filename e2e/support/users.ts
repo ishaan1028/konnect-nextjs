@@ -11,18 +11,20 @@ export function uniqueUser() {
   };
 }
 
+/** A Supabase client with the secret key: bypasses RLS, for test setup only. */
+export function adminClient() {
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SECRET_KEY!, {
+    auth: { persistSession: false },
+  });
+}
+
 /**
  * Creates an already-confirmed user through the Auth admin API (secret key),
  * for tests that need an account but aren't testing sign-up itself.
  */
 export async function createConfirmedUser() {
   const user = uniqueUser();
-  const admin = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SECRET_KEY!,
-    { auth: { persistSession: false } },
-  );
-  const { error } = await admin.auth.admin.createUser({
+  const { error } = await adminClient().auth.admin.createUser({
     email: user.email,
     password: user.password,
     email_confirm: true,

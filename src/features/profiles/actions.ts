@@ -3,7 +3,7 @@
 import { updateTag } from "next/cache";
 import { returnServerError, returnValidationErrors } from "next-safe-action";
 
-import { authActionClient } from "@/lib/safe-action";
+import { ownAccountActionClient } from "@/lib/safe-action";
 import { AVATARS_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,17 +13,16 @@ import { profileTag } from "./server/get-public-profile";
 
 const PROFILE_COLUMNS = "id, username, full_name, avatar_path" as const;
 
-function toCurrentUser(row: {
-  id: string;
-  username: string;
-  full_name: string;
-  avatar_path: string | null;
-}): CurrentUser {
+function toCurrentUser(
+  row: { id: string; username: string; full_name: string; avatar_path: string | null },
+  isDemo: boolean,
+): CurrentUser {
   return {
     id: row.id,
     username: row.username,
     fullName: row.full_name,
     avatarPath: row.avatar_path,
+    isDemo,
   };
 }
 
@@ -35,7 +34,7 @@ const UNIQUE_VIOLATION = "23505";
  * (ctx.user from a verified JWT) and RLS only lets a user update their own row;
  * the column grants also make the counters untouchable.
  */
-export const updateProfileAction = authActionClient
+export const updateProfileAction = ownAccountActionClient
   .metadata({ actionName: "updateProfile" })
   .inputSchema(updateProfileSchema)
   .action(async ({ parsedInput: { fullName, username, bio }, ctx: { user } }) => {
@@ -81,7 +80,7 @@ export const updateProfileAction = authActionClient
     updateTag(profileTag(current.username));
     if (usernameChanged) updateTag(profileTag(username));
 
-    return { profile: toCurrentUser(data) };
+    return { profile: toCurrentUser(data, user.isDemo) };
   });
 
 /**
@@ -89,7 +88,7 @@ export const updateProfileAction = authActionClient
  * The browser uploaded the file itself (straight to Storage, RLS-checked),
  * so the server only receives a path, and verifies it before trusting it.
  */
-export const updateAvatarAction = authActionClient
+export const updateAvatarAction = ownAccountActionClient
   .metadata({ actionName: "updateAvatar" })
   .inputSchema(avatarPathSchema)
   .action(async ({ parsedInput: { path }, ctx: { user } }) => {
@@ -123,10 +122,10 @@ export const updateAvatarAction = authActionClient
     }
 
     updateTag(profileTag(previous.username));
-    return { profile: toCurrentUser(data) };
+    return { profile: toCurrentUser(data, user.isDemo) };
   });
 
-export const removeAvatarAction = authActionClient
+export const removeAvatarAction = ownAccountActionClient
   .metadata({ actionName: "removeAvatar" })
   .action(async ({ ctx: { user } }) => {
     const supabase = await createClient();
@@ -154,5 +153,5 @@ export const removeAvatarAction = authActionClient
     }
 
     updateTag(profileTag(previous.username));
-    return { profile: toCurrentUser(data) };
+    return { profile: toCurrentUser(data, user.isDemo) };
   });

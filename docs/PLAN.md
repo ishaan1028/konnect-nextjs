@@ -416,7 +416,17 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - Followers list (with **Remove** when it's your profile) and Following list (with **Unfollow**), paginated, as intercepted modals
   - Suggestions rail on the home page with Follow; the feed is invalidated after following
   - pgTAP: can't follow yourself, can't create an edge for someone else, either side can delete
-- **Done when:** counts stay correct under rapid clicking, the modal routes work with back and refresh, and the RLS tests pass.
+- **Done when:** counts stay correct under rapid clicking, the modal routes work with back and refresh, and the RLS tests pass. ✅
+- **Notes from the build:**
+  - Before starting: a migration `lock_demo_account` makes the shared demo account's profile and avatar **read-only in RLS** (flag in `raw_app_meta_data`, checked live against `auth.users`), plus `ownAccountActionClient` and a read-only settings UI. It also fixes a missing `service_role` grant that broke every admin update to profiles.
+  - Migration `follows`: composite PK (no duplicates), no-self CHECK, RLS (public read, insert as yourself, delete by either side), and counter triggers (atomic `+1`/`-1`, correct through account-deletion cascades). The `updated_at` trigger now fires only on user-editable columns.
+  - RPCs: `get_follow_status`, `get_follow_list` (keyset pagination; PL/pgSQL with one plain query per list kind so the `(…, created_at desc)` indexes are used, verified with EXPLAIN), and `get_follow_suggestions` (friends of friends first). 17 pgTAP tests.
+  - Seed: 5 showcase people (local password `konnect-seed-2026`) and a small follow graph.
+  - Follow button: optimistic TanStack mutation with rollback; the Server Action `updateTag`s both cached profiles so counts refresh. `aria-pressed` and label-in-name. Status is prefetched (`ViewerFollowBoundary`) so it never flickers.
+  - Followers/following as **intercepted-route modals** (`@modal/(.)[username]/…`) with full-page fallbacks. `@modal` has `default.tsx`, `page.tsx` and `[...catchAll]` returning null so modals close on navigation. Infinite scroll uses `useSuspenseInfiniteQuery` + `react-intersection-observer`. Removing a follower asks for confirmation (AlertDialog).
+  - Home: "Suggested for you" rendered once and placed with CSS Grid (right rail on xl, between hero and feed below).
+  - Adding a new parallel-route slot needs a **dev server restart**.
+  - `E2E_PORT` lets e2e run a production build next to a dev server.
 
 ### Phase 8: Creating, editing and deleting posts
 
@@ -495,6 +505,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 - **Learn:** the admin client (secret key) only in `server-only` modules; why the delete happens server-side; sign-out and cache purge.
 - **Build:** `/settings/account`:
+  - Demo account: block password change and deletion in the app, and make `demoSignInAction` reset the demo password from server env on every sign-in (Supabase's Auth API can't be blocked by RLS, so the account repairs itself).
   - Type your username to confirm
   - The action lists and removes `avatars/<uid>/*` and `posts/<uid>/*`, then calls `auth.admin.deleteUser(uid)`; `ON DELETE CASCADE` removes everything else
   - Sign out, clear the query cache, redirect with a toast
@@ -551,5 +562,5 @@ For each phase I'll explain the concepts first, then build it with you in small 
 ## 6. Progress tracker
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
-- [x] 5 Query infra · [x] 6 Profiles · [ ] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
+- [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

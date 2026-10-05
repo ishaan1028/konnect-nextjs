@@ -13,9 +13,13 @@ export function makeQueryClient(config: Pick<QueryClientConfig, "mutationCache">
     ...config,
     defaultOptions: {
       queries: {
-        // Data prefetched on the server is "fresh" for a minute, so the browser
-        // doesn't immediately refetch what it just received in the HTML.
-        staleTime: 60 * 1000,
+        // Stale-while-revalidate by default: cached data always renders at
+        // once, and any later mount, focus or reconnect refetches it in the
+        // background. The few seconds of freshness only stop the browser from
+        // refetching what it just received from the server (TanStack's SSR
+        // advice); "0" would fetch everything twice on a page load. Queries
+        // that rarely change set a longer staleTime of their own.
+        staleTime: 5 * 1000,
       },
       dehydrate: {
         // Also send queries that are still loading, so a prefetch that hasn't

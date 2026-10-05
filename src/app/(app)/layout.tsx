@@ -10,7 +10,7 @@ import { MAIN_CONTENT_ID } from "@/components/layout/skip-link";
  * Layouts persist across navigations: moving between pages re-renders only
  * {children}, so the nav keeps its state and never re-mounts.
  */
-export default function AppLayout({ children }: LayoutProps<"/">) {
+export default function AppLayout({ children, modal }: LayoutProps<"/">) {
   return (
     <div className="min-h-dvh md:pl-19 xl:pl-61">
       <SideNav />
@@ -24,6 +24,9 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <BottomTabBar />
+      {/* Parallel route slot: intercepted routes (e.g. a followers list opened
+          from a profile) render here as modals over the current page. */}
+      {modal}
     </div>
   );
 }

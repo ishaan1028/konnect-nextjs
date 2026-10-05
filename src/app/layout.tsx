@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { Suspense } from "react";
 
+import { NavigationProgress } from "@/components/layout/navigation-progress";
 import { SkipLink } from "@/components/layout/skip-link";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { ThemeSync } from "@/components/theme/theme-sync";
@@ -52,6 +54,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full">
         <SkipLink />
+        {/* Reads the URL, so it streams in instead of blocking the static shell. */}
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         <QueryProvider>
           <TooltipProvider>{children}</TooltipProvider>
         </QueryProvider>

@@ -1,21 +1,45 @@
-import { UsersRound } from "lucide-react";
-import type { Metadata } from "next";
+import { ArrowLeft } from "lucide-react";
+import type { Metadata, Route } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 
-import { ComingSoon } from "@/components/shared/coming-soon";
-import { PageHeader } from "@/components/shared/page-header";
+import { buttonVariants } from "@/components/ui/button";
+import { FollowListSkeleton } from "@/features/follows/components/follow-list";
+import { FollowListLoader } from "@/features/follows/components/follow-list-loader";
 
-export const metadata: Metadata = { title: "Followers" };
+export async function generateMetadata({
+  params,
+}: PageProps<"/[username]/followers">): Promise<Metadata> {
+  const { username } = await params;
+  return { title: `Followers · @${decodeURIComponent(username).toLowerCase()}` };
+}
 
-export default function FollowersPage() {
+/** The full-page version, for direct visits, refreshes and shared links. */
+export default function FollowersPage({ params }: PageProps<"/[username]/followers">) {
   return (
-    <div className="mx-auto max-w-xl space-y-8">
-      <PageHeader title="Followers" />
-      <ComingSoon
-        icon={UsersRound}
-        title="Followers list"
-        description="Opens as a modal over the profile, or as this full page when shared or refreshed."
-        phase={7}
-      />
+    <div className="mx-auto max-w-xl space-y-6">
+      <div className="flex items-center gap-3">
+        <Suspense fallback={<span className="size-9" />}>
+          <BackToProfile params={params} />
+        </Suspense>
+        <h1 className="text-2xl font-bold">Followers</h1>
+      </div>
+      <Suspense fallback={<FollowListSkeleton />}>
+        <FollowListLoader params={params} kind="followers" />
+      </Suspense>
     </div>
+  );
+}
+
+async function BackToProfile({ params }: Pick<PageProps<"/[username]/followers">, "params">) {
+  const username = decodeURIComponent((await params).username).toLowerCase();
+  return (
+    <Link
+      href={`/${username}` as Route}
+      aria-label={`Back to @${username}`}
+      className={buttonVariants({ variant: "ghost", size: "icon" })}
+    >
+      <ArrowLeft aria-hidden />
+    </Link>
   );
 }

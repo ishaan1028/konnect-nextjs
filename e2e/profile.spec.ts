@@ -127,6 +127,21 @@ test.describe("edit profile", () => {
   });
 });
 
+test.describe("demo account", () => {
+  test("is read-only: notice shown and every profile control disabled", async ({ page }) => {
+    await page.goto("/login");
+    await page.getByRole("button", { name: "Continue as demo user" }).click();
+    await expect(page).toHaveURL("/");
+
+    await page.goto("/settings/profile");
+    await expect(page.getByText("This is the shared demo account")).toBeVisible();
+    await expect(page.getByLabel("Full name")).toBeDisabled();
+    await expect(page.getByLabel("Bio")).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Upload photo" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Save changes" })).toBeDisabled();
+  });
+});
+
 test.describe("profile photo", () => {
   test("uploads a cropped photo, shows it everywhere, then removes it", async ({ page }) => {
     const user = await createConfirmedUser();

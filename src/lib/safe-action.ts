@@ -3,6 +3,7 @@ import "server-only";
 import { createSafeActionClient, returnServerError } from "next-safe-action";
 import { z } from "zod";
 
+import { DEMO_READ_ONLY_MESSAGE } from "@/lib/auth/demo";
 import { getSessionUser } from "@/lib/dal";
 
 /**
@@ -30,4 +31,14 @@ export const authActionClient = actionClient.use(async ({ next }) => {
   const user = await getSessionUser();
   if (!user) returnServerError("Your session has expired. Please log in again.");
   return next({ ctx: { user } });
+});
+
+/**
+ * For actions that change the account's identity (name, username, photo).
+ * The shared demo account gets a clear message instead; Postgres RLS blocks
+ * the same writes independently, so this is UX, not the security boundary.
+ */
+export const ownAccountActionClient = authActionClient.use(async ({ next, ctx }) => {
+  if (ctx.user.isDemo) returnServerError(DEMO_READ_ONLY_MESSAGE);
+  return next();
 });

@@ -27,3 +27,10 @@ pnpm dev
 | `pnpm format`    | Format everything with Prettier                   |
 | `pnpm test`      | Unit tests (Vitest)                               |
 | `pnpm check`     | Typecheck, lint, format check and tests in one go |
+
+## Troubleshooting
+
+- **A link does a full page reload, or a modal opens as a full page.** Restart `pnpm dev`
+  after adding a parallel route slot (a folder like `@modal`). A dev server started
+  before the slot existed doesn't know about it, so its route tree disagrees with the
+  browser's and Next.js falls back to a hard navigation to recover.

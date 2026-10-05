@@ -22,6 +22,9 @@ import { useTheme } from "./use-theme";
 
 // Shared look for a selectable card. Base UI exposes state as data attributes
 // (data-checked), so styling needs no extra React state.
+// Concentric corners: the preview inside a card is rounded by the card's
+// radius minus its inset (2px border + p-3), so the gap around it stays even.
+const optionInner = "rounded-[calc(var(--radius-3xl)-2px-12px)]";
 const optionCard = cn(
   "group relative flex w-full flex-col gap-3 rounded-3xl border-2 border-transparent bg-card p-3 text-left ring-1 ring-border transition",
   "hover:ring-foreground/20 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
@@ -57,7 +60,10 @@ function ModePreview({ mode }: { mode: ThemeMode }) {
   );
 
   return (
-    <div aria-hidden className="relative h-24 overflow-hidden rounded-2xl ring-1 ring-black/10">
+    <div
+      aria-hidden
+      className={cn("relative h-24 overflow-hidden ring-1 ring-black/10", optionInner)}
+    >
       {mode === "system" ? (
         <div className="grid h-full grid-cols-2">
           {pane(light)}
@@ -124,7 +130,7 @@ export function AppearanceSettings() {
             <Radio.Root key={option} value={option} className={optionCard}>
               <span
                 aria-hidden
-                className="h-16 rounded-2xl ring-1 ring-black/10 ring-inset"
+                className={cn("h-16 ring-1 ring-black/10 ring-inset", optionInner)}
                 style={{ background: ACCENT_META[option].swatch }}
               />
               <span className="px-1 text-sm font-medium">{ACCENT_META[option].label}</span>

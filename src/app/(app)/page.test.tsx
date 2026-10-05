@@ -8,6 +8,9 @@ import HomePage from "./page";
 vi.mock("@/features/profiles/components/current-user-boundary", () => ({
   CurrentUserBoundary: () => null,
 }));
+vi.mock("@/features/follows/components/suggestions-boundary", () => ({
+  SuggestionsBoundary: () => null,
+}));
 
 describe("HomePage", () => {
   it("has a single, accessible main heading", () => {
