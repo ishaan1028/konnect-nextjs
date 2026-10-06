@@ -1,15 +1,8 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { logIn } from "./support/auth";
+import { logIn, signUpAndLogIn } from "./support/auth";
+import { follow, giveFollowers } from "./support/follows";
 import { adminClient, createConfirmedUser } from "./support/users";
-
-async function signUpAndLogIn(page: Page) {
-  const user = await createConfirmedUser();
-  await page.goto("/login");
-  await logIn(page, user.email, user.password);
-  await expect(page).toHaveURL("/");
-  return user;
-}
 
 const stat = (page: Page, label: "followers" | "following") =>
   page
@@ -89,9 +82,9 @@ test.describe("following", () => {
 
     // Read the label as soon as the row appears: no "Follow" first, no flip later.
     const suggestions = page.getByRole("complementary", { name: "Suggested for you" });
-    const suggested = suggestions.getByRole("button", { name: new RegExp(`@${fan.username}$`) });
+    const suggested = suggestions.getByRole("button", { name: new RegExp(`@${fan!.username}$`) });
     await expect(suggested).toBeVisible();
-    expect(await suggested.getAttribute("aria-label")).toBe(`Follow back @${fan.username}`);
+    expect(await suggested.getAttribute("aria-label")).toBe(`Follow back @${fan!.username}`);
 
     // Same in someone else's followers list that includes them.
     const other = await createConfirmedUser();
@@ -106,9 +99,9 @@ test.describe("following", () => {
       .insert({ follower_id: fan.id, following_id: otherProfile.id })
       .throwOnError();
     await page.goto(`/${other.username}/followers`);
-    const row = page.getByRole("button", { name: new RegExp(`@${fan.username}$`) });
+    const row = page.getByRole("button", { name: new RegExp(`@${fan!.username}$`) });
     await expect(row).toBeVisible();
-    expect(await row.getAttribute("aria-label")).toBe(`Follow back @${fan.username}`);
+    expect(await row.getAttribute("aria-label")).toBe(`Follow back @${fan!.username}`);
   });
 
   test("the suggestions card keeps its height while loading and after", async ({ page }) => {
@@ -204,10 +197,13 @@ test.describe("followers and following lists", () => {
   });
 
   test("the modal keeps one size, and a long list scrolls inside it", async ({ page }) => {
+    // More followers than fit in the modal, and a single account followed.
+    const star = await createConfirmedUser();
+    const fans = await giveFollowers(star.username, 10);
+    await follow(star.username, fans[0]!.username);
     await signUpAndLogIn(page);
-    await page.goto("/alex.demo");
+    await page.goto(`/${star.username}`);
 
-    // alex.demo has more followers than fit, and only a few people they follow.
     const heights = [];
     for (const kind of ["followers", "following"] as const) {
       await stat(page, kind).getByRole("link").click();
@@ -241,31 +237,22 @@ test.describe("followers and following lists", () => {
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test("you can remove someone from your followers", async ({ page, browser }) => {
+  test("you can remove someone from your followers", async ({ page }) => {
     const owner = await signUpAndLogIn(page);
 
-    // A second person follows the owner, in a separate browser session.
-    const fan = await createConfirmedUser();
-    const fanContext = await browser.newContext();
-    const fanPage = await fanContext.newPage();
-    await fanPage.goto("/login");
-    await logIn(fanPage, fan.email, fan.password);
-    await expect(fanPage).toHaveURL("/");
-    await fanPage.goto(`/${owner.username}`);
-    await fanPage.getByRole("button", { name: `Follow @${owner.username}` }).click();
-    await expect(
-      fanPage.getByRole("button", { name: `Following @${owner.username}` }),
-    ).toBeVisible();
-    await fanContext.close();
+    // Someone follows the owner (set up directly; following is tested above).
+    const [fan] = await giveFollowers(owner.username, 1);
 
     await page.goto(`/${owner.username}/followers`);
-    await page.getByRole("button", { name: `Remove @${fan.username} from your followers` }).click();
+    await page
+      .getByRole("button", { name: `Remove @${fan!.username} from your followers` })
+      .click();
     await page
       .getByRole("alertdialog", { name: "Remove follower?" })
       .getByRole("button", { name: "Remove" })
       .click();
 
     await expect(page.getByText("Follower removed")).toBeVisible();
-    await expect(page.getByRole("link", { name: new RegExp(fan.username) })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: new RegExp(fan!.username) })).toHaveCount(0);
   });
 });

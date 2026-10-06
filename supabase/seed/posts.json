@@ -1,0 +1,142 @@
+[
+  {
+    "id": "5eed1000-0000-4000-8000-000000000001",
+    "author": "zoe.travels",
+    "photo": "sea-sunset",
+    "hoursAgo": 3,
+    "caption": "Sunset number 214. Still not tired of them 🌅",
+    "location": "Big Sur, California",
+    "altText": "An orange sun setting over the sea behind dark rocky islets",
+    "likedBy": ["maya.k", "leo.bakes", "sana.draws", "alex.demo"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000002",
+    "author": "leo.bakes",
+    "photo": "cookies",
+    "hoursAgo": 6,
+    "caption": "Brown butter cookies, lemon on the side. Don't skip the flaky salt.",
+    "location": "Leo's Bakery",
+    "altText": "Golden cookies on a dark plate next to lemon slices and yellow daffodils",
+    "likedBy": ["sana.draws", "maya.k", "alex.demo"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000003",
+    "author": "sana.draws",
+    "photo": "sketchbook",
+    "hoursAgo": 12,
+    "caption": "New palette, new brief. Let's see where this one goes ✏️",
+    "location": "",
+    "altText": "A flat lay of an open sketchbook, colored pencils, a keyboard and a phone on a white desk",
+    "likedBy": ["leo.bakes", "zoe.travels"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000004",
+    "author": "arjun.codes",
+    "photo": "laptop-desk",
+    "hoursAgo": 20,
+    "caption": "Side project #7 ships tonight. Maybe. 🚀",
+    "location": "",
+    "altText": "An open laptop on a wooden table next to a phone and a cup",
+    "likedBy": ["zoe.travels"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000005",
+    "author": "maya.k",
+    "photo": "film-camera",
+    "hoursAgo": 30,
+    "caption": "Twin-lens days. Nothing slows you down like 12 frames a roll 🎞️",
+    "location": "Brooklyn, New York",
+    "altText": "A person in a dark sweater holding a twin-lens reflex film camera, in black and white",
+    "likedBy": ["zoe.travels", "arjun.codes", "sana.draws", "leo.bakes"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000006",
+    "author": "leo.bakes",
+    "photo": "pour-over",
+    "hoursAgo": 48,
+    "caption": "Pour-over while the second proof finishes. Bakery mornings ☕",
+    "location": "Leo's Bakery",
+    "altText": "Water poured from a gooseneck kettle into pour-over coffee filters on a café counter",
+    "likedBy": ["maya.k"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000007",
+    "author": "zoe.travels",
+    "photo": "santorini",
+    "hoursAgo": 55,
+    "caption": "White walls, blue domes, zero regrets.",
+    "location": "Oia, Santorini",
+    "altText": "White houses and a windmill on a hillside in Santorini under a clear sky",
+    "likedBy": ["maya.k", "sana.draws", "alex.demo"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000008",
+    "author": "sana.draws",
+    "photo": "coffee-red",
+    "hoursAgo": 70,
+    "caption": "Coffee-powered, as advertised.",
+    "location": "",
+    "altText": "A cup of milky coffee on a bright red background, seen from above",
+    "likedBy": ["leo.bakes", "arjun.codes"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000009",
+    "author": "maya.k",
+    "photo": "city-street",
+    "hoursAgo": 80,
+    "caption": "Quiet street, loud light. Shot on the last frame of the roll.",
+    "location": "SoHo, New York",
+    "altText": "A narrow city street lined with brick buildings under a pale sky",
+    "likedBy": ["zoe.travels"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000010",
+    "author": "arjun.codes",
+    "photo": "window-desk",
+    "hoursAgo": 90,
+    "caption": "Weekend setup: one window, one laptop, one bug.",
+    "location": "Pune, India",
+    "altText": "A laptop on a small desk by a window with half-closed blinds",
+    "likedBy": ["sana.draws"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000011",
+    "author": "leo.bakes",
+    "photo": "cappuccino",
+    "hoursAgo": 100,
+    "caption": "Cappuccino and the morning receipts. Busy day ahead!",
+    "location": "Leo's Bakery",
+    "altText": "A cappuccino with latte art on a wooden table beside a brass bell and paper receipts",
+    "likedBy": ["zoe.travels", "maya.k"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000012",
+    "author": "zoe.travels",
+    "photo": "fjord",
+    "hoursAgo": 120,
+    "caption": "Took the long way up Preikestolen. Worth every step.",
+    "location": "Lysefjord, Norway",
+    "altText": "A deep blue fjord between steep cliffs, seen from a high rock ledge",
+    "likedBy": ["arjun.codes", "maya.k", "leo.bakes"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000013",
+    "author": "sana.draws",
+    "photo": "design-desk",
+    "hoursAgo": 130,
+    "caption": "Lettering practice: ampersands all week.",
+    "location": "",
+    "altText": "A wooden desk covered with lettering pieces, a large ampersand, books and a vintage camera",
+    "likedBy": ["maya.k"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000014",
+    "author": "maya.k",
+    "photo": "quiet-alley",
+    "hoursAgo": 150,
+    "caption": "Every alley has a story. This one smelled like fresh paint.",
+    "location": "Lisbon, Portugal",
+    "altText": "A narrow brick alley with a bright opening at the far end",
+    "likedBy": ["sana.draws", "zoe.travels"]
+  }
+]

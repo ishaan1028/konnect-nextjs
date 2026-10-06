@@ -2,8 +2,6 @@
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Camera, ImagePlus } from "lucide-react";
-import type { Route } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 
@@ -18,11 +16,10 @@ import {
 } from "@/components/ui/empty";
 import { Spinner } from "@/components/ui/spinner";
 import { useCurrentUser } from "@/features/profiles/hooks";
-import { postImageUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/client";
-import { thumbhashPlaceholder } from "@/lib/thumbhash";
 
-import { type PostThumbnail, profilePostsQueryOptions } from "../queries";
+import { profilePostsQueryOptions } from "../queries";
+import { PostGridTile } from "./post-grid-tile";
 
 type ProfilePostsGridProps = { profileId: string; username: string };
 
@@ -49,9 +46,9 @@ export function ProfilePostsGrid({ profileId, username }: ProfilePostsGridProps)
   return (
     <div>
       <ul className="grid grid-cols-3 gap-1 sm:gap-1.5">
-        {posts.map((post) => (
+        {posts.map((post, index) => (
           <li key={post.id}>
-            <PostTile post={post} username={username} />
+            <PostGridTile post={post} authorUsername={username} priority={index < 3} />
           </li>
         ))}
       </ul>
@@ -62,26 +59,6 @@ export function ProfilePostsGrid({ profileId, username }: ProfilePostsGridProps)
         </div>
       )}
     </div>
-  );
-}
-
-function PostTile({ post, username }: { post: PostThumbnail; username: string }) {
-  return (
-    <Link
-      href={`/p/${post.id}` as Route}
-      className="group relative block aspect-square overflow-hidden rounded-lg bg-muted focus-visible:z-10 focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none"
-    >
-      <Image
-        src={postImageUrl(post.imagePath)}
-        // The link's name: what the photo shows, or at least whose it is.
-        alt={post.altText || `Photo by @${username}`}
-        fill
-        // Three columns of a ≤56rem page; a third of the screen on phones.
-        sizes="(min-width: 56rem) 19rem, 33vw"
-        placeholder={thumbhashPlaceholder(post.thumbhash)}
-        className="object-cover transition-transform duration-300 group-hover:scale-[1.03] motion-reduce:transition-none"
-      />
-    </Link>
   );
 }
 

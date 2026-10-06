@@ -19,5 +19,17 @@ export const queryKeys = {
   posts: {
     all: ["posts"] as const,
     byAuthor: (profileId: string) => ["posts", "by-author", profileId] as const,
+    feed: () => ["posts", "feed"] as const,
+    explore: () => ["posts", "explore"] as const,
+    detail: (postId: string) => ["posts", "detail", postId] as const,
+  },
+  // Not under "posts": invalidating every post list (after sharing a post)
+  // shouldn't refetch the like state of every post on screen.
+  likes: {
+    status: (postId: string) => ["likes", "status", postId] as const,
+    likers: (postId: string) => ["likes", "likers", postId] as const,
+  },
+  search: {
+    profiles: (query: string) => ["search", "profiles", query] as const,
   },
 };

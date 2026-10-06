@@ -9,7 +9,7 @@ import { authActionClient } from "@/lib/safe-action";
 import { POSTS_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
-import { createPostSchema, deletePostSchema, postDetailsSchema, postIdSchema } from "./schemas";
+import { createPostSchema, postDetailsSchema, postIdSchema, postTargetSchema } from "./schemas";
 import { postTag } from "./server/get-post";
 
 /**
@@ -45,7 +45,7 @@ export const createPostAction = authActionClient
         caption: input.caption,
         location: input.location,
       })
-      .select("id, author:profiles!inner(username)")
+      .select("id, author:profiles!posts_author_id_fkey!inner(username)")
       .single();
 
     if (error) {
@@ -94,7 +94,7 @@ export const updatePostAction = authActionClient
 /** Delete the post, then its photo, then go back to the author's profile. */
 export const deletePostAction = authActionClient
   .metadata({ actionName: "deletePost" })
-  .inputSchema(deletePostSchema)
+  .inputSchema(postTargetSchema)
   .action(async ({ parsedInput: { postId }, ctx: { user } }) => {
     const supabase = await createClient();
 
@@ -103,7 +103,7 @@ export const deletePostAction = authActionClient
       .delete()
       .eq("id", postId)
       .eq("author_id", user.id)
-      .select("image_path, author:profiles!inner(username)")
+      .select("image_path, author:profiles!posts_author_id_fkey!inner(username)")
       .maybeSingle();
 
     if (error) throw error;
@@ -121,4 +121,48 @@ export const deletePostAction = authActionClient
     // Redirect from the server: re-rendering the deleted post's page first
     // would flash a "not found" before the client could navigate away.
     redirect(`/${post.author.username}`, RedirectType.replace);
+  });
+
+const UNIQUE_VIOLATION = "23505";
+
+type Supabase = Awaited<ReturnType<typeof createClient>>;
+
+/** The fresh like state after a toggle, so every Like button can settle on it. */
+async function likeStatus(supabase: Supabase, postId: string) {
+  const { data, error } = await supabase.rpc("get_like_status", { post_id: postId }).maybeSingle();
+  if (error) throw error;
+  if (!data) returnServerError("That post no longer exists.");
+  return { liked: data.liked, count: data.likes_count };
+}
+
+/**
+ * Like / unlike. Idempotent (liking twice is a no-op, not an error), so rapid
+ * clicks and retries are safe. Counts render from the client cache, not the
+ * cached post page, so there's nothing to updateTag.
+ */
+export const likePostAction = authActionClient
+  .metadata({ actionName: "likePost" })
+  .inputSchema(postTargetSchema)
+  .action(async ({ parsedInput: { postId }, ctx: { user } }) => {
+    const supabase = await createClient();
+    // user_id comes from the verified session, never from the client.
+    const { error } = await supabase
+      .from("post_likes")
+      .insert({ post_id: postId, user_id: user.id });
+    if (error && error.code !== UNIQUE_VIOLATION) throw error;
+    return likeStatus(supabase, postId);
+  });
+
+export const unlikePostAction = authActionClient
+  .metadata({ actionName: "unlikePost" })
+  .inputSchema(postTargetSchema)
+  .action(async ({ parsedInput: { postId }, ctx: { user } }) => {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("post_likes")
+      .delete()
+      .eq("post_id", postId)
+      .eq("user_id", user.id);
+    if (error) throw error;
+    return likeStatus(supabase, postId);
   });

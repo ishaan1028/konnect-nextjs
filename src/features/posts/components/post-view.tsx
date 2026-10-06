@@ -9,28 +9,33 @@ import { formatDate } from "@/lib/format";
 import { avatarUrl, postImageUrl } from "@/lib/storage";
 import { thumbhashPlaceholder } from "@/lib/thumbhash";
 
-import type { PostDetail } from "../server/get-post";
+import type { PostDetail } from "../post-detail";
+import { DoubleTapLike } from "./double-tap-like";
 
 type PostViewProps = {
   post: PostDetail;
   /** The author's Edit/Delete menu, streamed in separately (it's personal). */
   ownerMenu?: ReactNode;
+  /** Like / comment / share and the like count (the viewer's like is personal). */
+  actions?: ReactNode;
 };
 
 /**
  * A post: author, photo, caption and date. Public and identical for every
  * visitor, so it renders on the server from the cached post.
  *
- * Phones: header, photo, caption stacked (Instagram's order). Wider screens:
- * photo on the left, everything else in a column on the right.
+ * Phones: header, photo, actions, caption stacked (Instagram's order). Wider
+ * screens: photo on the left; header, caption, then actions in a column on
+ * the right. Works as a Server Component (the page) and inside the client
+ * modal alike: it has no hooks of its own.
  */
-export function PostView({ post, ownerMenu }: PostViewProps) {
+export function PostView({ post, ownerMenu, actions }: PostViewProps) {
   const profileHref = `/${post.author.username}` as Route;
 
   return (
     <article
       aria-label={`Post by @${post.author.username}`}
-      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr]"
+      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto]"
     >
       <header className="flex items-center gap-3 border-b p-4 md:col-start-2">
         <Link href={profileHref} className="shrink-0 rounded-full" tabIndex={-1} aria-hidden>
@@ -54,21 +59,28 @@ export function PostView({ post, ownerMenu }: PostViewProps) {
 
       {/* Width and height are known, so the browser reserves the exact space
           (no layout shift); the ThumbHash preview fills it until it loads. */}
-      <div className="bg-muted md:col-start-1 md:row-span-2 md:row-start-1 md:self-center">
-        <Image
-          src={postImageUrl(post.imagePath)}
-          alt={post.altText || `Photo by @${post.author.username}`}
-          width={post.width}
-          height={post.height}
-          // The page's main image (its LCP): start loading it right away.
-          preload
-          sizes="(min-width: 64rem) 37rem, (min-width: 48rem) 60vw, 100vw"
-          placeholder={thumbhashPlaceholder(post.thumbhash)}
-          className="h-auto w-full"
-        />
+      <div className="bg-muted md:col-start-1 md:row-span-3 md:row-start-1 md:self-center">
+        <DoubleTapLike postId={post.id}>
+          <Image
+            src={postImageUrl(post.imagePath)}
+            alt={post.altText || `Photo by @${post.author.username}`}
+            width={post.width}
+            height={post.height}
+            // The page's main image (its LCP): fetch it first, never lazily.
+            loading="eager"
+            fetchPriority="high"
+            sizes="(min-width: 64rem) 37rem, (min-width: 48rem) 60vw, 100vw"
+            placeholder={thumbhashPlaceholder(post.thumbhash)}
+            className="h-auto w-full"
+          />
+        </DoubleTapLike>
       </div>
 
-      <div className="flex flex-col gap-3 p-4 md:col-start-2">
+      {actions && (
+        <div className="px-4 pt-2 md:col-start-2 md:row-start-3 md:border-t md:pb-4">{actions}</div>
+      )}
+
+      <div className="flex flex-col gap-3 p-4 md:col-start-2 md:row-start-2">
         {post.caption && (
           <p className="text-sm break-words whitespace-pre-line">
             <Link href={profileHref} className="mr-1.5 font-semibold hover:underline">
@@ -90,14 +102,14 @@ export function PostViewSkeleton() {
   return (
     <div
       aria-hidden
-      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr]"
+      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto]"
     >
       <div className="flex items-center gap-3 border-b p-4 md:col-start-2">
         <Skeleton className="size-10 rounded-full" />
         <Skeleton className="h-4 w-32" />
       </div>
-      <Skeleton className="aspect-[4/5] rounded-none md:col-start-1 md:row-span-2 md:row-start-1" />
-      <div className="space-y-2 p-4 md:col-start-2">
+      <Skeleton className="aspect-[4/5] rounded-none md:col-start-1 md:row-span-3 md:row-start-1" />
+      <div className="space-y-2 p-4 md:col-start-2 md:row-start-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />
       </div>

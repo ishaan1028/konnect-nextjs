@@ -5,20 +5,10 @@ import { cacheLife, cacheTag } from "next/cache";
 import { profileTag } from "@/features/profiles/server/get-public-profile";
 import { createPublicClient } from "@/lib/supabase/public";
 
+import { POST_DETAIL_COLUMNS, type PostDetail, toPostDetail } from "../post-detail";
 import { postIdSchema } from "../schemas";
 
-export type PostDetail = {
-  id: string;
-  imagePath: string;
-  width: number;
-  height: number;
-  thumbhash: string | null;
-  altText: string;
-  caption: string;
-  location: string;
-  createdAt: string;
-  author: { id: string; username: string; fullName: string; avatarPath: string | null };
-};
+export type { PostDetail };
 
 /** Cache tag for one post: edits and deletes expire it with updateTag. */
 export const postTag = (postId: string) => `post:${postId}`;
@@ -40,9 +30,7 @@ export async function getPost(postId: string): Promise<PostDetail | null> {
 
   const { data, error } = await createPublicClient()
     .from("posts")
-    .select(
-      "id, image_path, image_width, image_height, thumbhash, alt_text, caption, location, created_at, author:profiles!inner(id, username, full_name, avatar_path)",
-    )
+    .select(POST_DETAIL_COLUMNS)
     .eq("id", postId)
     .maybeSingle();
 
@@ -50,22 +38,5 @@ export async function getPost(postId: string): Promise<PostDetail | null> {
   if (!data) return null;
 
   cacheTag(profileTag(data.author.username));
-
-  return {
-    id: data.id,
-    imagePath: data.image_path,
-    width: data.image_width,
-    height: data.image_height,
-    thumbhash: data.thumbhash,
-    altText: data.alt_text,
-    caption: data.caption,
-    location: data.location,
-    createdAt: data.created_at,
-    author: {
-      id: data.author.id,
-      username: data.author.username,
-      fullName: data.author.full_name,
-      avatarPath: data.author.avatar_path,
-    },
-  };
+  return toPostDetail(data);
 }

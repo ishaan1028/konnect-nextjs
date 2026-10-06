@@ -21,17 +21,17 @@ import { deletePostAction } from "../actions";
 
 type DeletePostDialogProps = {
   postId: string;
-  authorId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
 /** Destructive, so it asks first. On success the action redirects to the profile. */
-export function DeletePostDialog({ postId, authorId, open, onOpenChange }: DeletePostDialogProps) {
+export function DeletePostDialog({ postId, open, onOpenChange }: DeletePostDialogProps) {
   const queryClient = useQueryClient();
   const remove = useAction(deletePostAction, {
     onNavigation() {
-      void queryClient.invalidateQueries({ queryKey: queryKeys.posts.byAuthor(authorId) });
+      // The post leaves the feed, Explore, its author's grid and its modal.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
       toast.success("Post deleted");
     },
     onError: ({ error }) => toast.error(error.serverError ?? "Couldn't delete the post."),

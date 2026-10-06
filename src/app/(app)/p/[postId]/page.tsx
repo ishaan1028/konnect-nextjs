@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { PostActions, PostActionsSkeleton } from "@/features/posts/components/post-actions";
 import { PostOwnerMenu } from "@/features/posts/components/post-owner-menu";
 import { PostView, PostViewSkeleton } from "@/features/posts/components/post-view";
+import { ViewerLikeBoundary } from "@/features/posts/components/viewer-like-boundary";
 import { getPost } from "@/features/posts/server/get-post";
 import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
 import { postImageUrl } from "@/lib/storage";
@@ -13,6 +15,18 @@ const excerpt = (caption: string, max = 80) => {
   const line = caption.split("\n")[0]!.trim();
   return line.length > max ? `${line.slice(0, max - 1).trimEnd()}…` : line;
 };
+
+/**
+ * ISR for posts. Real post ids aren't known at build time (and the build never
+ * talks to the database), so this lists one placeholder, which renders "not
+ * found" without a query. Every real post is served the App Shell on its
+ * first visit, then rendered in the background and cached: from then on its
+ * HTML arrives complete, photo included, instead of streaming in. The
+ * viewer's like and owner menu still stream (they read cookies).
+ */
+export function generateStaticParams() {
+  return [{ postId: "__placeholder__" }];
+}
 
 /** Shares the cached post with the page, so both use one lookup. */
 export async function generateMetadata({ params }: PageProps<"/p/[postId]">): Promise<Metadata> {
@@ -66,6 +80,13 @@ async function Post({ params }: Pick<PageProps<"/p/[postId]">, "params">) {
                 details={{ caption: post.caption, altText: post.altText, location: post.location }}
               />
             </CurrentUserBoundary>
+          </Suspense>
+        }
+        actions={
+          <Suspense fallback={<PostActionsSkeleton />}>
+            <ViewerLikeBoundary postId={post.id}>
+              <PostActions postId={post.id} authorUsername={post.author.username} />
+            </ViewerLikeBoundary>
           </Suspense>
         }
       />

@@ -13,6 +13,11 @@ const nextConfig: NextConfig = {
   // Partial Prerendering: a static HTML shell is served instantly and dynamic
   // parts stream in. Data is dynamic by default; we opt into caching with "use cache".
   cacheComponents: true,
+  // Links prefetch each route's shared App Shell, and dynamic routes with
+  // generateStaticParams get ISR: a URL unknown at build time is served the
+  // shell once, then rendered in full in the background and cached, so later
+  // visitors get complete HTML (see app/(app)/p/[postId]/page.tsx).
+  partialPrefetching: true,
   // <Link href> and router.push() are type-checked against real routes.
   typedRoutes: true,
   poweredByHeader: false,

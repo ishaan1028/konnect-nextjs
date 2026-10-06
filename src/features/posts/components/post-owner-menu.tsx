@@ -1,6 +1,7 @@
 "use client";
 
 import { Ellipsis, Pencil, Trash2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -13,8 +14,13 @@ import {
 import { useCurrentUser } from "@/features/profiles/hooks";
 
 import type { PostDetailsInput } from "../schemas";
-import { DeletePostDialog } from "./delete-post-dialog";
-import { EditPostDialog } from "./edit-post-dialog";
+
+// Only the author ever opens these (and rarely), so their code (forms,
+// validation) loads on first open instead of with every post page.
+const EditPostDialog = dynamic(() => import("./edit-post-dialog").then((m) => m.EditPostDialog));
+const DeletePostDialog = dynamic(() =>
+  import("./delete-post-dialog").then((m) => m.DeletePostDialog),
+);
 
 type PostOwnerMenuProps = {
   postId: string;
@@ -30,11 +36,17 @@ type PostOwnerMenuProps = {
 export function PostOwnerMenu({ postId, authorId, details }: PostOwnerMenuProps) {
   const user = useCurrentUser();
   const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
+  // Each dialog mounts on its first opening and stays (so it can animate out).
+  const [opened, setOpened] = useState({ edit: false, delete: false });
 
   if (user?.id !== authorId) return null;
 
-  const onOpenChange = (open: boolean) => {
-    if (!open) setDialog(null);
+  const open = (which: "edit" | "delete") => {
+    setOpened((previous) => ({ ...previous, [which]: true }));
+    setDialog(which);
+  };
+  const onOpenChange = (isOpen: boolean) => {
+    if (!isOpen) setDialog(null);
   };
 
   return (
@@ -46,30 +58,28 @@ export function PostOwnerMenu({ postId, authorId, details }: PostOwnerMenuProps)
           <Ellipsis aria-hidden />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-44">
-          <DropdownMenuItem onClick={() => setDialog("edit")}>
+          <DropdownMenuItem onClick={() => open("edit")}>
             <Pencil aria-hidden />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem variant="destructive" onClick={() => setDialog("delete")}>
+          <DropdownMenuItem variant="destructive" onClick={() => open("delete")}>
             <Trash2 aria-hidden />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <EditPostDialog
-        postId={postId}
-        authorId={authorId}
-        details={details}
-        open={dialog === "edit"}
-        onOpenChange={onOpenChange}
-      />
-      <DeletePostDialog
-        postId={postId}
-        authorId={authorId}
-        open={dialog === "delete"}
-        onOpenChange={onOpenChange}
-      />
+      {opened.edit && (
+        <EditPostDialog
+          postId={postId}
+          details={details}
+          open={dialog === "edit"}
+          onOpenChange={onOpenChange}
+        />
+      )}
+      {opened.delete && (
+        <DeletePostDialog postId={postId} open={dialog === "delete"} onOpenChange={onOpenChange} />
+      )}
     </>
   );
 }

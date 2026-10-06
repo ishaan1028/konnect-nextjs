@@ -3,17 +3,10 @@ import { randomUUID } from "node:crypto";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 
-import { logIn } from "./support/auth";
+import { signUpAndLogIn } from "./support/auth";
 import { makePng } from "./support/images";
-import { adminClient, createConfirmedUser } from "./support/users";
-
-async function signUpAndLogIn(page: Page) {
-  const user = await createConfirmedUser();
-  await page.goto("/login");
-  await logIn(page, user.email, user.password);
-  await expect(page).toHaveURL("/");
-  return user;
-}
+import { createPostFor } from "./support/posts";
+import { createConfirmedUser } from "./support/users";
 
 /** Picks a photo on /create (the file input is behind the button). */
 async function pickPhoto(page: Page, file: { name: string; mimeType: string; buffer: Buffer }) {
@@ -23,36 +16,6 @@ async function pickPhoto(page: Page, file: { name: string; mimeType: string; buf
     await page.getByRole("button", { name: "Choose from your device" }).click();
     await (await chooser).setFiles(file);
   }).toPass();
-}
-
-/** A post created directly in the database and Storage, for tests about viewing one. */
-async function createPostFor(page: Page, username: string, caption: string) {
-  const admin = adminClient();
-  const { data: author } = await admin
-    .from("profiles")
-    .select("id")
-    .eq("username", username)
-    .single()
-    .throwOnError();
-  const path = `${author.id}/${randomUUID()}.png`;
-  const { error } = await admin.storage
-    .from("posts")
-    .upload(path, await makePng(page), { contentType: "image/png" });
-  if (error) throw error;
-  const { data: post } = await admin
-    .from("posts")
-    .insert({
-      author_id: author.id,
-      image_path: path,
-      image_width: 400,
-      image_height: 300,
-      caption,
-      alt_text: "A green to violet gradient",
-    })
-    .select("id")
-    .single()
-    .throwOnError();
-  return post.id;
 }
 
 test.describe("posts", () => {

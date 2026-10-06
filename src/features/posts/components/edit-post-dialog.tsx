@@ -26,7 +26,6 @@ import { PostDetailsFields } from "./post-details-fields";
 
 type EditPostDialogProps = {
   postId: string;
-  authorId: string;
   details: PostDetailsInput;
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -51,7 +50,6 @@ export function EditPostDialog({ open, onOpenChange, ...props }: EditPostDialogP
 
 function EditPostForm({
   postId,
-  authorId,
   details,
   onDone,
 }: Omit<EditPostDialogProps, "open" | "onOpenChange"> & { onDone: () => void }) {
@@ -67,9 +65,9 @@ function EditPostForm({
       formProps: { mode: "onTouched", defaultValues: initial },
       actionProps: {
         onSuccess() {
-          // The page re-renders with the new text (updateTag); the grid's
-          // alt text comes from the client cache, so refresh that too.
-          void queryClient.invalidateQueries({ queryKey: queryKeys.posts.byAuthor(authorId) });
+          // The page re-renders with the new text (updateTag); the modal,
+          // feed and grids read the browser cache, so refresh every post list.
+          void queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
           toast.success("Post updated");
           onDone();
         },

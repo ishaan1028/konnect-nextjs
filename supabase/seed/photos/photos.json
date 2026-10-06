@@ -1,0 +1,72 @@
+{
+  "film-camera": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "DwgKBgDn91dKeafZmIx6ioWI9pJoL4k="
+  },
+  "city-street": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "l+cNFgYHlehId5h4aHeJd4h4xn9i+Uc="
+  },
+  "quiet-alley": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "mSgSDwIKqGWKh3h3h2eId4eI98k5z40C"
+  },
+  "sea-sunset": {
+    "width": 1080,
+    "height": 565,
+    "thumbhash": "26oSRIZmeYePeIh1eIRFf2X0vA=="
+  },
+  "santorini": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "rucNDwKKd4d/h4h1eGeIh4hohwlJl5AE"
+  },
+  "fjord": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "I5YJLgZdl/iUecd4h3d4hXeIfzH8CeI="
+  },
+  "cookies": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "kwgGHwKaJ1WcWHlQZ2llG3em5p0KqLIA"
+  },
+  "pour-over": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "1vcJDgJFFMWLRQWqaVaYa6c19sBlDmw="
+  },
+  "cappuccino": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "ETkKDwKjaHh6eHeghUh1aJWaamYIVnAE"
+  },
+  "sketchbook": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "7ygGDwJPR5qlaGVyeaeHh3aHR6rAoQsO"
+  },
+  "coffee-red": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "FvoKHgxoefd3eFeWhol3iGmIiI+J/Oc="
+  },
+  "design-desk": {
+    "width": 1080,
+    "height": 565,
+    "thumbhash": "mjgKDIIMiGibhnZ4W5zr4cB7DA=="
+  },
+  "laptop-desk": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "jxgOHwR3ineAeIiWZseFaIhmdguXt2AJ"
+  },
+  "window-desk": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "ZBgWDgB2h/h4eJeId4h4hYeHqXCGCmg="
+  }
+}

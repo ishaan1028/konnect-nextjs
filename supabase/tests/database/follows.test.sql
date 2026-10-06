@@ -9,6 +9,10 @@ insert into auth.users (id, email, raw_user_meta_data, aud, role) values
   ('b0000000-0000-4000-8000-00000000000b', 'fb@example.com', '{"username":"follow_b","full_name":"B"}', 'authenticated', 'authenticated'),
   ('c0000000-0000-4000-8000-00000000000c', 'fc@example.com', '{"username":"follow_c","full_name":"C"}', 'authenticated', 'authenticated');
 
+-- Suggestions are capped and ranked by popularity: make C the most popular so
+-- these tests don't depend on whatever else is in the local database.
+update public.profiles set followers_count = 1000000 where id = 'c0000000-0000-4000-8000-00000000000c';
+
 create function pg_temp.counts(person uuid)
 returns text language sql as $$
   select followers_count || '/' || following_count from public.profiles where id = person;

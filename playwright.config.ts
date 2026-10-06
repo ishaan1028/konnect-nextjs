@@ -19,6 +19,8 @@ const useProductionServer = isCI || process.env.E2E_PROD === "1";
  */
 export default defineConfig({
   testDir: "./e2e",
+  // Removes the accounts (and their posts and files) the tests created.
+  globalTeardown: "./e2e/global-teardown.ts",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,

@@ -35,7 +35,8 @@ export const createPostSchema = postDetailsSchema.extend({
 
 export const postIdSchema = z.uuid();
 
-export const deletePostSchema = z.object({ postId: postIdSchema });
+/** Actions on one post (delete, like, unlike). */
+export const postTargetSchema = z.object({ postId: postIdSchema });
 
 export type PostDetailsInput = z.input<typeof postDetailsSchema>;
 export type CreatePostInput = z.input<typeof createPostSchema>;

@@ -1,12 +1,13 @@
-import { Compass, ImagePlus, Images, UsersRound } from "lucide-react";
+import { Compass, ImagePlus, UsersRound } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 
-import { ComingSoon } from "@/components/shared/coming-soon";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SuggestionsSkeleton } from "@/features/follows/components/suggestions-skeleton";
+import { FeedBoundary } from "@/features/posts/components/feed-boundary";
+import { FeedSkeleton } from "@/features/posts/components/feed-skeleton";
 import { SuggestionsBoundary } from "@/features/follows/components/suggestions-boundary";
 import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
 import { WelcomeGreeting } from "@/features/profiles/components/welcome-greeting";
@@ -93,12 +94,9 @@ export default function HomePage() {
       </aside>
 
       <section aria-label="Feed" className="xl:col-start-1">
-        <ComingSoon
-          icon={Images}
-          title="Your feed lives here"
-          description="Posts from you and the people you follow, with likes, comments and infinite scroll."
-          phase={9}
-        />
+        <Suspense fallback={<FeedSkeleton />}>
+          <FeedBoundary />
+        </Suspense>
       </section>
     </div>
   );

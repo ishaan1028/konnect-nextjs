@@ -36,6 +36,39 @@ export type Database = {
           },
         ];
       };
+      post_likes: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       posts: {
         Row: {
           alt_text: string;
@@ -136,6 +169,42 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_explore_posts: {
+        Args: { cursor_created_at?: string; cursor_id?: string; max_results?: number };
+        Returns: {
+          alt_text: string;
+          author_username: string;
+          comments_count: number;
+          created_at: string;
+          id: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          likes_count: number;
+          thumbhash: string;
+        }[];
+      };
+      get_feed: {
+        Args: { cursor_created_at?: string; cursor_id?: string; max_results?: number };
+        Returns: {
+          alt_text: string;
+          author_avatar_path: string;
+          author_full_name: string;
+          author_id: string;
+          author_username: string;
+          caption: string;
+          comments_count: number;
+          created_at: string;
+          id: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          liked_by_viewer: boolean;
+          likes_count: number;
+          location: string;
+          thumbhash: string;
+        }[];
+      };
       get_follow_list: {
         Args: {
           cursor_followed_at?: string;
@@ -173,6 +242,30 @@ export type Database = {
           username: string;
         }[];
       };
+      get_like_status: {
+        Args: { post_id: string };
+        Returns: {
+          liked: boolean;
+          likes_count: number;
+        }[];
+      };
+      get_post_likers: {
+        Args: {
+          cursor_id?: string;
+          cursor_liked_at?: string;
+          max_results?: number;
+          post_id: string;
+        };
+        Returns: {
+          avatar_path: string;
+          follows_viewer: boolean;
+          full_name: string;
+          id: string;
+          liked_at: string;
+          username: string;
+          viewer_follows: boolean;
+        }[];
+      };
       get_profile_posts: {
         Args: {
           cursor_created_at?: string;
@@ -191,6 +284,18 @@ export type Database = {
         }[];
       };
       is_username_available: { Args: { username: string }; Returns: boolean };
+      search_profiles: {
+        Args: { max_results?: number; query: string };
+        Returns: {
+          avatar_path: string;
+          followers_count: number;
+          follows_viewer: boolean;
+          full_name: string;
+          id: string;
+          username: string;
+          viewer_follows: boolean;
+        }[];
+      };
     };
     Enums: {
       [_ in never]: never;

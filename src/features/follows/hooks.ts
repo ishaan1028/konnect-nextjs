@@ -14,7 +14,7 @@ import type { FollowListPage, FollowStatus } from "./queries";
  *   onMutate  → flip the button immediately (remember the previous state)
  *   action    → the Server Action writes the row; updateTag refreshes counts
  *   onError   → roll back and explain
- *   onSettled → mark lists stale so they refetch with the truth
+ *   onSettled → mark lists and the feed stale so they refetch with the truth
  */
 export function useToggleFollow(profileId: string) {
   const queryClient = useQueryClient();
@@ -42,6 +42,8 @@ export function useToggleFollow(profileId: string) {
 
     onSettled: () => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.follows.lists() });
+      // Their posts join (or leave) your feed.
+      void queryClient.invalidateQueries({ queryKey: queryKeys.posts.feed() });
       // Mark suggestions stale without refetching now: the person just followed
       // stays in the list (showing "Following") instead of vanishing mid-click.
       void queryClient.invalidateQueries({

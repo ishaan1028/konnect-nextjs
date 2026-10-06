@@ -18,6 +18,11 @@ const eslintConfig = defineConfig([
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
   },
+  {
+    // Command-line scripts (seeding, fixtures) report progress on stdout.
+    files: ["scripts/**"],
+    rules: { "no-console": "off" },
+  },
   // Must be last: turns off stylistic rules that would fight Prettier.
   prettier,
   globalIgnores([

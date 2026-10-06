@@ -3,13 +3,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import HomePage from "./page";
 
-// The greeting is an async Server Component that reads the session; Vitest
-// can't render those, so it's stubbed here and covered by e2e/shell.spec.ts.
+// The greeting, suggestions and feed are async Server Components that read the session;
+// Vitest can't render those, so they're stubbed here and covered by e2e/shell.spec.ts.
 vi.mock("@/features/profiles/components/current-user-boundary", () => ({
   CurrentUserBoundary: () => null,
 }));
 vi.mock("@/features/follows/components/suggestions-boundary", () => ({
   SuggestionsBoundary: () => null,
+}));
+vi.mock("@/features/posts/components/feed-boundary", () => ({
+  FeedBoundary: () => null,
 }));
 
 describe("HomePage", () => {

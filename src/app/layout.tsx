@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 
 import { NavigationProgress } from "@/components/layout/navigation-progress";
@@ -15,10 +16,17 @@ import "./globals.css";
 
 // next/font downloads fonts at build time and self-hosts them: no runtime
 // request to Google, and fallback metrics are adjusted so text doesn't shift.
+// Only the body face is preloaded: it's what the first paint needs. The others
+// load on demand without competing with a page's main image for bandwidth,
+// and their adjusted fallback metrics keep text from shifting when they swap in.
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"], preload: false });
 // Display face for headings and the wordmark.
-const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: ["latin"] });
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
+  subsets: ["latin"],
+  preload: false,
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
@@ -58,9 +66,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
-        <QueryProvider>
-          <TooltipProvider>{children}</TooltipProvider>
-        </QueryProvider>
+        {/* URL query state (?q= on Explore), shared through the app router. */}
+        <NuqsAdapter>
+          <QueryProvider>
+            <TooltipProvider>{children}</TooltipProvider>
+          </QueryProvider>
+        </NuqsAdapter>
         <Toaster position="top-center" />
         <ThemeSync />
       </body>
