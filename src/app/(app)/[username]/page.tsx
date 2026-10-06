@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { ComingSoon } from "@/components/shared/coming-soon";
+import { ProfilePostsBoundary } from "@/features/posts/components/profile-posts-boundary";
+import { ProfilePostsSkeleton } from "@/features/posts/components/profile-posts-skeleton";
 import { ViewerFollowBoundary } from "@/features/follows/components/viewer-follow-boundary";
 import { ProfileActions } from "@/features/profiles/components/profile-actions";
 import {
@@ -68,16 +69,18 @@ async function Profile({ params }: Pick<PageProps<"/[username]">, "params">) {
           </Suspense>
         }
       />
-      <section aria-labelledby="posts-heading" className="space-y-4">
-        <h2 id="posts-heading" className="sr-only">
+      <section aria-labelledby="posts-heading" className="space-y-4 border-t pt-4">
+        <h2
+          id="posts-heading"
+          className="flex items-center justify-center gap-2 text-xs font-semibold tracking-widest uppercase"
+        >
+          <Grid3x3 aria-hidden className="size-4" />
           Posts
         </h2>
-        <ComingSoon
-          icon={Grid3x3}
-          title="No posts yet"
-          description="Photos shared by this account will appear here."
-          phase={8}
-        />
+        {/* Public, so it's the same for everyone; it streams in under the header. */}
+        <Suspense fallback={<ProfilePostsSkeleton count={profile.postsCount} />}>
+          <ProfilePostsBoundary profileId={profile.id} username={profile.username} />
+        </Suspense>
       </section>
     </>
   );

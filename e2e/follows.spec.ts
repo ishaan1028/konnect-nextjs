@@ -15,7 +15,8 @@ const stat = (page: Page, label: "followers" | "following") =>
   page
     .getByRole("list", { name: "Profile stats" })
     .getByRole("listitem")
-    .filter({ hasText: label });
+    // "1 follower" / "2 followers": match either form.
+    .filter({ hasText: label === "followers" ? /\bfollowers?\b/ : /\bfollowing\b/ });
 
 test.describe("following", () => {
   test("follow and unfollow from a profile, with counts updating", async ({ page }) => {

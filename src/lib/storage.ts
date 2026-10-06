@@ -1,6 +1,7 @@
 import { env } from "@/lib/env";
 
 export const AVATARS_BUCKET = "avatars";
+export const POSTS_BUCKET = "posts";
 
 /**
  * Public URL of a file in a public bucket. Pure string building (no client or
@@ -13,4 +14,8 @@ export function publicStorageUrl(bucket: string, path: string): string {
 
 export function avatarUrl(path: string | null | undefined): string | null {
   return path ? publicStorageUrl(AVATARS_BUCKET, path) : null;
+}
+
+export function postImageUrl(path: string): string {
+  return publicStorageUrl(POSTS_BUCKET, path);
 }

@@ -36,6 +36,62 @@ export type Database = {
           },
         ];
       };
+      posts: {
+        Row: {
+          alt_text: string;
+          author_id: string;
+          caption: string;
+          comments_count: number;
+          created_at: string;
+          id: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          likes_count: number;
+          location: string;
+          thumbhash: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          alt_text?: string;
+          author_id: string;
+          caption?: string;
+          comments_count?: number;
+          created_at?: string;
+          id?: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          likes_count?: number;
+          location?: string;
+          thumbhash?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          alt_text?: string;
+          author_id?: string;
+          caption?: string;
+          comments_count?: number;
+          created_at?: string;
+          id?: string;
+          image_height?: number;
+          image_path?: string;
+          image_width?: number;
+          likes_count?: number;
+          location?: string;
+          thumbhash?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_path: string | null;
@@ -115,6 +171,23 @@ export type Database = {
           id: string;
           mutual_count: number;
           username: string;
+        }[];
+      };
+      get_profile_posts: {
+        Args: {
+          cursor_created_at?: string;
+          cursor_id?: string;
+          max_results?: number;
+          profile_id: string;
+        };
+        Returns: {
+          alt_text: string;
+          created_at: string;
+          id: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          thumbhash: string;
         }[];
       };
       is_username_available: { Args: { username: string }; Returns: boolean };

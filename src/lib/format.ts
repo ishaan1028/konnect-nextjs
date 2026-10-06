@@ -4,3 +4,15 @@ const compact = new Intl.NumberFormat("en", { notation: "compact", maximumFracti
 export function formatCount(value: number): string {
   return compact.format(value);
 }
+
+const longDate = new Intl.DateTimeFormat("en", { dateStyle: "long", timeZone: "UTC" });
+
+/** "October 6, 2026". Locale and time zone are fixed so server and client agree. */
+export function formatDate(iso: string): string {
+  return longDate.format(new Date(iso));
+}
+
+/** "1 post" / "2 posts": picks the word for a count (English-only app). */
+export function pluralize(count: number, singular: string, plural: string): string {
+  return count === 1 ? singular : plural;
+}

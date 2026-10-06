@@ -1,25 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { logIn } from "./support/auth";
+import { makePng } from "./support/images";
 import { createConfirmedUser, demoUser, uniqueUser } from "./support/users";
-
-/** A 400×300 PNG drawn in the browser, so no binary fixture lives in the repo. */
-async function makePng(page: Page): Promise<Buffer> {
-  const dataUrl = await page.evaluate(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 400;
-    canvas.height = 300;
-    const context = canvas.getContext("2d")!;
-    const gradient = context.createLinearGradient(0, 0, 400, 300);
-    gradient.addColorStop(0, "#22c55e");
-    gradient.addColorStop(1, "#7c3aed");
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, 400, 300);
-    return canvas.toDataURL("image/png");
-  });
-  return Buffer.from(dataUrl.split(",")[1]!, "base64");
-}
 
 test.describe("public profile", () => {
   test("shows the profile with its own title and canonical URL", async ({ page }) => {

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCount } from "@/lib/format";
+import { formatCount, pluralize } from "@/lib/format";
 import { avatarUrl } from "@/lib/storage";
 
 import type { PublicProfile } from "../server/get-public-profile";
@@ -18,9 +18,9 @@ type ProfileHeaderProps = {
 /** The public part of a profile: identical for every visitor, so it's cached. */
 export function ProfileHeader({ profile, actions }: ProfileHeaderProps) {
   const stats = [
-    { label: "posts", value: profile.postsCount },
+    { label: pluralize(profile.postsCount, "post", "posts"), value: profile.postsCount },
     {
-      label: "followers",
+      label: pluralize(profile.followersCount, "follower", "followers"),
       value: profile.followersCount,
       href: `/${profile.username}/followers` as Route,
     },

@@ -445,7 +445,14 @@ For each phase I'll explain the concepts first, then build it with you in small 
     - Upload with progress
     - The action verifies the path starts with `<uid>/` and that the object exists, inserts the row, then redirects to the post
   - Owner menu (dropdown): **Edit** (caption, location, alt text in a dialog) and **Delete** (alert dialog; the action deletes the row and then the storage object)
-- **Done when:** posting is quick on mobile, images never shift layout, and you can't edit someone else's post even by calling the API directly.
+- **Done when:** posting is quick on mobile, images never shift layout, and you can't edit someone else's post even by calling the API directly. ✅
+- **Notes from the build:**
+  - Decision: the shared demo account can create, edit and delete posts like any account (no lock, no cleanup job).
+  - Migration `posts`: table with author-folder, size and aspect-ratio (4:5 to 1.91:1) CHECKs; RLS (public read, write own); **column grants** (insert only the content columns, so ids, counters and timestamps can't be chosen; update only caption, location and alt text, so the photo can't be swapped); `posts_count` trigger; `get_profile_posts` keyset RPC (one row comparison against `(infinity, max uuid)` on the first page, so every page walks the index). The `posts` bucket has no UPDATE policy: uploaded photos are immutable. 22 pgTAP tests.
+  - `/create` is a static page (the composer reads the session in the browser): pick or drop → crop (react-easy-crop, loaded with `next/dynamic` only after a pick, inside a box that already has its final size) → WebP ≤1080px + ThumbHash in the browser → upload with progress (XHR to the Storage REST API, since supabase-js can't report upload progress) → `createPostAction` verifies the path and file, inserts, `updateTag`s the profile and **redirects server-side** (replace) to `/p/[id]`.
+  - `/p/[postId]`: cached public post (`"use cache"`, tagged with the post and its author's profile so renames refresh it) with OG/Twitter image metadata; the image has known dimensions, a ThumbHash placeholder and `preload` (LCP). The owner's Edit/Delete menu streams in. Delete also redirects from the server, so the deleted page never flashes "not found".
+  - Profile grid: 3-column tiles via `useSuspenseInfiniteQuery`, prefetched (non-awaited) with the cookie-less client; the skeleton draws exactly `min(posts_count, 24)` tiles.
+  - Canvas helpers moved to `lib/canvas-image.ts` (shared by avatars and posts); profile stats now say "1 post" / "1 follower".
 
 ### Phase 9: Feed, Explore, post detail and likes
 
@@ -562,5 +569,5 @@ For each phase I'll explain the concepts first, then build it with you in small 
 ## 6. Progress tracker
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
-- [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [ ] 8 Create post · [ ] 9 Feed/Explore/Likes
+- [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [x] 8 Create post · [ ] 9 Feed/Explore/Likes
 - [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

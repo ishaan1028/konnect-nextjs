@@ -16,4 +16,8 @@ export const queryKeys = {
       ["follows", "list", profileId, kind] as const,
     suggestions: () => ["follows", "suggestions"] as const,
   },
+  posts: {
+    all: ["posts"] as const,
+    byAuthor: (profileId: string) => ["posts", "by-author", profileId] as const,
+  },
 };
