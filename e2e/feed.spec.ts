@@ -37,7 +37,8 @@ test.describe("home feed", () => {
     ).toHaveAttribute("aria-pressed", "true");
 
     // The post opens as a modal over the feed, with the same like state.
-    await card(page, author.username).getByRole("link", { name: "Comment" }).click();
+    // (The post's time links to it.)
+    await card(page, author.username).locator("header").locator('a[href^="/p/"]').click();
     const modal = page.getByRole("dialog", { name: "Post" });
     await expect(modal.getByText("Hello from the feed")).toBeVisible();
     await expect(page).toHaveURL(/\/p\/[0-9a-f-]{36}$/);

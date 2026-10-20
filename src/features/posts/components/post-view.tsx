@@ -18,6 +18,10 @@ type PostViewProps = {
   ownerMenu?: ReactNode;
   /** Like / comment / share and the like count (the viewer's like is personal). */
   actions?: ReactNode;
+  /** The comment thread, under the caption. */
+  comments?: ReactNode;
+  /** "Add a comment…": last on phones, under the actions on wider screens. */
+  commentForm?: ReactNode;
 };
 
 /**
@@ -29,13 +33,13 @@ type PostViewProps = {
  * the right. Works as a Server Component (the page) and inside the client
  * modal alike: it has no hooks of its own.
  */
-export function PostView({ post, ownerMenu, actions }: PostViewProps) {
+export function PostView({ post, ownerMenu, actions, comments, commentForm }: PostViewProps) {
   const profileHref = `/${post.author.username}` as Route;
 
   return (
     <article
       aria-label={`Post by @${post.author.username}`}
-      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto]"
+      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto_auto]"
     >
       <header className="flex items-center gap-3 border-b p-4 md:col-start-2">
         <Link href={profileHref} className="shrink-0 rounded-full" tabIndex={-1} aria-hidden>
@@ -59,7 +63,7 @@ export function PostView({ post, ownerMenu, actions }: PostViewProps) {
 
       {/* Width and height are known, so the browser reserves the exact space
           (no layout shift); the ThumbHash preview fills it until it loads. */}
-      <div className="bg-muted md:col-start-1 md:row-span-3 md:row-start-1 md:self-center">
+      <div className="bg-muted md:col-start-1 md:row-span-4 md:row-start-1 md:self-center">
         <DoubleTapLike postId={post.id}>
           <Image
             src={postImageUrl(post.imagePath)}
@@ -77,10 +81,12 @@ export function PostView({ post, ownerMenu, actions }: PostViewProps) {
       </div>
 
       {actions && (
-        <div className="px-4 pt-2 md:col-start-2 md:row-start-3 md:border-t md:pb-4">{actions}</div>
+        <div className="px-4 pt-2 md:col-start-2 md:row-start-3 md:border-t md:pb-3">{actions}</div>
       )}
 
-      <div className="flex flex-col gap-3 p-4 md:col-start-2 md:row-start-2">
+      {/* On wider screens the thread scrolls inside the column (contain-size
+          keeps it from stretching the card past the photo's height). */}
+      <div className="flex flex-col gap-3 p-4 md:col-start-2 md:row-start-2 md:min-h-48 md:overflow-y-auto md:[contain:size]">
         {post.caption && (
           <p className="text-sm break-words whitespace-pre-line">
             <Link href={profileHref} className="mr-1.5 font-semibold hover:underline">
@@ -92,7 +98,14 @@ export function PostView({ post, ownerMenu, actions }: PostViewProps) {
         <time dateTime={post.createdAt} className="text-xs text-muted-foreground uppercase">
           {formatDate(post.createdAt)}
         </time>
+        {comments}
       </div>
+
+      {commentForm && (
+        <div className="border-t p-4 pt-3 md:col-start-2 md:row-start-4 md:border-t-0 md:pt-0">
+          {commentForm}
+        </div>
+      )}
     </article>
   );
 }
@@ -102,13 +115,13 @@ export function PostViewSkeleton() {
   return (
     <div
       aria-hidden
-      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto]"
+      className="mx-auto grid max-w-5xl overflow-hidden rounded-4xl border bg-card md:grid-cols-[minmax(0,3fr)_minmax(18rem,2fr)] md:grid-rows-[auto_1fr_auto_auto]"
     >
       <div className="flex items-center gap-3 border-b p-4 md:col-start-2">
         <Skeleton className="size-10 rounded-full" />
         <Skeleton className="h-4 w-32" />
       </div>
-      <Skeleton className="aspect-[4/5] rounded-none md:col-start-1 md:row-span-3 md:row-start-1" />
+      <Skeleton className="aspect-[4/5] rounded-none md:col-start-1 md:row-span-4 md:row-start-1" />
       <div className="space-y-2 p-4 md:col-start-2 md:row-start-2">
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-2/3" />

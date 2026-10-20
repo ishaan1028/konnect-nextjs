@@ -1,8 +1,8 @@
 /**
  * Seeds the showcase accounts' posts: uploads the photos in
- * supabase/seed/photos/ to Storage and creates the posts and their likes
- * (supabase/seed/posts.json). Runs after `supabase db reset` (pnpm db:reset);
- * safe to run again: existing files, posts and likes are left as they are.
+ * supabase/seed/photos/ to Storage and creates the posts, their likes and
+ * comments (supabase/seed/posts.json). Runs after `supabase db reset` (pnpm db:reset);
+ * safe to run again: existing files, posts, likes and comments are left as they are.
  *
  *   pnpm db:seed-photos
  *
@@ -30,7 +30,15 @@ const seedDir = new URL("../supabase/seed/", import.meta.url);
 const posts = JSON.parse(await readFile(new URL("posts.json", seedDir), "utf8"));
 const photos = JSON.parse(await readFile(new URL("photos/photos.json", seedDir), "utf8"));
 
-const usernames = [...new Set(posts.flatMap((post) => [post.author, ...post.likedBy]))];
+const usernames = [
+  ...new Set(
+    posts.flatMap((post) => [
+      post.author,
+      ...post.likedBy,
+      ...(post.comments ?? []).map((comment) => comment.by),
+    ]),
+  ),
+];
 const { data: profiles, error } = await admin
   .from("profiles")
   .select("id, username")
@@ -78,6 +86,21 @@ for (const post of posts) {
     { onConflict: "post_id,user_id", ignoreDuplicates: true },
   );
   if (likesError) throw likesError;
+
+  if (post.comments?.length) {
+    const postedAt = Date.now() - post.hoursAgo * 3_600_000;
+    const { error: commentsError } = await admin.from("comments").upsert(
+      post.comments.map((comment) => ({
+        id: comment.id,
+        post_id: post.id,
+        author_id: idOf(comment.by),
+        body: comment.body,
+        created_at: new Date(postedAt + comment.minutesAfter * 60_000).toISOString(),
+      })),
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+    if (commentsError) throw commentsError;
+  }
 }
 
 console.log(`Seeded ${posts.length} posts with photos.`);

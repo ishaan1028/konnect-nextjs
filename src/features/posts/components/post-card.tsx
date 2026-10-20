@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { RelativeTime } from "@/components/shared/relative-time";
+import { CommentForm } from "@/features/comments/components/comment-form";
+import { LatestComments } from "@/features/comments/components/latest-comments";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { avatarUrl, postImageUrl } from "@/lib/storage";
 import { thumbhashPlaceholder } from "@/lib/thumbhash";
@@ -23,6 +25,7 @@ type PostCardProps = {
 /** A post in the home feed. Its photo, comment button and time open the post. */
 export function PostCard({ post, priority = false }: PostCardProps) {
   const postHref = `/p/${post.id}` as Route;
+  const commentInputId = `card-comment-input-${post.id}`;
   const profileHref = `/${post.author.username}` as Route;
 
   return (
@@ -76,9 +79,15 @@ export function PostCard({ post, priority = false }: PostCardProps) {
           postId={post.id}
           authorUsername={post.author.username}
           initial={post.likes}
-          commentHref={postHref}
+          commentInputId={commentInputId}
         />
         {post.caption && <PostCaption username={post.author.username} caption={post.caption} />}
+        <LatestComments
+          postId={post.id}
+          comments={post.latestComments}
+          total={post.commentsCount}
+        />
+        <CommentForm postId={post.id} inputId={commentInputId} className="pt-1" />
       </div>
     </article>
   );

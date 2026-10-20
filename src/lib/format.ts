@@ -43,3 +43,8 @@ export function formatRelativeTime(iso: string, now: number): string {
   const sameYear = date.getUTCFullYear() === new Date(now).getUTCFullYear();
   return (sameYear ? monthDay : monthDayYear).format(date);
 }
+
+/** "Oct 6": month and day only, since choosing whether to add the year would need the clock. */
+export function formatShortDate(iso: string): string {
+  return monthDay.format(new Date(iso));
+}

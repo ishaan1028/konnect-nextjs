@@ -2,6 +2,7 @@ import "server-only";
 
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 
 import { env } from "@/lib/env";
 import type { Database } from "@/types/database.types";
@@ -14,8 +15,17 @@ import type { Database } from "@/types/database.types";
  *
  * With Cache Components, reading cookies() is request-time data, so components
  * that use this client must render inside a <Suspense> boundary.
+ *
+ * connection() first: some prerenders (dev validation, runtime prefetches) do
+ * get cookies, but forbid reading the clock. Supabase checks the session's
+ * expiry with Date.now(), which then throws inside getClaims(); it reports
+ * "no user", and the prerendered HTML shows a signed-in visitor as signed out
+ * (a hydration mismatch). Waiting for the real request keeps every session
+ * read, and TanStack's dehydrate() after it (which stamps Date.now() too), out
+ * of prerendering entirely.
  */
 export async function createClient() {
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient<Database>(

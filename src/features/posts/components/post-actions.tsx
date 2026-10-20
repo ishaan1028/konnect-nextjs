@@ -26,8 +26,8 @@ type PostActionsProps = {
   authorUsername: string;
   /** Known like state (a feed card's row); without it, it's read or fetched. */
   initial?: LikeStatus;
-  /** Where the comment button goes (the post itself); omitted on the post page. */
-  commentHref?: Route;
+  /** The comment box's id: the comment button moves focus there. */
+  commentInputId?: string;
 };
 
 /**
@@ -35,7 +35,7 @@ type PostActionsProps = {
  * Reads the post's shared like state, so every view of the post agrees.
  * Render inside a CurrentUserBoundary (or where the current user is cached).
  */
-export function PostActions({ postId, authorUsername, initial, commentHref }: PostActionsProps) {
+export function PostActions({ postId, authorUsername, initial, commentInputId }: PostActionsProps) {
   const user = useCurrentUser();
   const { data: likes } = useSuspenseQuery({
     ...likeStatusQueryOptions(createClient(), postId),
@@ -77,15 +77,25 @@ export function PostActions({ postId, authorUsername, initial, commentHref }: Po
             {heart}
           </Link>
         )}
-        {commentHref && (
-          <Link
-            href={commentHref}
-            aria-label="Comment"
-            className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
-          >
-            <MessageCircle aria-hidden className="size-6" />
-          </Link>
-        )}
+        {commentInputId &&
+          (user ? (
+            <Button
+              variant="ghost"
+              size="icon-lg"
+              aria-label="Comment"
+              onClick={() => document.getElementById(commentInputId)?.focus()}
+            >
+              <MessageCircle aria-hidden className="size-6" />
+            </Button>
+          ) : (
+            <Link
+              href={`/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route}
+              aria-label="Log in to comment"
+              className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
+            >
+              <MessageCircle aria-hidden className="size-6" />
+            </Link>
+          ))}
         <SharePostButton postId={postId} authorUsername={authorUsername} />
       </div>
 

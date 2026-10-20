@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { queryOptions } from "@tanstack/react-query";
 
+import { isSignedOutError } from "@/lib/auth/claims";
 import { isDemoClaims } from "@/lib/auth/demo";
 import { queryKeys } from "@/lib/query/keys";
 import type { Database } from "@/types/database.types";
@@ -25,8 +26,10 @@ export type CurrentUser = {
 };
 
 export async function fetchCurrentUser(supabase: Supabase): Promise<CurrentUser | null> {
-  // getClaims() verifies the JWT; a signed-out visitor is a normal state (null).
-  const { data: auth } = await supabase.auth.getClaims();
+  // getClaims() verifies the JWT; a signed-out visitor is a normal state (null),
+  // but a failure is thrown, so it's retried rather than shown as "signed out".
+  const { data: auth, error: authError } = await supabase.auth.getClaims();
+  if (authError && !isSignedOutError(authError)) throw authError;
   const userId = auth?.claims.sub;
   if (!auth || !userId) return null;
 

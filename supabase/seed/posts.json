@@ -7,7 +7,27 @@
     "caption": "Sunset number 214. Still not tired of them 🌅",
     "location": "Big Sur, California",
     "altText": "An orange sun setting over the sea behind dark rocky islets",
-    "likedBy": ["maya.k", "leo.bakes", "sana.draws", "alex.demo"]
+    "likedBy": ["maya.k", "leo.bakes", "sana.draws", "alex.demo"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000001",
+        "by": "maya.k",
+        "body": "This light is unreal. What time was this?",
+        "minutesAfter": 12
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000002",
+        "by": "zoe.travels",
+        "body": "Around 7:40, right before it dipped behind the rocks 🌅",
+        "minutesAfter": 25
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000003",
+        "by": "leo.bakes",
+        "body": "Adding Big Sur to the list.",
+        "minutesAfter": 60
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000002",
@@ -17,7 +37,21 @@
     "caption": "Brown butter cookies, lemon on the side. Don't skip the flaky salt.",
     "location": "Leo's Bakery",
     "altText": "Golden cookies on a dark plate next to lemon slices and yellow daffodils",
-    "likedBy": ["sana.draws", "maya.k", "alex.demo"]
+    "likedBy": ["sana.draws", "maya.k", "alex.demo"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000004",
+        "by": "sana.draws",
+        "body": "Brown butter and lemon? Genius.",
+        "minutesAfter": 8
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000005",
+        "by": "alex.demo",
+        "body": "Saving this for the weekend 🍪",
+        "minutesAfter": 30
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000003",
@@ -27,7 +61,15 @@
     "caption": "New palette, new brief. Let's see where this one goes ✏️",
     "location": "",
     "altText": "A flat lay of an open sketchbook, colored pencils, a keyboard and a phone on a white desk",
-    "likedBy": ["leo.bakes", "zoe.travels"]
+    "likedBy": ["leo.bakes", "zoe.travels"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000006",
+        "by": "zoe.travels",
+        "body": "Love that palette!",
+        "minutesAfter": 15
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000004",
@@ -47,7 +89,27 @@
     "caption": "Twin-lens days. Nothing slows you down like 12 frames a roll 🎞️",
     "location": "Brooklyn, New York",
     "altText": "A person in a dark sweater holding a twin-lens reflex film camera, in black and white",
-    "likedBy": ["zoe.travels", "arjun.codes", "sana.draws", "leo.bakes"]
+    "likedBy": ["zoe.travels", "arjun.codes", "sana.draws", "leo.bakes"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000007",
+        "by": "arjun.codes",
+        "body": "What stock are you shooting?",
+        "minutesAfter": 20
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000008",
+        "by": "maya.k",
+        "body": "Portra 400, always.",
+        "minutesAfter": 34
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000009",
+        "by": "sana.draws",
+        "body": "The texture on this 🤍",
+        "minutesAfter": 90
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000006",
@@ -67,7 +129,15 @@
     "caption": "White walls, blue domes, zero regrets.",
     "location": "Oia, Santorini",
     "altText": "White houses and a windmill on a hillside in Santorini under a clear sky",
-    "likedBy": ["maya.k", "sana.draws", "alex.demo"]
+    "likedBy": ["maya.k", "sana.draws", "alex.demo"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000010",
+        "by": "maya.k",
+        "body": "Postcard perfect.",
+        "minutesAfter": 40
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000008",
@@ -107,7 +177,15 @@
     "caption": "Cappuccino and the morning receipts. Busy day ahead!",
     "location": "Leo's Bakery",
     "altText": "A cappuccino with latte art on a wooden table beside a brass bell and paper receipts",
-    "likedBy": ["zoe.travels", "maya.k"]
+    "likedBy": ["zoe.travels", "maya.k"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000011",
+        "by": "maya.k",
+        "body": "That latte art 😍",
+        "minutesAfter": 10
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000012",
@@ -117,7 +195,21 @@
     "caption": "Took the long way up Preikestolen. Worth every step.",
     "location": "Lysefjord, Norway",
     "altText": "A deep blue fjord between steep cliffs, seen from a high rock ledge",
-    "likedBy": ["arjun.codes", "maya.k", "leo.bakes"]
+    "likedBy": ["arjun.codes", "maya.k", "leo.bakes"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000012",
+        "by": "arjun.codes",
+        "body": "How long was the hike up?",
+        "minutesAfter": 30
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000013",
+        "by": "zoe.travels",
+        "body": "About two hours each way. Bring water!",
+        "minutesAfter": 55
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000013",
@@ -127,7 +219,15 @@
     "caption": "Lettering practice: ampersands all week.",
     "location": "",
     "altText": "A wooden desk covered with lettering pieces, a large ampersand, books and a vintage camera",
-    "likedBy": ["maya.k"]
+    "likedBy": ["maya.k"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000014",
+        "by": "leo.bakes",
+        "body": "Need one of those ampersands for the bakery sign.",
+        "minutesAfter": 45
+      }
+    ]
   },
   {
     "id": "5eed1000-0000-4000-8000-000000000014",

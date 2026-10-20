@@ -4,6 +4,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Suspense } from "react";
 
+import { CommentForm } from "@/features/comments/components/comment-form";
+import {
+  CommentThread,
+  CommentThreadSkeleton,
+} from "@/features/comments/components/comment-thread";
 import { createClient } from "@/lib/supabase/client";
 
 import { postQueryOptions } from "../queries";
@@ -40,7 +45,18 @@ export function PostModalContent() {
       }
       actions={
         <Suspense fallback={<PostActionsSkeleton />}>
-          <PostActions postId={post.id} authorUsername={post.author.username} />
+          <PostActions
+            postId={post.id}
+            authorUsername={post.author.username}
+            // Its own id: the feed card behind the modal has a comment box too.
+            commentInputId={`modal-comment-input-${post.id}`}
+          />
+        </Suspense>
+      }
+      commentForm={<CommentForm postId={post.id} inputId={`modal-comment-input-${post.id}`} />}
+      comments={
+        <Suspense fallback={<CommentThreadSkeleton />}>
+          <CommentThread postId={post.id} />
         </Suspense>
       }
     />

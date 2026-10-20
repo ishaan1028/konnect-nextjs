@@ -3,6 +3,45 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      comments: {
+        Row: {
+          author_id: string;
+          body: string;
+          created_at: string;
+          id: string;
+          post_id: string;
+        };
+        Insert: {
+          author_id: string;
+          body: string;
+          created_at?: string;
+          id?: string;
+          post_id: string;
+        };
+        Update: {
+          author_id?: string;
+          body?: string;
+          created_at?: string;
+          id?: string;
+          post_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "comments_author_id_fkey";
+            columns: ["author_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "comments_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       follows: {
         Row: {
           created_at: string;
@@ -199,6 +238,7 @@ export type Database = {
           image_height: number;
           image_path: string;
           image_width: number;
+          latest_comments: Json;
           liked_by_viewer: boolean;
           likes_count: number;
           location: string;
@@ -247,6 +287,24 @@ export type Database = {
         Returns: {
           liked: boolean;
           likes_count: number;
+        }[];
+      };
+      get_post_comments: {
+        Args: {
+          cursor_created_at?: string;
+          cursor_id?: string;
+          max_results?: number;
+          post_id: string;
+        };
+        Returns: {
+          author_avatar_path: string;
+          author_full_name: string;
+          author_id: string;
+          author_username: string;
+          body: string;
+          can_delete: boolean;
+          created_at: string;
+          id: string;
         }[];
       };
       get_post_likers: {

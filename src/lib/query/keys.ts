@@ -32,4 +32,7 @@ export const queryKeys = {
   search: {
     profiles: (query: string) => ["search", "profiles", query] as const,
   },
+  comments: {
+    thread: (postId: string) => ["comments", postId] as const,
+  },
 };

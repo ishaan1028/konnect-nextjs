@@ -15,7 +15,9 @@ export async function proxy(request: NextRequest) {
   const { response, userId } = await updateSession(request);
   const { pathname, search } = request.nextUrl;
 
-  if (!userId && isProtectedPath(pathname)) {
+  // userId is undefined when the session couldn't be checked (a failure, not
+  // "signed out"): then neither redirect, and let the page's DAL decide.
+  if (userId === null && isProtectedPath(pathname)) {
     const login = new URL("/login", request.url);
     // Remember where they were going; login sends them back (sanitized there).
     if (pathname !== "/") login.searchParams.set("next", `${pathname}${search}`);

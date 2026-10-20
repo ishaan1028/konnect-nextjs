@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { type NextRequest, NextResponse } from "next/server";
 
+import { isSignedOutError } from "@/lib/auth/claims";
 import { env } from "@/lib/env";
 import type { Database } from "@/types/database.types";
 
@@ -13,7 +14,9 @@ import type { Database } from "@/types/database.types";
  * 1. the *request* cookies, so Server Components rendering this request see it;
  * 2. the *response* cookies, so the browser stores it for the next request.
  *
- * Returns the response to send, plus the verified user id (or null).
+ * Returns the response to send, plus the verified user id: null when signed
+ * out, undefined when it couldn't be determined (a failure, e.g. a network
+ * hiccup), in which case nothing should be inferred from it.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -44,7 +47,9 @@ export async function updateSession(request: NextRequest) {
   // Don't put code between creating the client and getClaims(): getClaims()
   // verifies the JWT signature (never trust getSession() on the server) and
   // refreshes the session when the token is about to expire.
-  const { data } = await supabase.auth.getClaims();
+  const { data, error } = await supabase.auth.getClaims();
+  const userId: string | null | undefined =
+    error && !isSignedOutError(error) ? undefined : (data?.claims.sub ?? null);
 
-  return { response, userId: data?.claims.sub ?? null };
+  return { response, userId };
 }

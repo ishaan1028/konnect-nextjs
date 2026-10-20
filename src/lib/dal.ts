@@ -3,6 +3,7 @@ import "server-only";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
+import { isSignedOutError } from "@/lib/auth/claims";
 import { isDemoClaims } from "@/lib/auth/demo";
 import { createClient } from "@/lib/supabase/server";
 
@@ -36,6 +37,9 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
 
+  // A real failure (not "no/expired session") must not look like "signed out":
+  // that would bounce a signed-in user to the login page over a hiccup.
+  if (error && !isSignedOutError(error)) throw error;
   if (error || !data) return null;
 
   return {

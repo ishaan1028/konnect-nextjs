@@ -80,12 +80,32 @@ const nextCursor = <T extends { id: string; createdAt: string }>(items: T[], pag
 
 export type LikeStatus = { liked: boolean; count: number };
 
-/** A post as a feed card: the photo, its author and the viewer's like. */
-export type FeedPost = PostDetail & { likes: LikeStatus; commentsCount: number };
+/** One of the latest comments shown under a feed card. */
+export type FeedComment = { id: string; body: string; createdAt: string; authorUsername: string };
+
+/** A post as a feed card: the photo, its author, the viewer's like and the latest comments. */
+export type FeedPost = PostDetail & {
+  likes: LikeStatus;
+  commentsCount: number;
+  latestComments: FeedComment[];
+};
 
 export type FeedPage = { items: FeedPost[]; nextCursor: PostCursor };
 
 export const FEED_PAGE_SIZE = 10;
+
+/** get_feed's latest_comments is JSON (snake_case); shape it like the rest of the app. */
+function toFeedComments(json: unknown): FeedComment[] {
+  if (!Array.isArray(json)) return [];
+  return (json as { id: string; body: string; created_at: string; author_username: string }[]).map(
+    (comment) => ({
+      id: comment.id,
+      body: comment.body,
+      createdAt: comment.created_at,
+      authorUsername: comment.author_username,
+    }),
+  );
+}
 
 /** Your posts and the posts of people you follow, newest first. */
 export const feedQueryOptions = (supabase: Supabase) =>
@@ -110,6 +130,7 @@ export const feedQueryOptions = (supabase: Supabase) =>
         location: row.location,
         createdAt: row.created_at,
         commentsCount: row.comments_count,
+        latestComments: toFeedComments(row.latest_comments),
         likes: { liked: row.liked_by_viewer, count: row.likes_count },
         author: {
           id: row.author_id,

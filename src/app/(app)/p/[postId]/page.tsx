@@ -2,6 +2,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { CommentForm, CommentFormSkeleton } from "@/features/comments/components/comment-form";
+import {
+  CommentThread,
+  CommentThreadSkeleton,
+} from "@/features/comments/components/comment-thread";
+import { ViewerCommentsBoundary } from "@/features/comments/components/viewer-comments-boundary";
 import { PostActions, PostActionsSkeleton } from "@/features/posts/components/post-actions";
 import { PostOwnerMenu } from "@/features/posts/components/post-owner-menu";
 import { PostView, PostViewSkeleton } from "@/features/posts/components/post-view";
@@ -85,8 +91,26 @@ async function Post({ params }: Pick<PageProps<"/p/[postId]">, "params">) {
         actions={
           <Suspense fallback={<PostActionsSkeleton />}>
             <ViewerLikeBoundary postId={post.id}>
-              <PostActions postId={post.id} authorUsername={post.author.username} />
+              <PostActions
+                postId={post.id}
+                authorUsername={post.author.username}
+                commentInputId={`comment-input-${post.id}`}
+              />
             </ViewerLikeBoundary>
+          </Suspense>
+        }
+        commentForm={
+          <Suspense fallback={<CommentFormSkeleton />}>
+            <CurrentUserBoundary>
+              <CommentForm postId={post.id} inputId={`comment-input-${post.id}`} />
+            </CurrentUserBoundary>
+          </Suspense>
+        }
+        comments={
+          <Suspense fallback={<CommentThreadSkeleton />}>
+            <ViewerCommentsBoundary postId={post.id}>
+              <CommentThread postId={post.id} />
+            </ViewerCommentsBoundary>
           </Suspense>
         }
       />

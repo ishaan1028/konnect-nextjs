@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCount, formatDate, formatRelativeTime, pluralize } from "./format";
+import { formatCount, formatDate, formatRelativeTime, formatShortDate, pluralize } from "./format";
 
 describe("formatCount", () => {
   it.each([
@@ -43,5 +43,11 @@ describe("formatRelativeTime", () => {
     ["2026-10-06T12:00:05Z", "now"],
   ])("%s → %s", (iso, expected) => {
     expect(formatRelativeTime(iso, now)).toBe(expected);
+  });
+});
+
+describe("formatShortDate", () => {
+  it("formats in UTC", () => {
+    expect(formatShortDate("2026-10-06T23:30:00Z")).toBe("Oct 6");
   });
 });

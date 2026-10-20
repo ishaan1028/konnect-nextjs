@@ -34,3 +34,18 @@ export async function createPostFor(page: Page, username: string, caption: strin
     .throwOnError();
   return post.id;
 }
+
+/** A comment by `username` on a post, straight in the database. */
+export async function createCommentFor(postId: string, username: string, body: string) {
+  const admin = adminClient();
+  const { data: author } = await admin
+    .from("profiles")
+    .select("id")
+    .eq("username", username)
+    .single()
+    .throwOnError();
+  await admin
+    .from("comments")
+    .insert({ post_id: postId, author_id: author.id, body })
+    .throwOnError();
+}

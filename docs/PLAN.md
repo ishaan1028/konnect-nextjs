@@ -493,7 +493,15 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - Migration `0006_comments.sql`: table, counters, RLS (author or post owner can delete).
   - Paginated comment list, add-comment form (Enter submits, Shift+Enter adds a newline, no empty comments), delete with confirmation
   - The comment button focuses the input; the feed card's "latest comments" stays in sync through the cache
-- **Done when:** commenting feels instant, deleting works for both roles, and the RLS tests pass.
+- **Done when:** commenting feels instant, deleting works for both roles, and the RLS tests pass. ✅
+- **Notes from the build:**
+  - Migration `comments`: table (1–500 characters after trimming), RLS (public read, comment as yourself, delete by the author **or** the post's owner), no edits (insert-only column grants), a `comments_count` trigger, `get_post_comments` (keyset, with `can_delete` per comment), and `get_feed` now returns each post's two latest comments as JSON. 18 pgTAP tests (109 in total).
+  - The thread is **newest first** (Instagram's order). With oldest first, a new comment belongs after pages that may not be loaded yet, and the next page's cursor would skip them.
+  - Optimistic add with a temporary id (shown faded, "Posting…"), swapped for the saved comment on success. On failure it's removed and the text goes back in the box. One mutation updates both caches it lives in, the thread and the feed card (count and latest two), and rolls both back together.
+  - Comment box: Enter posts, Shift+Enter adds a line, IME composition isn't sent, blank can't be posted, and a counter appears near the 500 limit. The comment button focuses the box (by id across the islands; the modal has its own id so it doesn't clash with the card behind it). Screen readers hear "Comment posted." and "Comment deleted.", and focus moves to the thread's heading after a delete.
+  - Feed cards show "View all N comments", the latest two, and an inline comment box. On phones the post page puts the box last, after the thread; on wider screens it sits under the actions and the thread scrolls in the right column.
+  - Seed: 14 comments on the showcase posts (fixed ids, so `pnpm db:seed-photos` stays idempotent).
+  - **Fixed along the way:** the dev log's "Date.now() while prerendering" errors and the hydration mismatches behind them. Some prerenders get cookies but forbid reading the clock; Supabase's `getClaims()` checks token expiry with `Date.now()`, the read threw, and it reported "no user", so the HTML showed signed-in people as signed out. `createClient()` now awaits `connection()` first, which also covers TanStack's `dehydrate()`. And `getClaims()` failures (as opposed to "no/expired session") no longer count as signed out, in the DAL, `fetchCurrentUser` and the proxy (which then neither redirects nor blocks). Relative times render a plain date on the server and switch to "5m" after hydration, so they never read the clock while prerendering.
 
 ### Phase 11: Real-time chat
 
@@ -583,4 +591,4 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
 - [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [x] 8 Create post · [x] 9 Feed/Explore/Likes
-- [ ] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus
+- [x] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

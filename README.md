@@ -68,7 +68,9 @@ The seed photos in `supabase/seed/photos/` are from [Unsplash](https://unsplash.
 
 ## Troubleshooting
 
-- **A link does a full page reload, or a modal opens as a full page.** Restart `pnpm dev`
-  after adding a parallel route slot (a folder like `@modal`). A dev server started
-  before the slot existed doesn't know about it, so its route tree disagrees with the
-  browser's and Next.js falls back to a hard navigation to recover.
+- **A link does a full page reload, or a modal opens as a full page.** Restart `pnpm dev`.
+  It happens after adding a parallel route slot (a folder like `@modal`), and sometimes
+  after editing route files or `src/proxy.ts` while the dev server runs: its route table
+  for the intercepted modals gets corrupted (the request fails with "Invalid interception
+  route: /(.)(.)…" in the terminal) and Next.js falls back to a full page load. Production
+  builds aren't affected.
