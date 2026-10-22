@@ -1,21 +1,29 @@
-import { MessagesSquare } from "lucide-react";
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
+import { z } from "zod";
 
-import { ComingSoon } from "@/components/shared/coming-soon";
-import { PageHeader } from "@/components/shared/page-header";
+import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
+import { Thread, ThreadSkeleton } from "@/features/chat/components/thread";
 
-export const metadata: Metadata = { title: "Chat" };
+export const metadata: Metadata = { title: "Messages" };
 
-export default function ConversationPage() {
+export default function ConversationPage({ params }: PageProps<"/messages/[conversationId]">) {
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
-      <PageHeader title="Chat" />
-      <ComingSoon
-        icon={MessagesSquare}
-        title="Conversation"
-        description="Message history, live updates and a composer."
-        phase={11}
-      />
-    </div>
+    <Suspense fallback={<ThreadSkeleton />}>
+      <Conversation params={params} />
+    </Suspense>
+  );
+}
+
+async function Conversation({ params }: Pick<PageProps<"/messages/[conversationId]">, "params">) {
+  const { conversationId } = await params;
+  // Not a UUID? It can't be a chat (and would be a database error otherwise).
+  if (!z.uuid().safeParse(conversationId).success) notFound();
+
+  return (
+    <ChatBoundary conversationId={conversationId}>
+      <Thread conversationId={conversationId} />
+    </ChatBoundary>
   );
 }

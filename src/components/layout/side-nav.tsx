@@ -10,6 +10,7 @@ import {
 } from "@/features/profiles/components/profile-nav-link";
 
 import { MoreMenu } from "./more-menu";
+import { navIcon } from "./nav-icon";
 import { primaryNavItems } from "./nav-items";
 import { SideNavLink } from "./nav-link";
 
@@ -35,7 +36,7 @@ export function SideNav() {
           {primaryNavItems.map(({ href, label, icon: Icon }) => (
             <li key={href}>
               {/* Rendered here on the server; only the element crosses to the client. */}
-              <SideNavLink href={href} label={label} icon={<Icon aria-hidden />} />
+              <SideNavLink href={href} label={label} icon={navIcon(href, <Icon aria-hidden />)} />
             </li>
           ))}
           <li>

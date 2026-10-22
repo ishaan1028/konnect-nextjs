@@ -1,6 +1,10 @@
+import { Suspense } from "react";
+
 import { BottomTabBar, MobileHeader } from "@/components/layout/mobile-nav";
 import { SideNav } from "@/components/layout/side-nav";
 import { MAIN_CONTENT_ID } from "@/components/layout/skip-link";
+import { ChatRealtime } from "@/features/chat/components/chat-realtime";
+import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
 
 /**
  * Shell for every signed-in screen. "(app)" is a route group: the parentheses
@@ -27,6 +31,12 @@ export default function AppLayout({ children, modal }: LayoutProps<"/">) {
       {/* Parallel route slot: intercepted routes (e.g. a followers list opened
           from a profile) render here as modals over the current page. */}
       {modal}
+      {/* Live chat pings and online presence for the whole signed-in app. */}
+      <Suspense fallback={null}>
+        <CurrentUserBoundary>
+          <ChatRealtime />
+        </CurrentUserBoundary>
+      </Suspense>
     </div>
   );
 }

@@ -209,7 +209,8 @@ test.describe("followers and following lists", () => {
       await stat(page, kind).getByRole("link").click();
       const modal = page.getByRole("dialog");
       await expect(modal.getByRole("listitem").first()).toBeVisible();
-      heights.push((await modal.boundingBox())?.height);
+      // Layout height: unlike the bounding box, not shrunk by the opening zoom animation.
+      heights.push(await modal.evaluate((el: HTMLElement) => el.offsetHeight));
       if (kind === "followers") {
         const list = modal.locator(".overflow-y-auto");
         expect(await list.evaluate((el) => el.scrollHeight > el.clientHeight)).toBe(true);

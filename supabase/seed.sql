@@ -99,3 +99,21 @@ insert into public.follows (follower_id, following_id) values
   ('5eed0000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000005'),
   ('5eed0000-0000-4000-8000-000000000002', '5eed0000-0000-4000-8000-000000000003'),
   ('5eed0000-0000-4000-8000-000000000004', '5eed0000-0000-4000-8000-000000000005');
+
+-- -----------------------------------------------------------------------------
+-- A chat between the demo account and Maya, so the demo's inbox isn't empty.
+-- (Inserted in order: the message trigger keeps the inbox preview current.)
+-- -----------------------------------------------------------------------------
+insert into public.conversations (id, dm_key) values (
+  '5eed3000-0000-4000-8000-000000000001',
+  least('d3e0a000-0000-4000-8000-000000000001'::uuid, '5eed0000-0000-4000-8000-000000000001'::uuid)::text
+    || ':' || greatest('d3e0a000-0000-4000-8000-000000000001'::uuid, '5eed0000-0000-4000-8000-000000000001'::uuid)::text
+);
+insert into public.conversation_participants (conversation_id, user_id, last_read_at) values
+  ('5eed3000-0000-4000-8000-000000000001', 'd3e0a000-0000-4000-8000-000000000001', now() - interval '2 hours'),
+  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', now());
+insert into public.messages (conversation_id, sender_id, body, created_at) values
+  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Hey Alex! Welcome to Konnect 👋', now() - interval '1 day 2 hours'),
+  ('5eed3000-0000-4000-8000-000000000001', 'd3e0a000-0000-4000-8000-000000000001', 'Thanks Maya! Loving the film shots.', now() - interval '1 day 1 hour'),
+  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Portra 400, always 😄', now() - interval '1 day 50 minutes'),
+  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Coffee at Leo''s this weekend?', now() - interval '1 hour');

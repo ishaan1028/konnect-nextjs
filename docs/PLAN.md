@@ -525,7 +525,15 @@ For each phase I'll explain the concepts first, then build it with you in small 
     - Auto-scroll only when you're already at the bottom; otherwise show a "New messages ↓" pill
     - `aria-live="polite"` log
   - Playwright test with **two browser contexts** chatting in real time.
-- **Done when:** two browsers chat instantly; a refresh keeps the history; a user can't subscribe to or read someone else's conversation (pgTAP plus a manual check).
+- **Done when:** two browsers chat instantly; a refresh keeps the history; a user can't subscribe to or read someone else's conversation (pgTAP plus a manual check). ✅
+- **Notes from the build:**
+  - Migration `chat`: conversations (`dm_key` unique), participants (`last_read_at`), messages (1–2000 characters, immutable). RLS through `private.is_participant()` (SECURITY DEFINER, so policies don't recurse). `get_or_create_dm` (you must follow them to _start_ a chat; any participant can reopen it), `get_inbox`, `get_unread_count`, `mark_conversation_read` (server time). 22 pgTAP tests (131 in total).
+  - Realtime is **Broadcast from Database**: a trigger `realtime.send`s each message to the private `conversation:<id>` channel and pings each participant's `user:<id>` channel (inbox and badge). Reads broadcast `read` ("Seen"). Channel access is one function, `private.can_use_channel(topic, sending)`, used by the `realtime.messages` policies: participants for conversations, only you for `user:<id>` (and only the server sends there), any signed-in user for the `online` Presence channel.
+  - Messages are inserted from the browser with a client-chosen id: the optimistic bubble, its retry and its realtime echo are all the same row, deduped by id (a unique violation on retry means it was already saved).
+  - One app-wide listener (`ChatRealtime`, in the `(app)` layout) handles inbox pings and Presence (online dots via a tiny `useSyncExternalStore` store). The open chat subscribes to its own channel with `useEffectEvent` handlers.
+  - Thread: oldest to newest, older pages load when the top comes into view (scroll position kept), day separators added after hydration (they use the viewer's time zone), grouped bubbles, "Seen", typing, a "New messages" pill when you're scrolled up, and `role="log"`. Phones: the chat covers the screen; wider: two panes, with the inbox in `messages/layout.tsx`.
+  - Skipped `@tanstack/react-virtual`: history loads 30 messages at a time, so the DOM stays small. Revisit for very long chats.
+  - Seed: a demo ↔ Maya chat with an unread message.
 
 ### Phase 12: Account deletion and danger zone
 
@@ -591,4 +599,4 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
 - [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [x] 8 Create post · [x] 9 Feed/Explore/Likes
-- [x] 10 Comments · [ ] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus
+- [x] 10 Comments · [x] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

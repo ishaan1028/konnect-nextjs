@@ -35,4 +35,9 @@ export const queryKeys = {
   comments: {
     thread: (postId: string) => ["comments", postId] as const,
   },
+  chat: {
+    inbox: ["chat", "inbox"] as const,
+    unreadCount: ["chat", "unread-count"] as const,
+    messages: (conversationId: string) => ["chat", "messages", conversationId] as const,
+  },
 };

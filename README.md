@@ -40,7 +40,7 @@ Local database (needs Docker):
 
 The demo account is `demo@konnect.dev`. Five showcase accounts (`maya.k`, `arjun.codes`,
 `zoe.travels`, `leo.bakes`, `sana.draws`; password `konnect-seed-2026`, local only) come
-with posts, likes and follows.
+with posts, likes, comments and follows, and the demo has an unread chat with Maya.
 
 ## Photo credits
 

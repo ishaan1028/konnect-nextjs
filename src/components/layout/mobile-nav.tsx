@@ -10,6 +10,7 @@ import {
 } from "@/features/profiles/components/profile-nav-link";
 
 import { MoreMenu } from "./more-menu";
+import { navIcon } from "./nav-icon";
 import { mobileTabItems } from "./nav-items";
 import { TabBarLink } from "./nav-link";
 
@@ -49,7 +50,7 @@ export function BottomTabBar() {
       <ul className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
         {mobileTabItems.map(({ href, label, icon: Icon }) => (
           <li key={href}>
-            <TabBarLink href={href} label={label} icon={<Icon aria-hidden />} />
+            <TabBarLink href={href} label={label} icon={navIcon(href, <Icon aria-hidden />)} />
           </li>
         ))}
         <li>

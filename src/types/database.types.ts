@@ -42,6 +42,74 @@ export type Database = {
           },
         ];
       };
+      conversation_participants: {
+        Row: {
+          conversation_id: string;
+          last_read_at: string | null;
+          user_id: string;
+        };
+        Insert: {
+          conversation_id: string;
+          last_read_at?: string | null;
+          user_id: string;
+        };
+        Update: {
+          conversation_id?: string;
+          last_read_at?: string | null;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "conversation_participants_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      conversations: {
+        Row: {
+          created_at: string;
+          dm_key: string;
+          id: string;
+          last_message_at: string | null;
+          last_message_preview: string | null;
+          last_message_sender_id: string | null;
+        };
+        Insert: {
+          created_at?: string;
+          dm_key: string;
+          id?: string;
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+          last_message_sender_id?: string | null;
+        };
+        Update: {
+          created_at?: string;
+          dm_key?: string;
+          id?: string;
+          last_message_at?: string | null;
+          last_message_preview?: string | null;
+          last_message_sender_id?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "conversations_last_message_sender_id_fkey";
+            columns: ["last_message_sender_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       follows: {
         Row: {
           created_at: string;
@@ -69,6 +137,45 @@ export type Database = {
           {
             foreignKeyName: "follows_following_id_fkey";
             columns: ["following_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      messages: {
+        Row: {
+          body: string;
+          conversation_id: string;
+          created_at: string;
+          id: string;
+          sender_id: string;
+        };
+        Insert: {
+          body: string;
+          conversation_id: string;
+          created_at?: string;
+          id?: string;
+          sender_id: string;
+        };
+        Update: {
+          body?: string;
+          conversation_id?: string;
+          created_at?: string;
+          id?: string;
+          sender_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey";
+            columns: ["conversation_id"];
+            isOneToOne: false;
+            referencedRelation: "conversations";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey";
+            columns: ["sender_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -282,6 +389,21 @@ export type Database = {
           username: string;
         }[];
       };
+      get_inbox: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          id: string;
+          last_message_at: string;
+          last_message_preview: string;
+          last_message_sender_id: string;
+          other_avatar_path: string;
+          other_full_name: string;
+          other_id: string;
+          other_last_read_at: string;
+          other_username: string;
+          unread: boolean;
+        }[];
+      };
       get_like_status: {
         Args: { post_id: string };
         Returns: {
@@ -289,6 +411,7 @@ export type Database = {
           likes_count: number;
         }[];
       };
+      get_or_create_dm: { Args: { other_user_id: string }; Returns: string };
       get_post_comments: {
         Args: {
           cursor_created_at?: string;
@@ -341,7 +464,9 @@ export type Database = {
           thumbhash: string;
         }[];
       };
+      get_unread_count: { Args: Record<PropertyKey, never>; Returns: number };
       is_username_available: { Args: { username: string }; Returns: boolean };
+      mark_conversation_read: { Args: { conversation_id: string }; Returns: undefined };
       search_profiles: {
         Args: { max_results?: number; query: string };
         Returns: {
