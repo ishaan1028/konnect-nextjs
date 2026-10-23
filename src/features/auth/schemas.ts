@@ -66,7 +66,23 @@ export const resetPasswordSchema = z
     path: ["confirmPassword"],
   });
 
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password"),
+    password: passwordSchema,
+    confirmPassword: z.string(),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    error: "Passwords don't match",
+    path: ["confirmPassword"],
+  })
+  .refine((values) => values.password !== values.currentPassword, {
+    error: "Choose a different password from your current one",
+    path: ["password"],
+  });
+
 export type SignUpInput = z.input<typeof signUpSchema>;
 export type SignInInput = z.input<typeof signInSchema>;
 export type EmailOnlyInput = z.input<typeof emailOnlySchema>;
 export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;
+export type ChangePasswordInput = z.input<typeof changePasswordSchema>;

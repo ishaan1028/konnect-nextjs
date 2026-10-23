@@ -1,6 +1,6 @@
-/** Shown wherever the shared demo account tries to change its identity. */
+/** Shown wherever the shared demo account tries to change its profile, password or existence. */
 export const DEMO_READ_ONLY_MESSAGE =
-  "The demo account is shared, so its profile can't be changed. Create your own account to make it yours.";
+  "The demo account is shared, so it can't be changed. Create your own account to make it yours.";
 
 /**
  * Whether verified JWT claims belong to a demo account (app_metadata.demo).

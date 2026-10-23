@@ -6,13 +6,24 @@ import type { Database } from "@/types/database.types";
 
 type Supabase = SupabaseClient<Database>;
 
+export type ChatPerson = {
+  id: string;
+  username: string;
+  fullName: string;
+  avatarPath: string | null;
+};
+
+/** Who someone is once they've deleted their account. */
+export const DELETED_USER = "Deleted user";
+
 export type Conversation = {
   id: string;
   lastMessageAt: string | null;
   lastMessagePreview: string | null;
   lastMessageSenderId: string | null;
   unread: boolean;
-  other: { id: string; username: string; fullName: string; avatarPath: string | null };
+  /** null: they deleted their account (shown as "Deleted user"). */
+  other: ChatPerson | null;
   /** When the other person last read the chat ("Seen"). */
   otherLastReadAt: string | null;
 };
@@ -20,7 +31,8 @@ export type Conversation = {
 export type Message = {
   id: string;
   conversationId: string;
-  senderId: string;
+  /** null: sent by someone who has since deleted their account. */
+  senderId: string | null;
   body: string;
   createdAt: string;
   /** Optimistic messages: still sending, or failed (with a Retry). */
@@ -43,12 +55,14 @@ export const inboxQueryOptions = (supabase: Supabase) =>
         lastMessageSenderId: row.last_message_sender_id ?? null,
         unread: row.unread,
         otherLastReadAt: row.other_last_read_at ?? null,
-        other: {
-          id: row.other_id,
-          username: row.other_username,
-          fullName: row.other_full_name,
-          avatarPath: row.other_avatar_path ?? null,
-        },
+        other: row.other_id
+          ? {
+              id: row.other_id,
+              username: row.other_username,
+              fullName: row.other_full_name,
+              avatarPath: row.other_avatar_path ?? null,
+            }
+          : null,
       }));
     },
   });

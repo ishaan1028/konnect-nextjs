@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { passwordSchema, resetPasswordSchema, signUpSchema, usernameSchema } from "./schemas";
+import {
+  changePasswordSchema,
+  passwordSchema,
+  resetPasswordSchema,
+  signUpSchema,
+  usernameSchema,
+} from "./schemas";
 
 const firstError = (result: { success: boolean; error?: { issues: { message: string }[] } }) =>
   result.error?.issues[0]?.message;
@@ -58,5 +64,28 @@ describe("resetPasswordSchema", () => {
       path: ["confirmPassword"],
       message: "Passwords don't match",
     });
+  });
+});
+
+describe("changePasswordSchema", () => {
+  const valid = {
+    currentPassword: "old-pass1",
+    password: "new-pass1",
+    confirmPassword: "new-pass1",
+  };
+
+  it("accepts a new, confirmed password", () => {
+    expect(changePasswordSchema.safeParse(valid).success).toBe(true);
+  });
+
+  it.each([
+    [{ ...valid, currentPassword: "" }, "Enter your current password"],
+    [{ ...valid, confirmPassword: "new-pass2" }, "Passwords don't match"],
+    [
+      { currentPassword: "same-pass1", password: "same-pass1", confirmPassword: "same-pass1" },
+      "Choose a different password from your current one",
+    ],
+  ])("rejects %j", (value, message) => {
+    expect(firstError(changePasswordSchema.safeParse(value))).toBe(message);
   });
 });

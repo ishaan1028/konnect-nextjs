@@ -543,7 +543,11 @@ For each phase I'll explain the concepts first, then build it with you in small 
   - Type your username to confirm
   - The action lists and removes `avatars/<uid>/*` and `posts/<uid>/*`, then calls `auth.admin.deleteUser(uid)`; `ON DELETE CASCADE` removes everything else
   - Sign out, clear the query cache, redirect with a toast
-- **Done when:** after deletion, no rows or objects with that UID remain (verified by a SQL check in tests).
+- **Done when:** after deletion, no rows or objects with that UID remain (verified by a SQL check in tests). ✅
+- **Notes from the build:**
+  - `/settings/account`: change password (asks for the current one: that check is also the fresh sign-in `secure_password_change` needs) and a danger zone. Deleting asks you to type your username; the Server Action re-checks it, removes `avatars/<uid>/*` and `posts/<uid>/*` through the Storage API (files first, so a failure leaves an account you can retry, not orphaned photos), calls `auth.admin.deleteUser`, clears the cookies, `revalidatePath("/", "layout")` (cached profiles and posts held their data and counts), and redirects; the client clears the TanStack cache and shows a toast.
+  - Chats are shared, so they stay for the other person: migration `account_deletion` makes `messages.sender_id` `on delete set null`, a trigger forgets the deleted id (`dm_key`, `last_message_sender_id`), removes a chat nobody is left in, and pings the other inbox; `get_inbox` left-joins, so the chat shows a "Deleted user" you can't reply to. 14 pgTAP tests (145 in total) prove nothing holds the id afterwards.
+  - Demo: password change and deletion are refused (`ownAccountActionClient`, disabled fieldsets). If someone changes the demo password through the Auth API anyway, `demoSignInAction` sets it back from the server env and retries (only when sign-in fails, rather than on every sign-in).
 
 ### Phase 13: Polish, accessibility, SEO and performance pass
 
@@ -599,4 +603,4 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 - [x] 0 Prep · [x] 1 Scaffold · [x] 2 Design system & themes · [x] 3 Supabase foundation · [x] 4 Auth
 - [x] 5 Query infra · [x] 6 Profiles · [x] 7 Follows · [x] 8 Create post · [x] 9 Feed/Explore/Likes
-- [x] 10 Comments · [x] 11 Chat · [ ] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus
+- [x] 10 Comments · [x] 11 Chat · [x] 12 Delete account · [ ] 13 Polish · [ ] 14 Deploy · [ ] Bonus

@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/features/profiles/hooks";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
-import { type Conversation, inboxQueryOptions } from "../queries";
+import { type Conversation, DELETED_USER, inboxQueryOptions } from "../queries";
 import { NewChatDialog } from "./new-chat-dialog";
 import { OnlineAvatar } from "./online-avatar";
 
@@ -64,7 +64,7 @@ function InboxRow({ chat, active, myId }: { chat: Conversation; active: boolean;
       <OnlineAvatar person={chat.other} size={48} />
       <span className="min-w-0 flex-1">
         <span className={cn("block truncate text-sm", chat.unread ? "font-bold" : "font-medium")}>
-          {chat.other.username}
+          {chat.other?.username ?? DELETED_USER}
         </span>
         <span
           className={cn(

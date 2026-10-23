@@ -22,10 +22,10 @@ function subscribe(listener: () => void) {
 }
 
 /** Whether someone is online (false on the server: presence is browser-only). */
-export function useIsOnline(userId: string): boolean {
+export function useIsOnline(userId: string | undefined): boolean {
   return useSyncExternalStore(
     subscribe,
-    () => online.has(userId),
+    () => userId !== undefined && online.has(userId),
     () => false,
   );
 }

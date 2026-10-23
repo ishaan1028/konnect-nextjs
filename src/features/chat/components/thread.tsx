@@ -28,6 +28,7 @@ import { useConversationChannel, useMarkRead, useSendMessage } from "../hooks";
 import { useIsOnline } from "../presence";
 import {
   type Conversation,
+  DELETED_USER,
   inboxQueryOptions,
   type Message,
   messagesQueryOptions,
@@ -71,7 +72,8 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
   );
   const markRead = useMarkRead(conversationId);
   const { send, retry } = useSendMessage(conversationId, userId);
-  const online = useIsOnline(chat.other.id);
+  const { other } = chat;
+  const online = useIsOnline(other?.id);
   const now = useNow();
 
   // Read what's here when you open it, and whenever something arrives while
@@ -158,7 +160,7 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
   return (
     // Phones: full screen over the app (like Instagram); wider: the right pane.
     <section
-      aria-label={`Chat with @${chat.other.username}`}
+      aria-label={`Chat with ${other ? `@${other.username}` : DELETED_USER}`}
       className="fixed inset-0 z-50 flex flex-col bg-background md:static md:z-auto md:h-full"
     >
       <header className="flex items-center gap-3 border-b px-3 py-2.5">
@@ -169,18 +171,25 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
         >
           <ArrowLeft aria-hidden />
         </Link>
-        <OnlineAvatar person={chat.other} size={40} />
-        <div className="min-w-0">
-          <Link
-            href={`/${chat.other.username}` as Route}
-            className="block truncate font-semibold hover:underline"
-          >
-            {chat.other.username}
-          </Link>
-          <p className="truncate text-xs text-muted-foreground">
-            {otherTyping ? "typing…" : online ? "Active now" : chat.other.fullName}
-          </p>
-        </div>
+        <OnlineAvatar person={other} size={40} />
+        {other ? (
+          <div className="min-w-0">
+            <Link
+              href={`/${other.username}` as Route}
+              className="block truncate font-semibold hover:underline"
+            >
+              {other.username}
+            </Link>
+            <p className="truncate text-xs text-muted-foreground">
+              {otherTyping ? "typing…" : online ? "Active now" : other.fullName}
+            </p>
+          </div>
+        ) : (
+          <div className="min-w-0">
+            <p className="truncate font-semibold">{DELETED_USER}</p>
+            <p className="truncate text-xs text-muted-foreground">This account no longer exists</p>
+          </div>
+        )}
       </header>
 
       <div className="relative min-h-0 flex-1">
@@ -191,9 +200,9 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
               <Spinner aria-label="Loading earlier messages" />
             </div>
           )}
-          {messages.length === 0 && (
+          {messages.length === 0 && other && (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              Say hi to {chat.other.fullName || chat.other.username} 👋
+              Say hi to {other.fullName || other.username} 👋
             </p>
           )}
           {/* A log: screen readers announce new messages as they arrive. */}
@@ -224,9 +233,9 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
               );
             })}
           </ol>
-          {otherTyping && (
+          {otherTyping && other && (
             <p aria-hidden className="mt-2 text-xs text-muted-foreground">
-              {chat.other.username} is typing…
+              {other.username} is typing…
             </p>
           )}
         </div>
@@ -242,7 +251,13 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
         )}
       </div>
 
-      <Composer onSend={send} onTyping={sendTyping} />
+      {other ? (
+        <Composer onSend={send} onTyping={sendTyping} />
+      ) : (
+        <p className="border-t p-4 text-center text-sm text-muted-foreground">
+          You can&apos;t reply to this conversation.
+        </p>
+      )}
     </section>
   );
 }

@@ -8,10 +8,17 @@ import { returnServerError, returnValidationErrors } from "next-safe-action";
 import { profileTag } from "@/features/profiles/server/get-public-profile";
 import { safeNextPath } from "@/lib/auth/redirect";
 import { env } from "@/lib/env";
-import { actionClient, authActionClient } from "@/lib/safe-action";
+import { actionClient, ownAccountActionClient } from "@/lib/safe-action";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
-import { emailOnlySchema, resetPasswordSchema, signInSchema, signUpSchema } from "./schemas";
+import {
+  changePasswordSchema,
+  emailOnlySchema,
+  resetPasswordSchema,
+  signInSchema,
+  signUpSchema,
+} from "./schemas";
 
 const RATE_LIMITED = "Too many attempts. Please wait a minute and try again.";
 
@@ -112,16 +119,38 @@ export const demoSignInAction = actionClient
       returnServerError("The demo account isn't available right now.");
     }
 
+    const credentials = { email: env.DEMO_USER_EMAIL, password: env.DEMO_USER_PASSWORD };
     const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email: env.DEMO_USER_EMAIL,
-      password: env.DEMO_USER_PASSWORD,
-    });
+    let { error } = await supabase.auth.signInWithPassword(credentials);
+    // Whoever is signed in as the demo can change its password through
+    // Supabase's Auth API (RLS can't block that): put it back and retry, so
+    // the shared account repairs itself.
+    if (authErrorCode(error) === "invalid_credentials") {
+      await resetDemoPassword(credentials);
+      ({ error } = await supabase.auth.signInWithPassword(credentials));
+    }
     if (error) throw error;
 
     revalidatePath("/", "layout");
     redirect("/");
   });
+
+/** Sets the demo account's password back to the one in the server env. */
+async function resetDemoPassword({ email, password }: { email: string; password: string }) {
+  const admin = createAdminClient();
+  // shortcut: pages through all users (the Auth admin API can't look up by email); it only runs after the password was changed.
+  for (let page = 1; ; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const demo = data.users.find((user) => user.email === email);
+    if (demo) {
+      const { error: updateError } = await admin.auth.admin.updateUserById(demo.id, { password });
+      if (updateError) throw updateError;
+      return;
+    }
+    if (data.users.length < 1000) throw new Error("The demo account doesn't exist");
+  }
+}
 
 export const signOutAction = actionClient.metadata({ actionName: "signOut" }).action(async () => {
   const supabase = await createClient();
@@ -172,7 +201,7 @@ export const requestPasswordResetAction = actionClient
  * Sets a new password. The user arrives here signed in by the one-time link in
  * the reset email (verified in /auth/confirm), so this requires a session.
  */
-export const updatePasswordAction = authActionClient
+export const updatePasswordAction = ownAccountActionClient
   .metadata({ actionName: "updatePassword" })
   .inputSchema(resetPasswordSchema)
   .action(async ({ parsedInput: { password } }) => {
@@ -197,5 +226,44 @@ export const updatePasswordAction = authActionClient
     }
 
     revalidatePath("/", "layout");
+    return { updated: true };
+  });
+
+/**
+ * Change your password from settings. The current password is checked first
+ * (someone at an unlocked screen can't take over the account), which is also
+ * the fresh sign-in Supabase requires before a password change.
+ */
+export const changePasswordAction = ownAccountActionClient
+  .metadata({ actionName: "changePassword" })
+  .inputSchema(changePasswordSchema)
+  .action(async ({ parsedInput: { currentPassword, password }, ctx: { user } }) => {
+    const supabase = await createClient();
+    const { error: checkError } = await supabase.auth.signInWithPassword({
+      email: user.email ?? "",
+      password: currentPassword,
+    });
+    if (checkError) {
+      switch (authErrorCode(checkError)) {
+        case "invalid_credentials":
+          returnValidationErrors(changePasswordSchema, {
+            currentPassword: { _errors: ["That's not your current password"] },
+          });
+        case "over_request_rate_limit":
+          returnServerError(RATE_LIMITED);
+        default:
+          throw checkError;
+      }
+    }
+
+    const { error } = await supabase.auth.updateUser({ password });
+    if (error) {
+      if (authErrorCode(error) === "weak_password") {
+        returnValidationErrors(changePasswordSchema, {
+          password: { _errors: ["That password is too weak. Try a longer one."] },
+        });
+      }
+      throw error;
+    }
     return { updated: true };
   });

@@ -4,9 +4,11 @@ import { UserAvatar } from "@/components/shared/user-avatar";
 import { avatarUrl } from "@/lib/storage";
 
 import { useIsOnline } from "../presence";
+import { type ChatPerson, DELETED_USER } from "../queries";
 
 type OnlineAvatarProps = {
-  person: { id: string; username: string; fullName: string; avatarPath: string | null };
+  /** null: a deleted account. */
+  person: ChatPerson | null;
   size: 40 | 48;
 };
 
@@ -14,12 +16,12 @@ const SIZE_CLASS = { 40: "size-10", 48: "size-12" } as const;
 
 /** An avatar with a green dot while the person is online (Realtime Presence). */
 export function OnlineAvatar({ person, size }: OnlineAvatarProps) {
-  const online = useIsOnline(person.id);
+  const online = useIsOnline(person?.id);
   return (
     <span className="relative shrink-0">
       <UserAvatar
-        name={person.fullName || person.username}
-        src={avatarUrl(person.avatarPath)}
+        name={person ? person.fullName || person.username : DELETED_USER}
+        src={avatarUrl(person?.avatarPath)}
         pixelSize={size}
         className={SIZE_CLASS[size]}
       />

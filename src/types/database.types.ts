@@ -100,15 +100,7 @@ export type Database = {
           last_message_preview?: string | null;
           last_message_sender_id?: string | null;
         };
-        Relationships: [
-          {
-            foreignKeyName: "conversations_last_message_sender_id_fkey";
-            columns: ["last_message_sender_id"];
-            isOneToOne: false;
-            referencedRelation: "profiles";
-            referencedColumns: ["id"];
-          },
-        ];
+        Relationships: [];
       };
       follows: {
         Row: {
@@ -149,21 +141,21 @@ export type Database = {
           conversation_id: string;
           created_at: string;
           id: string;
-          sender_id: string;
+          sender_id: string | null;
         };
         Insert: {
           body: string;
           conversation_id: string;
           created_at?: string;
           id?: string;
-          sender_id: string;
+          sender_id?: string | null;
         };
         Update: {
           body?: string;
           conversation_id?: string;
           created_at?: string;
           id?: string;
-          sender_id?: string;
+          sender_id?: string | null;
         };
         Relationships: [
           {
