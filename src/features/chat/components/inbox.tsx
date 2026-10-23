@@ -69,7 +69,9 @@ function InboxRow({ chat, active, myId }: { chat: Conversation; active: boolean;
         <span
           className={cn(
             "flex gap-1 text-sm",
-            chat.unread ? "font-semibold text-foreground" : "text-muted-foreground",
+            chat.unread && "font-semibold",
+            // Muted text fails contrast on the active row's background.
+            chat.unread || active ? "text-foreground" : "text-muted-foreground",
           )}
         >
           <span className="truncate">{preview}</span>

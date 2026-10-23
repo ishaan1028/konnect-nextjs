@@ -5,6 +5,7 @@ import { Camera, ImagePlus } from "lucide-react";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Empty,
@@ -30,9 +31,8 @@ type ProfilePostsGridProps = { profileId: string; username: string };
  */
 export function ProfilePostsGrid({ profileId, username }: ProfilePostsGridProps) {
   const user = useCurrentUser();
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    profilePostsQueryOptions(createClient(), profileId),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(profilePostsQueryOptions(createClient(), profileId));
   const { ref: sentinelRef } = useInView({
     rootMargin: "400px",
     onChange: (inView) => {
@@ -53,6 +53,7 @@ export function ProfilePostsGrid({ profileId, username }: ProfilePostsGridProps)
         ))}
       </ul>
       <div ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && <LoadMoreError onRetry={() => void fetchNextPage()} />}
       {isFetchingNextPage && (
         <div className="flex justify-center py-6">
           <Spinner aria-label="Loading more posts" />

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { SuggestionsSkeleton } from "@/features/follows/components/suggestions-skeleton";
 import { FeedBoundary } from "@/features/posts/components/feed-boundary";
 import { FeedSkeleton } from "@/features/posts/components/feed-skeleton";
@@ -85,18 +86,22 @@ export default function HomePage() {
                 more scrolls inside. The side padding keeps focus rings from
                 being clipped by the scroll area. */}
             <div className="-mx-1.5 h-75 overflow-y-auto px-1.5">
-              <Suspense fallback={<SuggestionsSkeleton />}>
-                <SuggestionsBoundary />
-              </Suspense>
+              <LoadErrorBoundary what="suggestions">
+                <Suspense fallback={<SuggestionsSkeleton />}>
+                  <SuggestionsBoundary />
+                </Suspense>
+              </LoadErrorBoundary>
             </div>
           </CardContent>
         </Card>
       </aside>
 
       <section aria-label="Feed" className="xl:col-start-1">
-        <Suspense fallback={<FeedSkeleton />}>
-          <FeedBoundary />
-        </Suspense>
+        <LoadErrorBoundary what="your feed">
+          <Suspense fallback={<FeedSkeleton />}>
+            <FeedBoundary />
+          </Suspense>
+        </LoadErrorBoundary>
       </section>
     </div>
   );

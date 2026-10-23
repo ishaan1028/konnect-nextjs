@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { ProfilePostsBoundary } from "@/features/posts/components/profile-posts-boundary";
 import { ProfilePostsSkeleton } from "@/features/posts/components/profile-posts-skeleton";
 import { ViewerFollowBoundary } from "@/features/follows/components/viewer-follow-boundary";
@@ -78,9 +79,11 @@ async function Profile({ params }: Pick<PageProps<"/[username]">, "params">) {
           Posts
         </h2>
         {/* Public, so it's the same for everyone; it streams in under the header. */}
-        <Suspense fallback={<ProfilePostsSkeleton count={profile.postsCount} />}>
-          <ProfilePostsBoundary profileId={profile.id} username={profile.username} />
-        </Suspense>
+        <LoadErrorBoundary what="posts">
+          <Suspense fallback={<ProfilePostsSkeleton count={profile.postsCount} />}>
+            <ProfilePostsBoundary profileId={profile.id} username={profile.username} />
+          </Suspense>
+        </LoadErrorBoundary>
       </section>
     </>
   );

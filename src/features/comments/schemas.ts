@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-export const COMMENT_MAX_LENGTH = 500;
+import { COMMENT_MAX_LENGTH } from "./constants";
+
+export { COMMENT_MAX_LENGTH };
 
 export const commentBodySchema = z
   .string()

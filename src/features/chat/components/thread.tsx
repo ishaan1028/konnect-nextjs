@@ -14,6 +14,7 @@ import {
 } from "react";
 import { useInView } from "react-intersection-observer";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -67,9 +68,8 @@ export function Thread({ conversationId }: { conversationId: string }) {
 type OpenThreadProps = { conversationId: string; userId: string; chat: Conversation };
 
 function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    messagesQueryOptions(createClient(), conversationId),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(messagesQueryOptions(createClient(), conversationId));
   const markRead = useMarkRead(conversationId);
   const { send, retry } = useSendMessage(conversationId, userId);
   const { other } = chat;
@@ -195,6 +195,12 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
       <div className="relative min-h-0 flex-1">
         <div ref={scroller} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3">
           <div ref={topRef} aria-hidden />
+          {isFetchNextPageError && (
+            <LoadMoreError
+              message="Couldn't load earlier messages."
+              onRetry={() => void fetchNextPage()}
+            />
+          )}
           {isFetchingNextPage && (
             <div className="flex justify-center py-2">
               <Spinner aria-label="Loading earlier messages" />
@@ -205,34 +211,37 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
               Say hi to {other.fullName || other.username} 👋
             </p>
           )}
-          {/* A log: screen readers announce new messages as they arrive. */}
-          <ol role="log" aria-label="Messages" className="flex flex-col">
-            {messages.map((message, index) => {
-              const previous = messages[index - 1];
-              // Day labels use the viewer's time zone, so they're added after
-              // hydration (now !== null) to keep the server HTML identical.
-              const newDay =
-                now !== null &&
-                (!previous || dayKey(previous.createdAt) !== dayKey(message.createdAt));
-              const grouped =
-                !newDay &&
-                previous?.senderId === message.senderId &&
-                Date.parse(message.createdAt) - Date.parse(previous.createdAt) < 5 * 60_000;
-              return (
-                <li key={message.id} className={grouped ? "mt-0.5" : "mt-3"}>
-                  {newDay && now !== null && (
-                    <p className="my-3 text-center text-xs font-medium text-muted-foreground">
-                      {dayLabel(message.createdAt, now)}
-                    </p>
-                  )}
-                  <Bubble message={message} mine={message.senderId === userId} onRetry={retry} />
-                  {message.id === lastMine?.id && seen && (
-                    <p className="mt-0.5 text-right text-xs text-muted-foreground">Seen</p>
-                  )}
-                </li>
-              );
-            })}
-          </ol>
+          {/* A log: screen readers announce new messages as they arrive. (The
+              role goes on a wrapper: a list can't be a log and stay a list.) */}
+          <div role="log" aria-label="Messages">
+            <ol className="flex flex-col">
+              {messages.map((message, index) => {
+                const previous = messages[index - 1];
+                // Day labels use the viewer's time zone, so they're added after
+                // hydration (now !== null) to keep the server HTML identical.
+                const newDay =
+                  now !== null &&
+                  (!previous || dayKey(previous.createdAt) !== dayKey(message.createdAt));
+                const grouped =
+                  !newDay &&
+                  previous?.senderId === message.senderId &&
+                  Date.parse(message.createdAt) - Date.parse(previous.createdAt) < 5 * 60_000;
+                return (
+                  <li key={message.id} className={grouped ? "mt-0.5" : "mt-3"}>
+                    {newDay && now !== null && (
+                      <p className="my-3 text-center text-xs font-medium text-muted-foreground">
+                        {dayLabel(message.createdAt, now)}
+                      </p>
+                    )}
+                    <Bubble message={message} mine={message.senderId === userId} onRetry={retry} />
+                    {message.id === lastMine?.id && seen && (
+                      <p className="mt-0.5 text-right text-xs text-muted-foreground">Seen</p>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </div>
           {otherTyping && other && (
             <p aria-hidden className="mt-2 text-xs text-muted-foreground">
               {other.username} is typing…

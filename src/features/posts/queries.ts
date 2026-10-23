@@ -6,7 +6,7 @@ import { queryKeys } from "@/lib/query/keys";
 import type { Database } from "@/types/database.types";
 
 import { POST_DETAIL_COLUMNS, type PostDetail, toPostDetail } from "./post-detail";
-import { postIdSchema } from "./schemas";
+import { isPostId } from "./post-id";
 
 type Supabase = SupabaseClient<Database>;
 
@@ -196,7 +196,7 @@ export const postQueryOptions = (supabase: Supabase, postId: string) =>
     queryKey: queryKeys.posts.detail(postId),
     queryFn: async (): Promise<PostDetail | null> => {
       // Not a UUID? It can't be a post (and would be a database error otherwise).
-      if (!postIdSchema.safeParse(postId).success) return null;
+      if (!isPostId(postId)) return null;
       const { data, error } = await supabase
         .from("posts")
         .select(POST_DETAIL_COLUMNS)

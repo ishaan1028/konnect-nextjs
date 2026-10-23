@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/public-env";
 import { createClient } from "@/lib/supabase/client";
 
 type UploadOptions = {
@@ -32,13 +32,13 @@ export async function uploadWithProgress({
   if (!accessToken) throw new Error("Your session has expired. Please log in again.");
 
   const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-  const url = `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucket}/${encodedPath}`;
+  const url = `${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/${bucket}/${encodedPath}`;
 
   await new Promise<void>((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.open("POST", url);
     request.setRequestHeader("authorization", `Bearer ${accessToken}`);
-    request.setRequestHeader("apikey", env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+    request.setRequestHeader("apikey", publicEnv.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
     request.setRequestHeader("content-type", file.type);
     // Each upload gets a fresh random name, so its content never changes and
     // browsers and the CDN may cache it for a year.

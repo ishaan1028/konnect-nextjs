@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { CommentForm, CommentFormSkeleton } from "@/features/comments/components/comment-form";
 import {
   CommentThread,
@@ -107,11 +108,13 @@ async function Post({ params }: Pick<PageProps<"/p/[postId]">, "params">) {
           </Suspense>
         }
         comments={
-          <Suspense fallback={<CommentThreadSkeleton />}>
-            <ViewerCommentsBoundary postId={post.id}>
-              <CommentThread postId={post.id} />
-            </ViewerCommentsBoundary>
-          </Suspense>
+          <LoadErrorBoundary what="comments">
+            <Suspense fallback={<CommentThreadSkeleton />}>
+              <ViewerCommentsBoundary postId={post.id}>
+                <CommentThread postId={post.id} />
+              </ViewerCommentsBoundary>
+            </Suspense>
+          </LoadErrorBoundary>
         }
       />
     </>

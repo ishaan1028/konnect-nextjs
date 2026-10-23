@@ -13,7 +13,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - The roadmap, architecture and decisions live in `docs/PLAN.md`; follow its phase order and §5 conventions.
 - Package manager: pnpm. Before committing run `pnpm check` (typecheck, lint, format, unit tests).
 - Server Components by default; add `"use client"` only on small interactive leaves.
-- Environment variables are read only through `@/lib/env`, never `process.env` directly in app code.
+- Environment variables are read only through `@/lib/env` (server) or `@/lib/public-env` (browser code: the `NEXT_PUBLIC_` values, validated by `env` at build), never `process.env` directly in app code. Importing `env` in the browser would ship Zod to every page.
+- Keep Zod out of browser code that loads on first paint (shell, post, profile, feed): only forms import schemas; a value that just needs a quick check gets a plain helper (`isPostId`). The server still validates with the schema.
 - Feature code lives in `src/features/<feature>/`; shared primitives in `src/components/` and `src/lib/`.
 - shadcn components use **Base UI**: compose with the `render` prop (not Radix's `asChild`). Base UI's own docs ship in `node_modules/@base-ui/react/docs/`.
 - Props passed from Server to Client Components must be serializable: pass rendered elements (`icon={<Icon />}`), never component functions.
@@ -24,6 +25,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Server Actions are built from `@/lib/safe-action` (`actionClient` / `authActionClient`) with `.metadata({ actionName })`; return expected failures with `returnServerError` / `returnValidationErrors`.
 - E2E: `pnpm test:e2e` (dev server) or `pnpm test:e2e:prod`; needs `pnpm db:start`.
 - TanStack Query: shared `queryOptions` in `features/*/queries.ts` take the Supabase client as a parameter; keys only from `@/lib/query/keys`. Prefetch on the server inside a small `<Suspense>` + boundary (`CurrentUserBoundary` pattern) and never await it (pending queries stream, so cached data shows at once and refreshes in the background), read with `useSuspenseQuery` *inside* that boundary only, never from components rendered outside it.
+- Every list's `<Suspense>` sits inside `<LoadErrorBoundary what="…">` (a failed load shows "Couldn't load … Try again" in place, not the page-wide error.tsx); infinite lists render `<LoadMoreError>` on `isFetchNextPageError`. New routes go into the axe sweep in `e2e/a11y.spec.ts` (all four themes).
 - No layout shift from loading: a fallback takes exactly the space of what replaces it. Lists in cards and modals get a fixed height (`h-…`, not `max-h-…`) and scroll inside (`overflow-y-auto`); skeleton rows match the real rows' size and count.
 - Don't swap interactive components between a Suspense fallback and resolved content (state like an open menu is lost); stream a slot *inside* them instead.
 - Public, shared data: a `"use cache"` server function with `cacheTag` + `cacheLife`, using `createPublicClient()` (never cookies); invalidate with `updateTag` in the Server Action that changes it. Personal bits render in a small streamed client island.

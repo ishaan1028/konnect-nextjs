@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
 import { Inbox, InboxSkeleton } from "@/features/chat/components/inbox";
 
@@ -13,11 +14,13 @@ export default function MessagesLayout({ children }: LayoutProps<"/messages">) {
     <div className="mx-auto max-w-5xl md:grid md:h-[calc(100dvh-5.5rem)] md:grid-cols-[20rem_minmax(0,1fr)] md:overflow-hidden md:rounded-2xl md:border">
       <h1 className="sr-only">Messages</h1>
       <aside aria-label="Inbox" className="md:min-h-0 md:border-r">
-        <Suspense fallback={<InboxSkeleton />}>
-          <ChatBoundary>
-            <Inbox />
-          </ChatBoundary>
-        </Suspense>
+        <LoadErrorBoundary what="your chats">
+          <Suspense fallback={<InboxSkeleton />}>
+            <ChatBoundary>
+              <Inbox />
+            </ChatBoundary>
+          </Suspense>
+        </LoadErrorBoundary>
       </aside>
       <div className="md:min-h-0">{children}</div>
     </div>

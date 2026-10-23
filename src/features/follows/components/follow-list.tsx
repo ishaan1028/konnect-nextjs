@@ -4,6 +4,7 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { UsersRound } from "lucide-react";
 import { useInView } from "react-intersection-observer";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { useCurrentUser } from "@/features/profiles/hooks";
@@ -31,9 +32,8 @@ const EMPTY_TEXT: Record<FollowListKind, string> = {
  */
 export function FollowList({ profileId, kind }: FollowListProps) {
   const user = useCurrentUser();
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    followListQueryOptions(createClient(), profileId, kind),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(followListQueryOptions(createClient(), profileId, kind));
   const { ref: sentinelRef } = useInView({
     // Start loading a little before the user reaches the end.
     rootMargin: "200px",
@@ -81,6 +81,7 @@ export function FollowList({ profileId, kind }: FollowListProps) {
         ))}
       </ul>
       <div ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && <LoadMoreError onRetry={() => void fetchNextPage()} />}
       {isFetchingNextPage && (
         <div className="flex justify-center py-3">
           <Spinner aria-label="Loading more" />

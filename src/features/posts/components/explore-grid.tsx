@@ -11,6 +11,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/lib/supabase/client";
 
@@ -19,9 +20,8 @@ import { PostGridTile } from "./post-grid-tile";
 
 /** Everyone else's posts as a 3-column grid. Render inside ExploreBoundary. */
 export function ExploreGrid() {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    exploreQueryOptions(createClient()),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(exploreQueryOptions(createClient()));
   const { ref: sentinelRef } = useInView({
     rootMargin: "100% 0px",
     onChange: (inView) => {
@@ -59,6 +59,7 @@ export function ExploreGrid() {
         ))}
       </ul>
       <div ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && <LoadMoreError onRetry={() => void fetchNextPage()} />}
       {isFetchingNextPage && (
         <div className="flex justify-center py-6">
           <Spinner aria-label="Loading more posts" />

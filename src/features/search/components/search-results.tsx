@@ -3,6 +3,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { SearchX } from "lucide-react";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { FollowButton } from "@/features/follows/components/follow-button";
 import { FollowListSkeleton } from "@/features/follows/components/follow-list";
 import { PersonRow } from "@/features/follows/components/person-row";
@@ -15,13 +16,21 @@ import { searchProfilesQueryOptions } from "../queries";
 /** People matching `query`, with Follow buttons. Fetched in the browser. */
 export function SearchResults({ query }: { query: string }) {
   const user = useCurrentUser();
-  const { data: people, isPending } = useQuery({
+  const {
+    data: people,
+    isPending,
+    isError,
+    refetch,
+  } = useQuery({
     ...searchProfilesQueryOptions(createClient(), query),
     // While the next query loads, keep showing the last results (no flicker).
     placeholderData: keepPreviousData,
   });
 
   if (isPending) return <FollowListSkeleton />;
+  if (isError) {
+    return <LoadMoreError message="Couldn't search right now." onRetry={() => void refetch()} />;
+  }
 
   return (
     <div>

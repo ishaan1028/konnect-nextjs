@@ -40,8 +40,13 @@ test.describe("comments", () => {
 
     // Delete it (with a confirmation).
     await comment(page, viewer.username).getByRole("button", { name: "Delete comment" }).click();
+    // Wait for the delete's Server Action to finish (a reload would cancel it).
+    const deleted = page.waitForResponse(
+      (response) => response.request().method() === "POST" && response.url().includes("/p/"),
+    );
     await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
     await expect(comment(page, viewer.username)).toBeHidden();
+    await deleted;
     await page.reload();
     await expect(page.getByText("No comments yet. Start the conversation.")).toBeVisible();
   });

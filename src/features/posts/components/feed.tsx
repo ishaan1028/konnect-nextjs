@@ -5,6 +5,7 @@ import { Compass, Images } from "lucide-react";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Empty,
@@ -26,9 +27,8 @@ import { PostCard } from "./post-card";
  * prefetched on the server (FeedBoundary); render inside it.
  */
 export function Feed() {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    feedQueryOptions(createClient()),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(feedQueryOptions(createClient()));
   const { ref: sentinelRef } = useInView({
     // Start loading about a screen early, so scrolling never hits the end.
     rootMargin: "100% 0px",
@@ -46,6 +46,7 @@ export function Feed() {
         <PostCard key={post.id} post={post} priority={index === 0} />
       ))}
       <div ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && <LoadMoreError onRetry={() => void fetchNextPage()} />}
       {isFetchingNextPage ? (
         <div className="flex justify-center py-4">
           <Spinner aria-label="Loading more posts" />

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { z } from "zod";
 
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
 import { Thread, ThreadSkeleton } from "@/features/chat/components/thread";
 
@@ -10,9 +11,11 @@ export const metadata: Metadata = { title: "Messages" };
 
 export default function ConversationPage({ params }: PageProps<"/messages/[conversationId]">) {
   return (
-    <Suspense fallback={<ThreadSkeleton />}>
-      <Conversation params={params} />
-    </Suspense>
+    <LoadErrorBoundary what="this chat">
+      <Suspense fallback={<ThreadSkeleton />}>
+        <Conversation params={params} />
+      </Suspense>
+    </LoadErrorBoundary>
   );
 }
 

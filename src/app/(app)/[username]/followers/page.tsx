@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { buttonVariants } from "@/components/ui/button";
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { FollowListSkeleton } from "@/features/follows/components/follow-list";
 import { FollowListLoader } from "@/features/follows/components/follow-list-loader";
 
@@ -24,9 +25,11 @@ export default function FollowersPage({ params }: PageProps<"/[username]/followe
         </Suspense>
         <h1 className="text-2xl font-bold">Followers</h1>
       </div>
-      <Suspense fallback={<FollowListSkeleton />}>
-        <FollowListLoader params={params} kind="followers" />
-      </Suspense>
+      <LoadErrorBoundary what="followers">
+        <Suspense fallback={<FollowListSkeleton />}>
+          <FollowListLoader params={params} kind="followers" />
+        </Suspense>
+      </LoadErrorBoundary>
     </div>
   );
 }

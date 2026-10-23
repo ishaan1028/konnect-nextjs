@@ -3,6 +3,7 @@ import { Suspense } from "react";
 
 import { PageHeader } from "@/components/shared/page-header";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { ExploreBoundary } from "@/features/posts/components/explore-boundary";
 import { ProfilePostsSkeleton } from "@/features/posts/components/profile-posts-skeleton";
 import { PROFILE_POSTS_PAGE_SIZE } from "@/features/posts/queries";
@@ -18,9 +19,11 @@ export default function ExplorePage() {
           the grid it shows (when not searching) is prefetched on the server. */}
       <Suspense fallback={<ExploreSkeleton />}>
         <ExploreSearch>
-          <Suspense fallback={<ProfilePostsSkeleton count={PROFILE_POSTS_PAGE_SIZE} />}>
-            <ExploreBoundary />
-          </Suspense>
+          <LoadErrorBoundary what="posts">
+            <Suspense fallback={<ProfilePostsSkeleton count={PROFILE_POSTS_PAGE_SIZE} />}>
+              <ExploreBoundary />
+            </Suspense>
+          </LoadErrorBoundary>
         </ExploreSearch>
       </Suspense>
     </div>

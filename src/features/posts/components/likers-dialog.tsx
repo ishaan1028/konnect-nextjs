@@ -4,8 +4,10 @@ import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { Suspense } from "react";
 import { useInView } from "react-intersection-observer";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { FollowButton } from "@/features/follows/components/follow-button";
 import { FollowListSkeleton } from "@/features/follows/components/follow-list";
 import { PersonRow } from "@/features/follows/components/person-row";
@@ -27,9 +29,11 @@ export function LikersDialog({ postId, open, onOpenChange }: LikersDialogProps) 
         <div className="-mx-6 min-h-0 overflow-y-auto px-6">
           {/* Only fetched once the dialog is opened. */}
           {open && (
-            <Suspense fallback={<FollowListSkeleton />}>
-              <LikersList postId={postId} />
-            </Suspense>
+            <LoadErrorBoundary what="likes">
+              <Suspense fallback={<FollowListSkeleton />}>
+                <LikersList postId={postId} />
+              </Suspense>
+            </LoadErrorBoundary>
           )}
         </div>
       </DialogContent>
@@ -39,9 +43,8 @@ export function LikersDialog({ postId, open, onOpenChange }: LikersDialogProps) 
 
 function LikersList({ postId }: { postId: string }) {
   const user = useCurrentUser();
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    likersQueryOptions(createClient(), postId),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(likersQueryOptions(createClient(), postId));
   const { ref: sentinelRef } = useInView({
     rootMargin: "200px",
     onChange: (inView) => {
@@ -78,6 +81,7 @@ function LikersList({ postId }: { postId: string }) {
         ))}
       </ul>
       <div ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && <LoadMoreError onRetry={() => void fetchNextPage()} />}
       {isFetchingNextPage && (
         <div className="flex justify-center py-3">
           <Spinner aria-label="Loading more" />

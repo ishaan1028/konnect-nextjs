@@ -8,11 +8,13 @@ import { Suspense, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Spinner } from "@/components/ui/spinner";
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { FollowListSkeleton } from "@/features/follows/components/follow-list";
 import { followListQueryOptions } from "@/features/follows/queries";
 import { useCurrentUser } from "@/features/profiles/hooks";
@@ -64,9 +66,11 @@ function PeoplePicker({ onDone }: { onDone: () => void }) {
         />
       </InputGroup>
       <div className="-mx-6 min-h-0 overflow-y-auto px-6">
-        <Suspense fallback={<FollowListSkeleton />}>
-          <People filter={filter.trim().toLowerCase()} onDone={onDone} />
-        </Suspense>
+        <LoadErrorBoundary what="people">
+          <Suspense fallback={<FollowListSkeleton />}>
+            <People filter={filter.trim().toLowerCase()} onDone={onDone} />
+          </Suspense>
+        </LoadErrorBoundary>
       </div>
     </>
   );
@@ -77,9 +81,8 @@ function People({ filter, onDone }: { filter: string; onDone: () => void }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [starting, setStarting] = useState<string | null>(null);
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    followListQueryOptions(createClient(), user?.id ?? "", "following"),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(followListQueryOptions(createClient(), user?.id ?? "", "following"));
   const { ref: sentinelRef } = useInView({
     rootMargin: "200px",
     onChange: (inView) => {
@@ -147,6 +150,11 @@ function People({ filter, onDone }: { filter: string; onDone: () => void }) {
         </li>
       ))}
       <li ref={sentinelRef} aria-hidden />
+      {isFetchNextPageError && (
+        <li>
+          <LoadMoreError onRetry={() => void fetchNextPage()} />
+        </li>
+      )}
     </ul>
   );
 }

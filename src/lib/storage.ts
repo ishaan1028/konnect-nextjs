@@ -1,4 +1,4 @@
-import { env } from "@/lib/env";
+import { publicEnv } from "@/lib/public-env";
 
 export const AVATARS_BUCKET = "avatars";
 export const POSTS_BUCKET = "posts";
@@ -9,7 +9,7 @@ export const POSTS_BUCKET = "posts";
  */
 export function publicStorageUrl(bucket: string, path: string): string {
   const encodedPath = path.split("/").map(encodeURIComponent).join("/");
-  return `${env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodedPath}`;
+  return `${publicEnv.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${bucket}/${encodedPath}`;
 }
 
 export function avatarUrl(path: string | null | undefined): string | null {

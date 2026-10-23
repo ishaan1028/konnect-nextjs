@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { Suspense } from "react";
 
+import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
 import { CommentForm } from "@/features/comments/components/comment-form";
 import {
   CommentThread,
@@ -55,9 +56,11 @@ export function PostModalContent() {
       }
       commentForm={<CommentForm postId={post.id} inputId={`modal-comment-input-${post.id}`} />}
       comments={
-        <Suspense fallback={<CommentThreadSkeleton />}>
-          <CommentThread postId={post.id} />
-        </Suspense>
+        <LoadErrorBoundary what="comments">
+          <Suspense fallback={<CommentThreadSkeleton />}>
+            <CommentThread postId={post.id} />
+          </Suspense>
+        </LoadErrorBoundary>
       }
     />
   );

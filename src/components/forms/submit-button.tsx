@@ -11,14 +11,7 @@ type SubmitButtonProps = ComponentProps<typeof Button> & {
 /** Full-width submit button that shows progress and blocks double submits. */
 export function SubmitButton({ pending, pendingLabel, children, ...props }: SubmitButtonProps) {
   return (
-    <Button
-      type="submit"
-      size="lg"
-      className="w-full"
-      disabled={pending}
-      aria-disabled={pending}
-      {...props}
-    >
+    <Button type="submit" size="lg" className="w-full" disabled={pending} {...props}>
       {pending ? (
         <>
           <Spinner aria-hidden data-icon="inline-start" />

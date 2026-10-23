@@ -11,7 +11,7 @@ import { useCurrentUser } from "@/features/profiles/hooks";
 import { cn } from "@/lib/utils";
 
 import { useAddComment } from "../hooks";
-import { COMMENT_MAX_LENGTH, commentBodySchema } from "../schemas";
+import { COMMENT_MAX_LENGTH } from "../constants";
 
 type CommentFormProps = {
   postId: string;
@@ -52,13 +52,15 @@ export function CommentForm({ postId, inputId, className }: CommentFormProps) {
   }
 
   const submit = () => {
-    const parsed = commentBodySchema.safeParse(body);
-    if (!parsed.success) return;
+    // The same rule as commentBodySchema (which the server checks), without
+    // loading Zod on the post page.
+    const trimmed = body.trim();
+    if (!trimmed || trimmed.length > COMMENT_MAX_LENGTH) return;
     const typed = body;
     setBody("");
     setAnnouncement("");
     add.mutate(
-      { body: parsed.data, tempId: `temp-${crypto.randomUUID()}` },
+      { body: trimmed, tempId: `temp-${crypto.randomUUID()}` },
       {
         onSuccess: () => setAnnouncement("Comment posted."),
         // Give the text back unless they've already started a new one.

@@ -3,6 +3,7 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
 
+import { LoadMoreError } from "@/components/shared/load-more-error";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
@@ -17,9 +18,8 @@ import { CommentItem } from "./comment-item";
  * boundary that prefetched them (ViewerCommentsBoundary) or in the modal.
  */
 export function CommentThread({ postId }: { postId: string }) {
-  const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useSuspenseInfiniteQuery(
-    commentsQueryOptions(createClient(), postId),
-  );
+  const { data, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage } =
+    useSuspenseInfiniteQuery(commentsQueryOptions(createClient(), postId));
   const remove = useDeleteComment(postId);
   const listRef = useRef<HTMLHeadingElement>(null);
   const [announcement, setAnnouncement] = useState("");
@@ -50,17 +50,24 @@ export function CommentThread({ postId }: { postId: string }) {
           ))}
         </ul>
       )}
-      {hasNextPage && (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-muted-foreground"
-          disabled={isFetchingNextPage}
-          onClick={() => void fetchNextPage()}
-        >
-          {isFetchingNextPage && <Spinner aria-hidden data-icon="inline-start" />}
-          View older comments
-        </Button>
+      {isFetchNextPageError ? (
+        <LoadMoreError
+          message="Couldn't load older comments."
+          onRetry={() => void fetchNextPage()}
+        />
+      ) : (
+        hasNextPage && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            disabled={isFetchingNextPage}
+            onClick={() => void fetchNextPage()}
+          >
+            {isFetchingNextPage && <Spinner aria-hidden data-icon="inline-start" />}
+            View older comments
+          </Button>
+        )
       )}
       <p role="status" className="sr-only">
         {announcement}
