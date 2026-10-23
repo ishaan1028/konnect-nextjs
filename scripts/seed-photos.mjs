@@ -103,4 +103,14 @@ for (const post of posts) {
   }
 }
 
+// The demo account starts with a few saved posts, so /saved isn't empty.
+const { error: savedError } = await admin.from("saved_posts").upsert(
+  posts
+    .filter((post) => post.author !== "alex.demo")
+    .slice(0, 3)
+    .map((post) => ({ user_id: idOf("alex.demo"), post_id: post.id })),
+  { onConflict: "user_id,post_id", ignoreDuplicates: true },
+);
+if (savedError) throw savedError;
+
 console.log(`Seeded ${posts.length} posts with photos.`);

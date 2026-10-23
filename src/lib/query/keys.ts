@@ -29,6 +29,11 @@ export const queryKeys = {
     status: (postId: string) => ["likes", "status", postId] as const,
     likers: (postId: string) => ["likes", "likers", postId] as const,
   },
+  // Private to the viewer: their bookmark on one post, and their saved grid.
+  saved: {
+    status: (postId: string) => ["saved", "status", postId] as const,
+    list: () => ["saved", "list"] as const,
+  },
   search: {
     profiles: (query: string) => ["search", "profiles", query] as const,
   },

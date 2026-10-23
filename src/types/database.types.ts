@@ -302,6 +302,39 @@ export type Database = {
         };
         Relationships: [];
       };
+      saved_posts: {
+        Row: {
+          created_at: string;
+          post_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          post_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          post_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "saved_posts_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "saved_posts_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;
@@ -341,6 +374,7 @@ export type Database = {
           liked_by_viewer: boolean;
           likes_count: number;
           location: string;
+          saved_by_viewer: boolean;
           thumbhash: string;
         }[];
       };
@@ -453,6 +487,20 @@ export type Database = {
           image_height: number;
           image_path: string;
           image_width: number;
+          thumbhash: string;
+        }[];
+      };
+      get_saved_posts: {
+        Args: { cursor_id?: string; cursor_saved_at?: string; max_results?: number };
+        Returns: {
+          alt_text: string;
+          author_username: string;
+          created_at: string;
+          id: string;
+          image_height: number;
+          image_path: string;
+          image_width: number;
+          saved_at: string;
           thumbhash: string;
         }[];
       };

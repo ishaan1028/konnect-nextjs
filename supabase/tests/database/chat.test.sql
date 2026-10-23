@@ -3,7 +3,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 
-select plan(22);
+select plan(23);
 
 -- A follows B. C is an outsider.
 insert into auth.users (id, email, raw_user_meta_data, aud, role) values
@@ -56,6 +56,19 @@ select is(
   'sending updates the conversation''s preview'
 );
 
+-- An older message that commits late (sent at almost the same moment) keeps
+-- the newer one as the preview. (created_at is set directly: only the test can.)
+reset role;
+insert into public.messages (conversation_id, sender_id, body, created_at)
+select conversation, 'a7000000-0000-4000-8000-00000000000a', 'Sent first, saved last', now() - interval '1 minute'
+from ids;
+select is(
+  (select last_message_preview from public.conversations where id = (select conversation from ids)),
+  'Hey B!',
+  'a message that commits late doesn''t replace a newer preview'
+);
+set local role authenticated;
+
 select throws_ok(
   $$ insert into public.messages (conversation_id, sender_id, body)
      select conversation, 'b7000000-0000-4000-8000-00000000000b', 'Spoofed' from ids $$,
@@ -80,8 +93,8 @@ set local request.jwt.claims to '{"sub":"b7000000-0000-4000-8000-00000000000b","
 
 select is(
   (select count(*)::int from public.messages where conversation_id = (select conversation from ids)),
-  1,
-  'the other participant can read the message'
+  2,
+  'the other participant can read the messages'
 );
 
 select is(

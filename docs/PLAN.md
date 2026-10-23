@@ -589,7 +589,10 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Bonus phases (after parity)
 
-- **Saved posts** (the old UI's disabled "Saved" tab), using `saved_posts` and a bookmark toggle.
+- **Saved posts** (the old UI's disabled "Saved" tab), using `saved_posts` and a bookmark toggle. ✅
+  - Migration `saved_posts`: private (RLS: only your own rows, no counts or lists for anyone else), keyset `get_saved_posts` (newest saved first), and `get_feed` now returns `saved_by_viewer` so feed cards need no request each. 12 pgTAP tests; account deletion's "nothing holds their id" test covers saves too.
+  - The bookmark sits at the right of every post's actions (feed card, page, modal) and reads one shared `["saved", "status", id]` entry, toggled optimistically like likes; `/saved` is a grid of the same tiles as profiles, with an empty state. The seed gives the demo three saved posts.
+  - Found on the way: Explore, Messages and Saved trusted the proxy's cookie check, so an expired session rendered the page and then failed its queries; their boundaries now call `requireUser()` (redirects to /login). And a quick burst of chat messages could commit out of order (Bob saw "three, two, one", both inboxes said "one"): sends now go one at a time in order, and the preview trigger only moves forward in time (migration `chat_preview_order`).
 - **Notifications:** likes, comments and follows written by triggers into a `notifications` table, with a realtime badge and an activity page.
 - **OAuth** sign-in (Google or GitHub) through Supabase.
 - Multi-image carousel posts, message reactions, and "unsend" (delete) messages.

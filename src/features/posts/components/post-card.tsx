@@ -79,6 +79,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
           postId={post.id}
           authorUsername={post.author.username}
           initial={post.likes}
+          initialSaved={post.saved}
           commentInputId={commentInputId}
         />
         {post.caption && <PostCaption username={post.author.username} caption={post.caption} />}

@@ -76,6 +76,13 @@ test.describe("chat", () => {
       await composer(alicePage).press("Enter");
     }
     await expect(alicePage.getByRole("list", { name: "Chats" })).toContainText("You: three");
+    // Everyone sees them in the order they were sent, and the same preview.
+    await expect(thread(bobPage).getByText(/^(one|two|three)$/)).toHaveText([
+      "one",
+      "two",
+      "three",
+    ]);
+    await expect(bobPage.getByRole("list", { name: "Chats" })).toContainText("three");
 
     // A refresh keeps the history.
     await alicePage.reload();

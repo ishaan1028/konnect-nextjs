@@ -41,6 +41,9 @@ const UNIQUE_VIOLATION = "23505";
  */
 export function useSendMessage(conversationId: string, userId: string) {
   const queryClient = useQueryClient();
+  // One insert at a time, in the order they were sent: parallel inserts can
+  // commit out of order, and everyone's chat is ordered by the server's time.
+  const queue = useRef(Promise.resolve());
 
   const deliver = async (message: Message) => {
     const { data, error } = await createClient()
@@ -65,6 +68,12 @@ export function useSendMessage(conversationId: string, userId: string) {
     });
   };
 
+  const enqueue = (message: Message) => {
+    queue.current = queue.current
+      .then(() => deliver(message))
+      .catch(() => upsertMessage(queryClient, { ...message, status: "failed" }));
+  };
+
   return {
     send(body: string) {
       const message: Message = {
@@ -76,11 +85,11 @@ export function useSendMessage(conversationId: string, userId: string) {
         status: "sending",
       };
       upsertMessage(queryClient, message);
-      void deliver(message);
+      enqueue(message);
     },
     retry(message: Message) {
       upsertMessage(queryClient, { ...message, status: "sending" });
-      void deliver(message);
+      enqueue(message);
     },
   };
 }

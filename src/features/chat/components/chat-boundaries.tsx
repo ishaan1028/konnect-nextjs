@@ -4,6 +4,7 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 import { currentUserQueryOptions } from "@/features/profiles/queries";
+import { requireUser } from "@/lib/dal";
 import { getServerQueryClient } from "@/lib/query/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -20,6 +21,8 @@ export async function ChatBoundary({
   conversationId?: string;
   children: ReactNode;
 }) {
+  // The proxy only checks for a session cookie; an expired one lands here.
+  await requireUser();
   const queryClient = getServerQueryClient();
   const supabase = await createClient();
   void queryClient.prefetchQuery(currentUserQueryOptions(supabase));

@@ -21,6 +21,8 @@ insert into public.posts (id, author_id, image_path, image_width, image_height) 
   ('d9000000-0000-4000-8000-000000000001', 'd8000000-0000-4000-8000-00000000000d', 'd8000000-0000-4000-8000-00000000000d/p.webp', 1080, 1080),
   ('b9000000-0000-4000-8000-000000000001', 'b8000000-0000-4000-8000-00000000000b', 'b8000000-0000-4000-8000-00000000000b/p.webp', 1080, 1080);
 
+insert into public.saved_posts (user_id, post_id) values
+  ('d8000000-0000-4000-8000-00000000000d', 'b9000000-0000-4000-8000-000000000001');
 insert into public.post_likes (post_id, user_id) values
   ('b9000000-0000-4000-8000-000000000001', 'd8000000-0000-4000-8000-00000000000d'),
   ('d9000000-0000-4000-8000-000000000001', 'b8000000-0000-4000-8000-00000000000b');
@@ -61,9 +63,10 @@ select is(
     + (select count(*)::int from public.follows
        where 'd8000000-0000-4000-8000-00000000000d' in (follower_id, following_id))
     + (select count(*)::int from public.conversation_participants where user_id = 'd8000000-0000-4000-8000-00000000000d')
-    + (select count(*)::int from public.messages where sender_id = 'd8000000-0000-4000-8000-00000000000d'),
+    + (select count(*)::int from public.messages where sender_id = 'd8000000-0000-4000-8000-00000000000d')
+    + (select count(*)::int from public.saved_posts where user_id = 'd8000000-0000-4000-8000-00000000000d'),
   0,
-  'no profile, post, like, comment, follow, chat membership or message holds their id'
+  'no profile, post, like, comment, follow, saved post, chat membership or message holds their id'
 );
 
 select is(

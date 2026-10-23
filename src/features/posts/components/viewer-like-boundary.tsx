@@ -7,11 +7,13 @@ import { currentUserQueryOptions } from "@/features/profiles/queries";
 import { getServerQueryClient } from "@/lib/query/server";
 import { createClient } from "@/lib/supabase/server";
 
+import { savedStatusQueryOptions } from "@/features/saved/queries";
+
 import { likeStatusQueryOptions } from "../queries";
 
 /**
- * Like CurrentUserBoundary, plus the viewer's like state for one post, so the
- * heart is right on first paint. Not awaited: a return visit shows the cached
+ * Like CurrentUserBoundary, plus the viewer's like and saved state for one
+ * post, so the heart and bookmark are right on first paint. Not awaited: a return visit shows the cached
  * state at once. Render inside <Suspense fallback={<PostActionsSkeleton />}>.
  */
 export async function ViewerLikeBoundary({
@@ -25,6 +27,7 @@ export async function ViewerLikeBoundary({
   const supabase = await createClient();
   void queryClient.prefetchQuery(currentUserQueryOptions(supabase));
   void queryClient.prefetchQuery(likeStatusQueryOptions(supabase, postId));
+  void queryClient.prefetchQuery(savedStatusQueryOptions(supabase, postId));
 
   return <HydrationBoundary state={dehydrate(queryClient)}>{children}</HydrationBoundary>;
 }

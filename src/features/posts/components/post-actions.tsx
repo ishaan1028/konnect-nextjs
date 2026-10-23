@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { Heart, MessageCircle } from "lucide-react";
+import { Bookmark, Heart, MessageCircle } from "lucide-react";
 import type { Route } from "next";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCurrentUser } from "@/features/profiles/hooks";
+import { SaveButton } from "@/features/saved/components/save-button";
 import { pluralize } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
@@ -26,16 +27,24 @@ type PostActionsProps = {
   authorUsername: string;
   /** Known like state (a feed card's row); without it, it's read or fetched. */
   initial?: LikeStatus;
+  /** Known saved state (a feed card's row), the same way. */
+  initialSaved?: boolean;
   /** The comment box's id: the comment button moves focus there. */
   commentInputId?: string;
 };
 
 /**
- * Like, comment and share, then the like count (which opens "Likes").
+ * Like, comment, share and save, then the like count (which opens "Likes").
  * Reads the post's shared like state, so every view of the post agrees.
  * Render inside a CurrentUserBoundary (or where the current user is cached).
  */
-export function PostActions({ postId, authorUsername, initial, commentInputId }: PostActionsProps) {
+export function PostActions({
+  postId,
+  authorUsername,
+  initial,
+  initialSaved,
+  commentInputId,
+}: PostActionsProps) {
   const user = useCurrentUser();
   const { data: likes } = useSuspenseQuery({
     ...likeStatusQueryOptions(createClient(), postId),
@@ -97,6 +106,19 @@ export function PostActions({ postId, authorUsername, initial, commentInputId }:
             </Link>
           ))}
         <SharePostButton postId={postId} authorUsername={authorUsername} />
+        <div className="-mr-2 ml-auto">
+          {user ? (
+            <SaveButton postId={postId} initial={initialSaved} />
+          ) : (
+            <Link
+              href={`/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route}
+              aria-label="Log in to save"
+              className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
+            >
+              <Bookmark aria-hidden className="size-6" />
+            </Link>
+          )}
+        </div>
       </div>
 
       {likes.count > 0 ? (

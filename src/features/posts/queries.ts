@@ -86,6 +86,8 @@ export type FeedComment = { id: string; body: string; createdAt: string; authorU
 /** A post as a feed card: the photo, its author, the viewer's like and the latest comments. */
 export type FeedPost = PostDetail & {
   likes: LikeStatus;
+  /** Whether the viewer saved it (private). */
+  saved: boolean;
   commentsCount: number;
   latestComments: FeedComment[];
 };
@@ -132,6 +134,7 @@ export const feedQueryOptions = (supabase: Supabase) =>
         commentsCount: row.comments_count,
         latestComments: toFeedComments(row.latest_comments),
         likes: { liked: row.liked_by_viewer, count: row.likes_count },
+        saved: row.saved_by_viewer,
         author: {
           id: row.author_id,
           username: row.author_username,
