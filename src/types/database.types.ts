@@ -135,6 +135,42 @@ export type Database = {
           },
         ];
       };
+      message_reactions: {
+        Row: {
+          created_at: string;
+          emoji: string;
+          message_id: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          emoji: string;
+          message_id: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          emoji?: string;
+          message_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "message_reactions_message_id_fkey";
+            columns: ["message_id"];
+            isOneToOne: false;
+            referencedRelation: "messages";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "message_reactions_user_id_fkey";
+            columns: ["user_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       messages: {
         Row: {
           body: string;
@@ -168,6 +204,68 @@ export type Database = {
           {
             foreignKeyName: "messages_sender_id_fkey";
             columns: ["sender_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      notifications: {
+        Row: {
+          actor_id: string;
+          comment_id: string | null;
+          created_at: string;
+          id: string;
+          post_id: string | null;
+          read_at: string | null;
+          recipient_id: string;
+          type: string;
+        };
+        Insert: {
+          actor_id: string;
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          post_id?: string | null;
+          read_at?: string | null;
+          recipient_id: string;
+          type: string;
+        };
+        Update: {
+          actor_id?: string;
+          comment_id?: string | null;
+          created_at?: string;
+          id?: string;
+          post_id?: string | null;
+          read_at?: string | null;
+          recipient_id?: string;
+          type?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey";
+            columns: ["actor_id"];
+            isOneToOne: false;
+            referencedRelation: "profiles";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_comment_id_fkey";
+            columns: ["comment_id"];
+            isOneToOne: false;
+            referencedRelation: "comments";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_post_id_fkey";
+            columns: ["post_id"];
+            isOneToOne: false;
+            referencedRelation: "posts";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey";
+            columns: ["recipient_id"];
             isOneToOne: false;
             referencedRelation: "profiles";
             referencedColumns: ["id"];
@@ -437,6 +535,25 @@ export type Database = {
           likes_count: number;
         }[];
       };
+      get_notifications: {
+        Args: { cursor_created_at?: string; cursor_id?: string; max_results?: number };
+        Returns: {
+          actor_avatar_path: string;
+          actor_follows_viewer: boolean;
+          actor_full_name: string;
+          actor_id: string;
+          actor_username: string;
+          comment_body: string;
+          created_at: string;
+          id: string;
+          post_id: string;
+          post_image_path: string;
+          post_thumbhash: string;
+          read: boolean;
+          type: string;
+          viewer_follows_actor: boolean;
+        }[];
+      };
       get_or_create_dm: { Args: { other_user_id: string }; Returns: string };
       get_post_comments: {
         Args: {
@@ -507,6 +624,7 @@ export type Database = {
       get_unread_count: { Args: Record<PropertyKey, never>; Returns: number };
       is_username_available: { Args: { username: string }; Returns: boolean };
       mark_conversation_read: { Args: { conversation_id: string }; Returns: undefined };
+      mark_notifications_read: { Args: Record<PropertyKey, never>; Returns: undefined };
       search_profiles: {
         Args: { max_results?: number; query: string };
         Returns: {

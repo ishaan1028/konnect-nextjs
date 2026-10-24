@@ -84,6 +84,24 @@ test.describe("chat", () => {
     ]);
     await expect(bobPage.getByRole("list", { name: "Chats" })).toContainText("three");
 
+    // Bob reacts to "three"; Alice sees it live.
+    const message = (page: Page, text: string) =>
+      thread(page).locator("li", { has: page.getByText(text, { exact: true }) });
+    await message(bobPage, "three").getByRole("button", { name: "Message options" }).click();
+    await bobPage.getByRole("menuitem", { name: "React with ❤️" }).click();
+    await expect(message(alicePage, "three")).toContainText("Reactions: ❤️");
+
+    // Alice unsends "three": gone for both, and the previews fall back to "two".
+    await message(alicePage, "three").getByRole("button", { name: "Message options" }).click();
+    await alicePage.getByRole("menuitem", { name: "Unsend" }).click();
+    await alicePage
+      .getByRole("alertdialog", { name: "Unsend message?" })
+      .getByRole("button", { name: "Unsend" })
+      .click();
+    await expect(thread(alicePage).getByText("three", { exact: true })).toHaveCount(0);
+    await expect(thread(bobPage).getByText("three", { exact: true })).toHaveCount(0);
+    await expect(bobPage.getByRole("list", { name: "Chats" })).toContainText("two");
+
     // A refresh keeps the history.
     await alicePage.reload();
     await expect(thread(alicePage).getByText("Hi Bob!")).toBeVisible();

@@ -28,6 +28,11 @@ export type Conversation = {
   otherLastReadAt: string | null;
 };
 
+/** The reactions on offer (the database allows exactly these). */
+export const REACTIONS = ["❤️", "😂", "😮", "😢", "😡", "👍"] as const;
+
+export type Reaction = { userId: string; emoji: string };
+
 export type Message = {
   id: string;
   conversationId: string;
@@ -35,6 +40,8 @@ export type Message = {
   senderId: string | null;
   body: string;
   createdAt: string;
+  /** One per person (theirs or yours), newest last. */
+  reactions: Reaction[];
   /** Optimistic messages: still sending, or failed (with a Retry). */
   status?: "sending" | "failed";
 };
@@ -89,7 +96,9 @@ export const messagesQueryOptions = (supabase: Supabase, conversationId: string)
     queryFn: async ({ pageParam }): Promise<MessagesPage> => {
       let query = supabase
         .from("messages")
-        .select("id, conversation_id, sender_id, body, created_at")
+        .select(
+          "id, conversation_id, sender_id, body, created_at, message_reactions(user_id, emoji)",
+        )
         .eq("conversation_id", conversationId)
         .order("created_at", { ascending: false })
         .limit(PAGE_SIZE);
@@ -104,6 +113,10 @@ export const messagesQueryOptions = (supabase: Supabase, conversationId: string)
         senderId: row.sender_id,
         body: row.body,
         createdAt: row.created_at,
+        reactions: row.message_reactions.map((reaction) => ({
+          userId: reaction.user_id,
+          emoji: reaction.emoji,
+        })),
       }));
       return {
         items,

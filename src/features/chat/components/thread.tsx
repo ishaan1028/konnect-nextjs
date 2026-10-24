@@ -20,12 +20,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { useCurrentUser } from "@/features/profiles/hooks";
-import { formatDate } from "@/lib/format";
+import { dayKey, dayLabel, formatDate } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { useNow } from "@/lib/use-now";
 import { cn } from "@/lib/utils";
 
-import { useConversationChannel, useMarkRead, useSendMessage } from "../hooks";
+import { useConversationChannel, useMarkRead, useMessageActions, useSendMessage } from "../hooks";
 import { useIsOnline } from "../presence";
 import {
   type Conversation,
@@ -34,6 +34,7 @@ import {
   type Message,
   messagesQueryOptions,
 } from "../queries";
+import { MessageMenu, MessageReactions } from "./message-menu";
 import { OnlineAvatar } from "./online-avatar";
 
 const MAX_LENGTH = 2000;
@@ -72,6 +73,7 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
     useSuspenseInfiniteQuery(messagesQueryOptions(createClient(), conversationId));
   const markRead = useMarkRead(conversationId);
   const { send, retry } = useSendMessage(conversationId, userId);
+  const actions = useMessageActions(conversationId, userId);
   const { other } = chat;
   const online = useIsOnline(other?.id);
   const now = useNow();
@@ -233,7 +235,7 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
                         {dayLabel(message.createdAt, now)}
                       </p>
                     )}
-                    <Bubble message={message} mine={message.senderId === userId} onRetry={retry} />
+                    <Bubble message={message} userId={userId} onRetry={retry} actions={actions} />
                     {message.id === lastMine?.id && seen && (
                       <p className="mt-0.5 text-right text-xs text-muted-foreground">Seen</p>
                     )}
@@ -271,27 +273,41 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
   );
 }
 
-function Bubble({
-  message,
-  mine,
-  onRetry,
-}: {
+type BubbleProps = {
   message: Message;
-  mine: boolean;
+  userId: string;
   onRetry: (message: Message) => void;
-}) {
+  actions: ReturnType<typeof useMessageActions>;
+};
+
+function Bubble({ message, userId, onRetry, actions }: BubbleProps) {
+  const mine = message.senderId === userId;
   return (
-    <div className={cn("flex flex-col", mine ? "items-end" : "items-start")}>
-      <p
-        title={formatDate(message.createdAt)}
-        className={cn(
-          "max-w-[75%] rounded-3xl px-4 py-2 text-sm break-words whitespace-pre-wrap",
-          mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
-          message.status === "sending" && "opacity-60",
+    <div className={cn("group/message flex flex-col", mine ? "items-end" : "items-start")}>
+      <div className={cn("flex max-w-[80%] items-center gap-1", mine && "flex-row-reverse")}>
+        <p
+          title={formatDate(message.createdAt)}
+          className={cn(
+            "min-w-0 rounded-3xl px-4 py-2 text-sm break-words whitespace-pre-wrap",
+            mine ? "bg-primary text-primary-foreground" : "bg-muted text-foreground",
+            message.status === "sending" && "opacity-60",
+          )}
+        >
+          {message.body}
+        </p>
+        {/* Only saved messages can be reacted to or unsent. */}
+        {!message.status && (
+          <MessageMenu
+            mine={mine}
+            myReaction={message.reactions.find((reaction) => reaction.userId === userId)?.emoji}
+            onReact={(emoji) => void actions.react(message, emoji)}
+            onUnsend={() => void actions.unsend(message)}
+          />
         )}
-      >
-        {message.body}
-      </p>
+      </div>
+      {message.reactions.length > 0 && (
+        <MessageReactions reactions={message.reactions} userId={userId} />
+      )}
       {message.status === "failed" && (
         <p className="mt-1 flex items-center gap-1 text-xs text-destructive">
           Not sent.
@@ -355,18 +371,6 @@ function Composer({ onSend, onTyping }: { onSend: (body: string) => void; onTypi
       </Button>
     </form>
   );
-}
-
-/** The local calendar day of a timestamp (YYYY-M-D). */
-function dayKey(iso: string) {
-  const date = new Date(iso);
-  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
-}
-
-function dayLabel(iso: string, now: number) {
-  if (dayKey(iso) === dayKey(new Date(now).toISOString())) return "Today";
-  if (dayKey(iso) === dayKey(new Date(now - 86_400_000).toISOString())) return "Yesterday";
-  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(iso));
 }
 
 /** The thread's shape while it streams in: header, a few bubbles, composer. */

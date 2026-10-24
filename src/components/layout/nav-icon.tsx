@@ -1,14 +1,21 @@
 import type { ReactNode } from "react";
 
 import { UnreadBadge } from "@/features/chat/components/unread-badge";
+import { NotificationBadge } from "@/features/notifications/components/notification-badge";
 
-/** A nav item's icon; Messages also carries the unread-chats badge. */
+const BADGES: Record<string, ReactNode> = {
+  "/messages": <UnreadBadge />,
+  "/notifications": <NotificationBadge />,
+};
+
+/** A nav item's icon, with its live count (unread chats, new notifications). */
 export function navIcon(href: string, icon: ReactNode) {
-  if (href !== "/messages") return icon;
+  const badge = BADGES[href];
+  if (!badge) return icon;
   return (
     <span className="relative inline-flex">
       {icon}
-      <UnreadBadge />
+      {badge}
     </span>
   );
 }

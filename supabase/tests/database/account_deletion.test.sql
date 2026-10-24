@@ -43,6 +43,8 @@ insert into public.messages (conversation_id, sender_id, body, created_at) value
   ('da000000-0000-4000-8000-000000000001', 'b8000000-0000-4000-8000-00000000000b', 'Hi D', now() - interval '1 minute'),
   ('da000000-0000-4000-8000-000000000001', 'd8000000-0000-4000-8000-00000000000d', 'Hi B', now()),
   ('da000000-0000-4000-8000-000000000002', 'd8000000-0000-4000-8000-00000000000d', 'Hi C', now());
+insert into public.message_reactions (message_id, user_id, emoji)
+select id, 'd8000000-0000-4000-8000-00000000000d', '❤️' from public.messages where body = 'Hi D';
 
 -- C deletes their account first: the D ↔ C chat survives for D.
 delete from auth.users where id = 'c8000000-0000-4000-8000-00000000000c';
@@ -64,9 +66,12 @@ select is(
        where 'd8000000-0000-4000-8000-00000000000d' in (follower_id, following_id))
     + (select count(*)::int from public.conversation_participants where user_id = 'd8000000-0000-4000-8000-00000000000d')
     + (select count(*)::int from public.messages where sender_id = 'd8000000-0000-4000-8000-00000000000d')
-    + (select count(*)::int from public.saved_posts where user_id = 'd8000000-0000-4000-8000-00000000000d'),
+    + (select count(*)::int from public.saved_posts where user_id = 'd8000000-0000-4000-8000-00000000000d')
+    + (select count(*)::int from public.notifications
+       where 'd8000000-0000-4000-8000-00000000000d' in (recipient_id, actor_id))
+    + (select count(*)::int from public.message_reactions where user_id = 'd8000000-0000-4000-8000-00000000000d'),
   0,
-  'no profile, post, like, comment, follow, saved post, chat membership or message holds their id'
+  'no profile, post, like, comment, follow, saved post, notification, reaction, chat membership or message holds their id'
 );
 
 select is(

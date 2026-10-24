@@ -11,7 +11,8 @@ import { setOnlineUsers } from "../presence";
 /**
  * App-wide chat updates, mounted once per signed-in session:
  * - `user:<id>` (only you can listen): a ping whenever one of your chats gets
- *   a message or is read, so the inbox and the unread badge refresh;
+ *   a message or is read, or you get a notification, so the inbox and the
+ *   badges refresh;
  * - `online` (signed-in users): Presence, for the green "online" dots.
  * Renders nothing. Render inside a CurrentUserBoundary.
  */
@@ -28,6 +29,9 @@ export function ChatRealtime() {
         .on("broadcast", { event: "inbox" }, () => {
           void queryClient.invalidateQueries({ queryKey: queryKeys.chat.inbox });
           void queryClient.invalidateQueries({ queryKey: queryKeys.chat.unreadCount });
+        })
+        .on("broadcast", { event: "notification" }, () => {
+          void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
         })
         .subscribe(),
     );

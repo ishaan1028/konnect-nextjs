@@ -34,6 +34,12 @@ export const queryKeys = {
     status: (postId: string) => ["saved", "status", postId] as const,
     list: () => ["saved", "list"] as const,
   },
+  // Only the viewer's own: the activity list and the unread badge.
+  notifications: {
+    all: ["notifications"] as const,
+    list: () => ["notifications", "list"] as const,
+    unreadCount: () => ["notifications", "unread-count"] as const,
+  },
   search: {
     profiles: (query: string) => ["search", "profiles", query] as const,
   },

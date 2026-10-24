@@ -1,4 +1,12 @@
-import { Bookmark, Compass, House, type LucideIcon, MessageCircle, SquarePlus } from "lucide-react";
+import {
+  Bookmark,
+  Compass,
+  Heart,
+  House,
+  type LucideIcon,
+  MessageCircle,
+  SquarePlus,
+} from "lucide-react";
 import type { Route } from "next";
 
 export type NavItem = {
@@ -14,6 +22,7 @@ export const primaryNavItems = [
   { href: "/", label: "Home", icon: House },
   { href: "/explore", label: "Explore", icon: Compass },
   { href: "/messages", label: "Messages", icon: MessageCircle },
+  { href: "/notifications", label: "Notifications", icon: Heart },
   { href: "/create", label: "Create", icon: SquarePlus },
   { href: "/saved", label: "Saved", icon: Bookmark },
 ] as const satisfies readonly NavItem[];

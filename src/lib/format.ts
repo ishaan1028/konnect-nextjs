@@ -48,3 +48,16 @@ export function formatRelativeTime(iso: string, now: number): string {
 export function formatShortDate(iso: string): string {
   return monthDay.format(new Date(iso));
 }
+
+/** The local calendar day of a timestamp (YYYY-M-D). */
+export function dayKey(iso: string) {
+  const date = new Date(iso);
+  return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
+}
+
+/** "Today", "Yesterday" or a date, in the viewer's time zone (call after hydration). */
+export function dayLabel(iso: string, now: number) {
+  if (dayKey(iso) === dayKey(new Date(now).toISOString())) return "Today";
+  if (dayKey(iso) === dayKey(new Date(now - 86_400_000).toISOString())) return "Yesterday";
+  return new Intl.DateTimeFormat(undefined, { dateStyle: "medium" }).format(new Date(iso));
+}

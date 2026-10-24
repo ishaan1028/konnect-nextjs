@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCount, formatDate, formatRelativeTime, formatShortDate, pluralize } from "./format";
+import {
+  formatCount,
+  formatDate,
+  formatRelativeTime,
+  formatShortDate,
+  dayLabel,
+  pluralize,
+} from "./format";
 
 describe("formatCount", () => {
   it.each([
@@ -49,5 +56,16 @@ describe("formatRelativeTime", () => {
 describe("formatShortDate", () => {
   it("formats in UTC", () => {
     expect(formatShortDate("2026-10-06T23:30:00Z")).toBe("Oct 6");
+  });
+});
+
+describe("dayLabel", () => {
+  // Local noon, so the test holds in any time zone.
+  const now = new Date(2026, 9, 22, 12).getTime();
+
+  it("names today and yesterday, then shows the date", () => {
+    expect(dayLabel(new Date(2026, 9, 22, 0, 5).toISOString(), now)).toBe("Today");
+    expect(dayLabel(new Date(2026, 9, 21, 23, 55).toISOString(), now)).toBe("Yesterday");
+    expect(dayLabel(new Date(2026, 9, 19, 9).toISOString(), now)).not.toMatch(/Today|Yesterday/);
   });
 });

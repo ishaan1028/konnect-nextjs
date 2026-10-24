@@ -1,7 +1,9 @@
+import { Heart } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 import { Logo } from "@/components/brand/logo";
+import { buttonVariants } from "@/components/ui/button";
 import { AccountMenuItems } from "@/features/auth/components/account-menu-items";
 import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
 import {
@@ -25,17 +27,26 @@ export function MobileHeader() {
       >
         <Logo />
       </Link>
-      <MoreMenu
-        variant="icon"
-        account={
-          // Only the account items stream in; the menu stays the same instance.
-          <Suspense fallback={null}>
-            <CurrentUserBoundary>
-              <AccountMenuItems />
-            </CurrentUserBoundary>
-          </Suspense>
-        }
-      />
+      <div className="flex items-center gap-1">
+        <Link
+          href="/notifications"
+          aria-label="Notifications"
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
+        >
+          {navIcon("/notifications", <Heart aria-hidden />)}
+        </Link>
+        <MoreMenu
+          variant="icon"
+          account={
+            // Only the account items stream in; the menu stays the same instance.
+            <Suspense fallback={null}>
+              <CurrentUserBoundary>
+                <AccountMenuItems />
+              </CurrentUserBoundary>
+            </Suspense>
+          }
+        />
+      </div>
     </header>
   );
 }

@@ -15,6 +15,7 @@ export default function robots(): MetadataRoute.Robots {
         "/create",
         "/explore",
         "/messages",
+        "/notifications",
         "/saved",
         "/settings",
         "/login",

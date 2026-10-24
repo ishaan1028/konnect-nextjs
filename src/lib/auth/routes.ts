@@ -5,7 +5,14 @@
  */
 
 /** Pages that only make sense signed in. Signed-out visitors go to /login. */
-const PROTECTED_PREFIXES = ["/explore", "/create", "/messages", "/saved", "/settings"] as const;
+const PROTECTED_PREFIXES = [
+  "/explore",
+  "/create",
+  "/messages",
+  "/notifications",
+  "/saved",
+  "/settings",
+] as const;
 
 /** Pages for signed-out visitors. Signed-in users are sent to the feed. */
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"] as const;

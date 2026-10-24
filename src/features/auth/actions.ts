@@ -154,8 +154,9 @@ async function resetDemoPassword({ email, password }: { email: string; password:
 
 export const signOutAction = actionClient.metadata({ actionName: "signOut" }).action(async () => {
   const supabase = await createClient();
-  // Revokes the refresh token server-side and clears the auth cookies.
-  await supabase.auth.signOut();
+  // This browser only (revokes its refresh token, clears the cookies): the
+  // default "global" would also sign out everyone sharing the demo account.
+  await supabase.auth.signOut({ scope: "local" });
 
   revalidatePath("/", "layout");
   redirect("/login");

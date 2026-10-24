@@ -22,6 +22,7 @@ const SIGNED_IN = [
   "/create",
   "/messages",
   CHAT,
+  "/notifications",
   "/settings/profile",
   "/settings/account",
   "/settings/appearance",
