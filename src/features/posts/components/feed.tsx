@@ -1,7 +1,7 @@
 "use client";
 
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
-import { Compass, Images } from "lucide-react";
+import { CircleCheck, Compass, Images } from "lucide-react";
 import Link from "next/link";
 import { useInView } from "react-intersection-observer";
 
@@ -53,9 +53,15 @@ export function Feed() {
         </div>
       ) : (
         !hasNextPage && (
-          <p className="py-4 text-center text-sm text-muted-foreground">
-            You&apos;re all caught up.
-          </p>
+          // The end of the feed (and of the page): the message, a line, the footer.
+          <footer className="flex items-center gap-3 py-6 text-sm text-muted-foreground">
+            <span className="flex shrink-0 items-center gap-2 font-medium text-foreground">
+              <CircleCheck aria-hidden className="size-5 text-primary" />
+              You&apos;re all caught up
+            </span>
+            <span aria-hidden className="h-px flex-1 bg-border" />
+            <span className="shrink-0 text-xs">© 2026 Konnect</span>
+          </footer>
         )
       )}
     </div>

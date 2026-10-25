@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
+import { StickySidebar } from "@/components/layout/sticky-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
 import { SuggestionsBoundary } from "@/features/follows/components/suggestions-boundary";
@@ -55,7 +56,8 @@ export default function HomePage() {
         </section>
       </div>
 
-      <div className="hidden min-w-0 space-y-4 lg:block">
+      {/* Scrolls with the feed, but always keeps its top or bottom in view. */}
+      <StickySidebar className="hidden min-w-0 space-y-4 lg:block">
         <Suspense fallback={<ProfileSummarySkeleton />}>
           <ProfileSummary />
         </Suspense>
@@ -106,9 +108,7 @@ export default function HomePage() {
             </LoadErrorBoundary>
           </div>
         </RailCard>
-
-        <p className="px-4 text-xs text-muted-foreground">© 2026 Konnect</p>
-      </div>
+      </StickySidebar>
     </div>
   );
 }
