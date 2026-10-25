@@ -97,7 +97,7 @@ export const followListQueryOptions = (
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-export const followSuggestionsQueryOptions = (supabase: Supabase, limit = 5) =>
+export const followSuggestionsQueryOptions = (supabase: Supabase, limit = 2) =>
   queryOptions({
     queryKey: queryKeys.follows.suggestions(),
     queryFn: async (): Promise<Suggestion[]> => {

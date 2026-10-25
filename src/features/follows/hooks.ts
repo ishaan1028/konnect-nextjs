@@ -50,6 +50,10 @@ export function useToggleFollow(profileId: string) {
         queryKey: queryKeys.follows.suggestions(),
         refetchType: "none",
       });
+      void queryClient.invalidateQueries({
+        queryKey: queryKeys.follows.rail(),
+        refetchType: "none",
+      });
     },
   });
 }

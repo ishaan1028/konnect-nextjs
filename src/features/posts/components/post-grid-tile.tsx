@@ -17,6 +17,8 @@ type PostGridTileProps = {
   counts?: { likes: number; comments: number };
   /** In the first row (above the fold): load eagerly, it may be the page's largest paint. */
   priority?: boolean;
+  /** The rendered width, for the image's srcset (defaults to a 3-column page grid). */
+  sizes?: string;
 };
 
 /**
@@ -28,6 +30,8 @@ export function PostGridTile({
   authorUsername,
   counts,
   priority = false,
+  // Three columns of a ≤56rem page; a third of the screen on phones.
+  sizes = "(min-width: 56rem) 19rem, 33vw",
 }: PostGridTileProps) {
   return (
     <Link
@@ -39,8 +43,7 @@ export function PostGridTile({
         // The link's name: what the photo shows, or at least whose it is.
         alt={post.altText || `Photo by @${authorUsername}`}
         fill
-        // Three columns of a ≤56rem page; a third of the screen on phones.
-        sizes="(min-width: 56rem) 19rem, 33vw"
+        sizes={sizes}
         placeholder={thumbhashPlaceholder(post.thumbhash)}
         loading={priority ? "eager" : "lazy"}
         fetchPriority={priority ? "high" : "auto"}

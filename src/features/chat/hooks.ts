@@ -232,6 +232,10 @@ export function useConversationChannel(
       onIncoming();
     }
   });
+  const onSubscribed = useEffectEvent(() => {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.chat.messages(conversationId) });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.chat.inbox });
+  });
   const onUnsend = useEffectEvent((payload: { id: string }) =>
     removeMessage(queryClient, conversationId, payload.id),
   );
@@ -268,7 +272,11 @@ export function useConversationChannel(
           clearTimeout(typingTimer);
           typingTimer = setTimeout(() => setOtherTyping(false), 3000);
         })
-        .subscribe();
+        // Messages, reads and reactions sent before the channel joined (or
+        // while reconnecting) were missed: catch up on every (re)subscribe.
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") onSubscribed();
+        });
     });
 
     return () => {

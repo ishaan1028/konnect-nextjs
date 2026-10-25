@@ -15,6 +15,8 @@ export const queryKeys = {
     list: (profileId: string, kind: "followers" | "following") =>
       ["follows", "list", profileId, kind] as const,
     suggestions: () => ["follows", "suggestions"] as const,
+    /** The home page's people rail (people you follow, then suggestions). */
+    rail: () => ["follows", "rail"] as const,
   },
   posts: {
     all: ["posts"] as const,

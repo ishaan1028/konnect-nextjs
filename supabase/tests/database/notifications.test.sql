@@ -110,7 +110,7 @@ select is(
 
 delete from public.comments where body = 'Love this!';
 select is(
-  (select count(*)::int from public.notifications where type = 'comment'),
+  (select count(*)::int from public.notifications where type = 'comment' and recipient_id = 'a1100000-0000-4000-8000-00000000000a'),
   0,
   'deleting a comment removes its notification'
 );

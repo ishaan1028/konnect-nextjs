@@ -1,108 +1,130 @@
-import { Compass, ImagePlus, UsersRound } from "lucide-react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Suspense } from "react";
 
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
+import { SuggestionsBoundary } from "@/features/follows/components/suggestions-boundary";
 import { SuggestionsSkeleton } from "@/features/follows/components/suggestions-skeleton";
+import { ComposerBar } from "@/features/home/components/composer-bar";
+import {
+  PopularPosts,
+  PopularPostsSkeleton,
+  ProfileSummary,
+  ProfileSummarySkeleton,
+} from "@/features/home/components/home-cards";
+import { PeopleRailSkeleton } from "@/features/home/components/people-rail";
+import { PeopleRailBoundary } from "@/features/home/components/people-rail-boundary";
+import { RailCard } from "@/features/home/components/rail-card";
+import { RecentChats } from "@/features/home/components/recent-chats";
 import { FeedBoundary } from "@/features/posts/components/feed-boundary";
 import { FeedSkeleton } from "@/features/posts/components/feed-skeleton";
-import { SuggestionsBoundary } from "@/features/follows/components/suggestions-boundary";
-import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
-import { WelcomeGreeting } from "@/features/profiles/components/welcome-greeting";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Home",
 };
 
-// A Server Component: rendered at build time into the static shell, zero JS shipped.
+/**
+ * The feed with the people rail and a composer above it; from lg, a side
+ * rail with you, suggestions, popular posts and recent chats. The layout is
+ * in the static shell; every personal part streams into a slot of its exact
+ * final size, so nothing shifts.
+ */
 export default function HomePage() {
   return (
-    // One grid, one copy of each part: on xl the suggestions sit in a right
-    // rail; below that they flow between the hero and the feed. Source order
-    // (hero → suggestions → feed) is also the reading order.
-    <div className="mx-auto grid max-w-xl gap-6 xl:max-w-5xl xl:grid-cols-[minmax(0,36rem)_20rem] xl:justify-center xl:gap-x-10">
+    <div className="mx-auto grid max-w-xl gap-6 lg:max-w-[61rem] lg:grid-cols-[minmax(0,36rem)_minmax(0,21rem)] lg:justify-center lg:gap-x-8 xl:max-w-[68.5rem] xl:grid-cols-[minmax(0,42rem)_minmax(0,24rem)] xl:gap-x-10">
       <h1 className="sr-only">Home feed</h1>
 
-      <div className="relative overflow-hidden rounded-4xl bg-brand p-7 text-white shadow-xl shadow-primary/20">
-        <div
-          aria-hidden
-          className="absolute -top-20 -right-16 size-64 rounded-full bg-brand-vivid opacity-80 blur-3xl"
-        />
-        <p className="relative text-sm font-medium text-white/80">
-          {/* Partial Prerendering in one line: the hero is static, only the
-                name streams in, and the fallback occupies the same space. */}
-          <Suspense fallback="Welcome to Konnect">
-            <CurrentUserBoundary>
-              <WelcomeGreeting />
-            </CurrentUserBoundary>
-          </Suspense>
-        </p>
-        <h2 className="relative mt-1 text-4xl font-extrabold">Your people, your moments.</h2>
-        <p className="relative mt-2 max-w-sm text-white/85">
-          Share photos, follow friends and chat in real time.
-        </p>
-        <div className="relative mt-6 flex flex-wrap gap-2">
-          <Link
-            href="/create"
-            className={cn(
-              buttonVariants({ size: "lg" }),
-              "bg-white text-neutral-900 hover:bg-white/90",
-            )}
-          >
-            <ImagePlus aria-hidden data-icon="inline-start" />
-            New post
-          </Link>
-          <Link
-            href="/explore"
-            className={cn(
-              buttonVariants({ variant: "ghost", size: "lg" }),
-              "text-white hover:bg-white/15 hover:text-white",
-            )}
-          >
-            <Compass aria-hidden data-icon="inline-start" />
-            Explore
-          </Link>
-        </div>
+      <div className="min-w-0 space-y-4">
+        <nav aria-label="People" className="rounded-3xl border bg-card">
+          <LoadErrorBoundary what="people">
+            <Suspense fallback={<PeopleRailSkeleton />}>
+              <PeopleRailBoundary />
+            </Suspense>
+          </LoadErrorBoundary>
+        </nav>
+
+        <ComposerBar />
+
+        <section aria-label="Feed">
+          <LoadErrorBoundary what="your feed">
+            <Suspense fallback={<FeedSkeleton />}>
+              <FeedBoundary />
+            </Suspense>
+          </LoadErrorBoundary>
+        </section>
       </div>
 
-      <aside
-        aria-labelledby="suggestions-heading"
-        className="xl:sticky xl:top-10 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:self-start"
-      >
-        <Card>
-          <CardHeader>
-            <CardTitle id="suggestions-heading" className="flex items-center gap-2">
-              <UsersRound aria-hidden className="size-4 text-primary" />
-              Suggested for you
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* Fixed height (fits the 5 suggestions): the skeleton and the list
-                fill the same box, so nothing shifts when they load; anything
-                more scrolls inside. The side padding keeps focus rings from
-                being clipped by the scroll area. */}
-            <div className="-mx-1.5 h-75 overflow-y-auto px-1.5">
-              <LoadErrorBoundary what="suggestions">
-                <Suspense fallback={<SuggestionsSkeleton />}>
-                  <SuggestionsBoundary />
-                </Suspense>
-              </LoadErrorBoundary>
-            </div>
-          </CardContent>
-        </Card>
-      </aside>
+      <div className="hidden min-w-0 space-y-4 lg:block">
+        <Suspense fallback={<ProfileSummarySkeleton />}>
+          <ProfileSummary />
+        </Suspense>
 
-      <section aria-label="Feed" className="xl:col-start-1">
-        <LoadErrorBoundary what="your feed">
-          <Suspense fallback={<FeedSkeleton />}>
-            <FeedBoundary />
-          </Suspense>
-        </LoadErrorBoundary>
-      </section>
+        <aside aria-labelledby="suggestions-heading" className="rounded-3xl border bg-card p-4">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <h2 id="suggestions-heading" className="text-sm font-semibold">
+              Suggested for you
+            </h2>
+          </div>
+          {/* Fixed height (fits the 2 suggestions): the skeleton and the list
+              fill the same box, so nothing shifts when they load. The side
+              padding keeps focus rings from being clipped by the scroll area. */}
+          <div className="-mx-1.5 h-30 overflow-y-auto px-1.5">
+            <LoadErrorBoundary what="suggestions">
+              <Suspense fallback={<SuggestionsSkeleton />}>
+                <SuggestionsBoundary />
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
+        </aside>
+
+        <RailCard
+          title="Popular on Konnect"
+          id="popular-heading"
+          action={{ href: "/explore", label: "Explore" }}
+        >
+          <LoadErrorBoundary what="popular posts">
+            <Suspense fallback={<PopularPostsSkeleton />}>
+              <PopularPosts />
+            </Suspense>
+          </LoadErrorBoundary>
+        </RailCard>
+
+        <RailCard
+          title="Recent chats"
+          id="chats-heading"
+          action={{ href: "/messages", label: "See all" }}
+        >
+          {/* Four rows tall, loaded or not. */}
+          <div className="h-70">
+            <LoadErrorBoundary what="your chats">
+              <Suspense fallback={<RecentChatsSkeleton />}>
+                <ChatBoundary>
+                  <RecentChats />
+                </ChatBoundary>
+              </Suspense>
+            </LoadErrorBoundary>
+          </div>
+        </RailCard>
+
+        <p className="px-4 text-xs text-muted-foreground">© 2026 Konnect</p>
+      </div>
+    </div>
+  );
+}
+
+function RecentChatsSkeleton() {
+  return (
+    <div aria-hidden className="space-y-0.5">
+      {[0, 1, 2, 3].map((row) => (
+        <div key={row} className="flex items-center gap-3 p-2.5">
+          <Skeleton className="size-12 rounded-full" />
+          <div className="flex-1 space-y-1.5">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-36" />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

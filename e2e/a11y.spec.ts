@@ -96,7 +96,7 @@ test("keyboard: the skip link works, and closing a menu or dialog returns focus"
   await expect(page).toHaveURL("/maya.k");
 
   // A menu opened from the keyboard closes with Escape, back on its button.
-  const more = page.getByRole("button", { name: "More", exact: true });
+  const more = page.getByRole("button", { name: /account menu/ });
   await more.focus();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("menu")).toBeVisible();

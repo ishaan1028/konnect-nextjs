@@ -9,7 +9,7 @@ export async function logIn(page: Page, email: string, password: string) {
 }
 
 export async function logOut(page: Page) {
-  await page.getByRole("button", { name: "More", exact: true }).click();
+  await page.getByRole("button", { name: /account menu/ }).click();
   await page.getByRole("menuitem", { name: "Log out" }).click();
   await expect(page).toHaveURL("/login");
 }

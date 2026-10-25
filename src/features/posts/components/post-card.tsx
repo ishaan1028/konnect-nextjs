@@ -1,5 +1,6 @@
 "use client";
 
+import { Maximize2 } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,6 +9,7 @@ import { RelativeTime } from "@/components/shared/relative-time";
 import { CommentForm } from "@/features/comments/components/comment-form";
 import { LatestComments } from "@/features/comments/components/latest-comments";
 import { UserAvatar } from "@/components/shared/user-avatar";
+import { buttonVariants } from "@/components/ui/button";
 import { avatarUrl, postImageUrl } from "@/lib/storage";
 import { thumbhashPlaceholder } from "@/lib/thumbhash";
 
@@ -56,6 +58,15 @@ export function PostCard({ post, priority = false }: PostCardProps) {
           </p>
           {post.location && <p className="truncate text-muted-foreground">{post.location}</p>}
         </div>
+        {/* Opens the post's modal (all comments), like a tile on a profile. */}
+        <Link
+          href={postHref}
+          aria-label="Open post"
+          title="Open post"
+          className={buttonVariants({ variant: "ghost", size: "icon" })}
+        >
+          <Maximize2 aria-hidden />
+        </Link>
       </header>
 
       {/* Known width and height: the space is reserved before the photo loads. */}
@@ -66,7 +77,7 @@ export function PostCard({ post, priority = false }: PostCardProps) {
           width={post.width}
           height={post.height}
           // The feed column is at most 36rem wide; full width on phones.
-          sizes="(min-width: 40rem) 36rem, 100vw"
+          sizes="(min-width: 80rem) 42rem, (min-width: 40rem) 36rem, 100vw"
           placeholder={thumbhashPlaceholder(post.thumbhash)}
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}

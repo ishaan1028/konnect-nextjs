@@ -4,16 +4,16 @@ import { logIn, logOut } from "./support/auth";
 import { adminClient, createConfirmedUser, demoUser } from "./support/users";
 
 test.describe("signed-in app shell", () => {
-  test("shows the current user in the nav, menu and greeting", async ({ page }) => {
+  test("shows the current user in the nav, menu and composer", async ({ page }) => {
     await page.goto("/login");
     await logIn(page, demoUser.email, demoUser.password);
     await expect(page).toHaveURL("/");
 
     // Streamed in behind Suspense from the server-prefetched TanStack cache.
-    await expect(page.getByText("Welcome back, Alex")).toBeVisible();
+    await expect(page.getByText("What's new, Alex?")).toBeVisible();
     await expect(page.getByRole("link", { name: "Profile" })).toHaveAttribute("href", "/alex.demo");
 
-    await page.getByRole("button", { name: "More", exact: true }).click();
+    await page.getByRole("button", { name: /account menu/ }).click();
     await expect(page.getByText("Signed in as @alex.demo")).toBeVisible();
   });
 
@@ -22,12 +22,12 @@ test.describe("signed-in app shell", () => {
 
     await page.goto("/login");
     await logIn(page, demoUser.email, demoUser.password);
-    await expect(page.getByText("Welcome back, Alex")).toBeVisible();
+    await expect(page.getByText("What's new, Alex?")).toBeVisible();
 
     await logOut(page);
     await logIn(page, other.email, other.password);
 
-    await expect(page.getByText("Welcome back, Test")).toBeVisible();
+    await expect(page.getByText("What's new, Test?")).toBeVisible();
     await expect(page.getByRole("link", { name: "Profile" })).toHaveAttribute(
       "href",
       `/${other.username}`,
@@ -44,7 +44,7 @@ test.describe("signed-in app shell", () => {
     });
     await page.goto("/login");
     await logIn(page, demoUser.email, demoUser.password);
-    await expect(page.getByText("Welcome back, Alex")).toBeVisible();
+    await expect(page.getByText("What's new, Alex?")).toBeVisible();
 
     const bar = page.locator('[data-slot="navigation-progress"]');
     await expect(bar).toHaveCSS("opacity", "0");
@@ -60,7 +60,7 @@ test.describe("signed-in app shell", () => {
     const user = await createConfirmedUser();
     await page.goto("/login");
     await logIn(page, user.email, user.password);
-    await expect(page.getByText("Welcome back, Test")).toBeVisible();
+    await expect(page.getByText("What's new, Test?")).toBeVisible();
 
     // The name changes on the server while the user is elsewhere in the app
     // (Explore doesn't load the current user, so the cache keeps the old name).
@@ -77,22 +77,22 @@ test.describe("signed-in app shell", () => {
       const seen: string[] = [];
       Object.assign(window, { greetings: seen });
       new MutationObserver(() => {
-        const text = [...document.querySelectorAll<HTMLElement>("main p")].find(
-          (p) => p.offsetParent && p.textContent?.startsWith("Welcome"),
+        const text = [...document.querySelectorAll<HTMLElement>("main a")].find(
+          (link) => link.offsetParent && link.textContent?.startsWith("What's new"),
         )?.textContent;
         if (text && seen.at(-1) !== text) seen.push(text);
       }).observe(document.body, { subtree: true, childList: true, characterData: true });
     });
     await page.getByRole("link", { name: "Home" }).first().click();
 
-    await expect(page.getByText("Welcome back, Renamed")).toBeVisible();
+    await expect(page.getByText("What's new, Renamed?")).toBeVisible();
     const greetings = await page.evaluate(
       () => (window as unknown as { greetings: string[] }).greetings,
     );
     // The cached name came first (stale-while-revalidate), then the fresh one.
-    expect(greetings.indexOf("Welcome back, Test")).toBeGreaterThanOrEqual(0);
-    expect(greetings.indexOf("Welcome back, Test")).toBeLessThan(
-      greetings.indexOf("Welcome back, Renamed"),
+    expect(greetings.indexOf("What's new, Test?")).toBeGreaterThanOrEqual(0);
+    expect(greetings.indexOf("What's new, Test?")).toBeLessThan(
+      greetings.indexOf("What's new, Renamed?"),
     );
   });
 });
@@ -102,7 +102,7 @@ test.describe("signed-out visitor on a public page", () => {
     await page.goto("/alex.demo");
 
     await expect(page.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/login");
-    await page.getByRole("button", { name: "More", exact: true }).click();
+    await page.getByRole("button", { name: /account menu/ }).click();
     await expect(page.getByRole("menuitem", { name: "Log in" })).toBeVisible();
     await expect(page.getByRole("menuitem", { name: "Log out" })).toHaveCount(0);
   });

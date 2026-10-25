@@ -3,7 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { signUpAndLogIn } from "./support/auth";
 import { follow } from "./support/follows";
-import { createPostFor } from "./support/posts";
+import { createCommentFor, createPostFor } from "./support/posts";
 import { adminClient, createConfirmedUser } from "./support/users";
 
 const card = (page: Page, username: string) =>
@@ -37,8 +37,8 @@ test.describe("home feed", () => {
     ).toHaveAttribute("aria-pressed", "true");
 
     // The post opens as a modal over the feed, with the same like state.
-    // (The post's time links to it.)
-    await card(page, author.username).locator("header").locator('a[href^="/p/"]').click();
+    // (The "Open post" button and the post's time both link to it.)
+    await card(page, author.username).getByRole("link", { name: "Open post" }).click();
     const modal = page.getByRole("dialog", { name: "Post" });
     await expect(modal.getByText("Hello from the feed")).toBeVisible();
     await expect(page).toHaveURL(/\/p\/[0-9a-f-]{36}$/);
@@ -75,6 +75,33 @@ test.describe("home feed", () => {
     await expect(
       page.getByRole("region", { name: "Feed" }).getByRole("link", { name: "Explore" }),
     ).toHaveAttribute("href", "/explore");
+  });
+
+  test("Open post on a feed card shows it in the modal, with all its comments", async ({
+    page,
+  }) => {
+    const author = await createConfirmedUser();
+    const viewer = await signUpAndLogIn(page);
+    await follow(viewer.username, author.username);
+    const postId = await createPostFor(page, author.username, "Open me up");
+    for (const body of ["First!", "Second", "Third"]) {
+      await createCommentFor(postId, author.username, body);
+    }
+
+    await page.goto("/");
+    await card(page, author.username).getByRole("link", { name: "Open post" }).click();
+    await expect(page).toHaveURL(`/p/${postId}`);
+    const modal = page.getByRole("dialog", { name: "Post" });
+    await expect(modal.getByText("Open me up")).toBeVisible();
+    // The card shows the latest two; the modal has the whole thread.
+    for (const body of ["First!", "Second", "Third"]) {
+      await expect(modal).toContainText(body);
+    }
+
+    // Closing goes back to the feed.
+    await page.keyboard.press("Escape");
+    await expect(modal).toBeHidden();
+    await expect(page).toHaveURL("/");
   });
 
   test("a post opens as a modal from a profile grid, and as a page on reload", async ({ page }) => {

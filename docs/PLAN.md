@@ -1,9 +1,9 @@
 # Konnect: Plan to rebuild Connect in Next.js 16 and Supabase
 
-> A "learn Next.js by doing" rebuild of **Connect** (Express + MongoDB + Socket.io API, CRA + React-Bootstrap client).
+> A production-grade rebuild of **Connect** (Express + MongoDB + Socket.io API, CRA + React-Bootstrap client).
 > The new app is **Konnect**: Next.js 16 App Router + Supabase (Postgres, Auth, Storage, Realtime) + TanStack Query + shadcn/ui.
 >
-> Every phase ships something that runs, and each one teaches a set of Next.js concepts.
+> Every phase ships something that runs, and each one introduces a set of Next.js and Supabase techniques.
 > Source repos: [connect-api](https://github.com/ishaan1028/connect-api) · [connect-client](https://github.com/ishaan1028/connect-client)
 
 ---
@@ -38,7 +38,7 @@ Login (prefilled demo credentials) · Register · Forgot password · Reset passw
 
 ### Problems in the old code (Konnect fixes all of these)
 
-These make a good "what I learned" story for interviews.
+Each fix below is a concrete before/after worth walking a reviewer through.
 
 | #   | Problem                                                                                                                                                                                                                                  | Fix in Konnect                                                                                                                    |
 | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -238,12 +238,12 @@ void qc.prefetchQuery(        │  dehydrate  ┌─> useSuspenseQuery(feedOptio
 
 Every phase has four parts:
 
-- **Learn:** the Next.js concepts it teaches
+- **Concepts:** the Next.js and Supabase techniques it uses
 - **Build:** the tasks
 - **Done when:** the acceptance check
 - A **git commit** (or PR) at the end
 
-For each phase I'll explain the concepts first, then build it with you in small commits, explaining every file. You can ask to write any piece yourself and have me review it.
+Each phase lands as a reviewed commit with its tests.
 
 ### Phase 0: Prep (½ day)
 
@@ -254,7 +254,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 1: Scaffold and tooling
 
-- **Learn:**
+- **Concepts:**
   - App Router mental model: `app/` file conventions (`layout`, `page`, `loading`, `error`, `not-found`)
   - Server Components by default; `"use client"` boundaries
   - Turbopack
@@ -272,7 +272,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 2: Design system, themes and app shell
 
-- **Learn:**
+- **Concepts:**
   - Root layout and the `<html>`/`<body>` contract
   - `next/font` (zero-CLS self-hosted fonts)
   - Metadata API (`metadata`, `viewport`, `themeColor`)
@@ -303,7 +303,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 3: Supabase foundation
 
-- **Learn:**
+- **Concepts:**
   - **`proxy.ts`** (Next 16's name for middleware): what it should and shouldn't do; `matcher`
   - The three Supabase clients and why: browser, server (cookies), and admin (`server-only`, secret key)
   - `cookies()` is async and makes a route dynamic
@@ -323,7 +323,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 4: Authentication
 
-- **Learn:**
+- **Concepts:**
   - Server Actions (`"use server"`), next-safe-action middleware (auth context)
   - React Hook Form + Zod shared schemas
   - `redirect()` inside actions
@@ -352,7 +352,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 5: TanStack Query infrastructure and the current user
 
-- **Learn:**
+- **Concepts:**
   - Server vs client data fetching, and when to use each
   - The `HydrationBoundary` / `dehydrate` pattern
   - Streaming with `<Suspense>` plus pending-query dehydration
@@ -377,7 +377,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 6: Profiles and settings
 
-- **Learn:**
+- **Concepts:**
   - Dynamic segments (`[username]`) and async `params`
   - `notFound()`
   - `generateMetadata`
@@ -406,7 +406,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 7: Social graph (follow, unfollow, remove follower, suggestions)
 
-- **Learn:**
+- **Concepts:**
   - **Parallel routes (`@modal`) + intercepting routes (`(.)`)**: followers open as a modal on soft navigation and as a full page on refresh or share
   - `useMutation` with **optimistic updates** and rollback
   - Cross-query invalidation
@@ -430,7 +430,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 8: Creating, editing and deleting posts
 
-- **Learn:**
+- **Concepts:**
   - Heavy client work in client components
   - `next/dynamic` for code-splitting (the cropper only loads on `/create`)
   - Server Action validation of client-supplied storage paths
@@ -456,7 +456,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 9: Feed, Explore, post detail and likes
 
-- **Learn:**
+- **Concepts:**
   - `useInfiniteQuery` + `prefetchInfiniteQuery`
   - Keyset pagination
   - `next/image` `sizes` and `preload` (formerly `priority`) for the LCP image
@@ -488,7 +488,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 10: Comments
 
-- **Learn:** optimistic inserts with temporary IDs, focus management, `aria-live` for new content.
+- **Concepts:** optimistic inserts with temporary IDs, focus management, `aria-live` for new content.
 - **Build:**
   - Migration `0006_comments.sql`: table, counters, RLS (author or post owner can delete).
   - Paginated comment list, add-comment form (Enter submits, Shift+Enter adds a newline, no empty comments), delete with confirmation
@@ -505,7 +505,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 11: Real-time chat
 
-- **Learn:**
+- **Concepts:**
   - Where client-only side effects belong (`useEffect` + cleanup)
   - `useEffectEvent` for stable handlers
   - Patching the TanStack cache from socket events
@@ -537,7 +537,7 @@ For each phase I'll explain the concepts first, then build it with you in small 
 
 ### Phase 12: Account deletion and danger zone
 
-- **Learn:** the admin client (secret key) only in `server-only` modules; why the delete happens server-side; sign-out and cache purge.
+- **Concepts:** the admin client (secret key) only in `server-only` modules; why the delete happens server-side; sign-out and cache purge.
 - **Build:** `/settings/account`:
   - Demo account: block password change and deletion in the app, and make `demoSignInAction` reset the demo password from server env on every sign-in (Supabase's Auth API can't be blocked by RLS, so the account repairs itself).
   - Type your username to confirm
@@ -601,6 +601,9 @@ For each phase I'll explain the concepts first, then build it with you in small 
 - Multi-image carousel posts, message reactions, and "unsend" (delete) messages. (Reactions and unsend ✅; carousel not started.)
   - Migration `chat_unsend_reactions`: senders can delete their own messages (a trigger moves the preview back to the newest remaining one and broadcasts `unsend`); `message_reactions` holds one emoji per person per message from a fixed set (❤️ 😂 😮 😢 😡 👍), visible to and writable by participants only, broadcast as `reaction`. Both go from the browser like sending. 12 pgTAP tests.
   - Each message has a "…" menu (on hover or focus, always on touch screens): the six reactions (picking yours again removes it) and, for your own, Unsend with a confirmation. Reactions show in a small pill under the bubble.
+
+- **Home page redesign** ✅: the marketing-style hero is gone. The feed now has a stories-style people rail on top (`get_people_rail`: people you follow, most recent poster first, with a ring for a post in the last day and live online dots, then suggestions with a +) and a "What's new, Alex?" composer bar. From `lg`, a side rail adds your profile summary (counts linking to the lists), suggestions (two, plus a "Find more people" row when there are fewer), "Popular on Konnect" (a 3×2 grid of the most-liked posts, `"use cache"` for minutes and tagged with each post so a delete drops it) and recent chats (live, reusing the inbox rows). Every streamed part has a fallback of its exact size. 5 pgTAP tests.
+- **Sidebar polish** ✅: the logo sits in a soft accent panel with social motifs in their own space beside the name; the selected route is tinted; the foot of the sidebar is shadcn's NavUser pattern: the whole account row (avatar, name, @username, ⇅) opens the account menu beside the sidebar (Settings, Saved, theme, accent, Log out); the icon rail shows just the avatar. Realtime channels now refetch what they keep fresh on every (re)subscribe, so pings sent before a channel joined (or while it reconnected) aren't lost: that was why a new notification's badge, or chat's "Seen", sometimes never arrived under load.
 
 ---
 

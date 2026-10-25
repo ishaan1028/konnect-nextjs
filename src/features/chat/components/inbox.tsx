@@ -50,7 +50,15 @@ function InboxHeader() {
   );
 }
 
-function InboxRow({ chat, active, myId }: { chat: Conversation; active: boolean; myId?: string }) {
+export function InboxRow({
+  chat,
+  active,
+  myId,
+}: {
+  chat: Conversation;
+  active: boolean;
+  myId?: string;
+}) {
   const preview = chat.lastMessagePreview
     ? `${chat.lastMessageSenderId === myId ? "You: " : ""}${chat.lastMessagePreview}`
     : "Say hi 👋";

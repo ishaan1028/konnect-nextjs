@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Menu, Settings } from "lucide-react";
+import { Bookmark, ChevronLeft, ChevronRight, Menu, Settings } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -38,9 +38,11 @@ type MoreMenuProps = {
    * would close a menu someone had just opened.)
    */
   account?: ReactNode;
+  /** Rail only: who's signed in, shown inside the trigger (a streamed slot, like `account`). */
+  summary?: ReactNode;
 };
 
-export function MoreMenu({ variant, account }: MoreMenuProps) {
+export function MoreMenu({ variant, summary, account }: MoreMenuProps) {
   const { mode, accent, setMode, setAccent } = useTheme();
 
   return (
@@ -48,19 +50,36 @@ export function MoreMenu({ variant, account }: MoreMenuProps) {
       <DropdownMenuTrigger
         aria-label={variant === "icon" ? "More options" : undefined}
         className={cn(
-          "flex items-center rounded-2xl transition-colors hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none aria-expanded:bg-accent",
+          "group/more flex items-center rounded-2xl transition-colors focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none",
           variant === "rail"
-            ? "h-12 w-full gap-4 px-3 text-[0.95rem] text-foreground/80 max-xl:justify-center max-xl:px-0"
-            : "size-11 justify-center",
+            ? // shadcn's NavUser: the whole account row opens the menu.
+              "w-full gap-2.5 bg-linear-to-br from-primary/10 via-primary/5 to-transparent p-2 text-left ring-1 ring-primary/10 hover:from-primary/15 data-popup-open:from-primary/20 max-xl:justify-center max-xl:bg-none max-xl:p-1 max-xl:ring-0 max-xl:hover:bg-accent dark:from-primary/25 dark:via-primary/10"
+            : "size-11 justify-center hover:bg-accent aria-expanded:bg-accent",
         )}
       >
-        <Menu aria-hidden className="size-6 shrink-0" />
-        {variant === "rail" && <span className="max-xl:sr-only">More</span>}
+        {variant === "rail" ? (
+          <>
+            {summary}
+            {/* › points to where the menu opens; ‹ (while it's open) closes it. */}
+            <ChevronRight
+              aria-hidden
+              className="ml-auto size-4 shrink-0 text-muted-foreground group-data-popup-open/more:hidden max-xl:hidden"
+            />
+            <ChevronLeft
+              aria-hidden
+              className="ml-auto hidden size-4 shrink-0 text-muted-foreground group-data-popup-open/more:block max-xl:hidden max-xl:group-data-popup-open/more:hidden"
+            />
+            <span className="sr-only">, account menu</span>
+          </>
+        ) : (
+          <Menu aria-hidden className="size-6 shrink-0" />
+        )}
       </DropdownMenuTrigger>
 
       <DropdownMenuContent
-        side={variant === "rail" ? "top" : "bottom"}
-        align={variant === "rail" ? "start" : "end"}
+        // Beside the sidebar, lined up with its foot (like shadcn's NavUser).
+        side={variant === "rail" ? "right" : "bottom"}
+        align="end"
         className="w-64"
       >
         <DropdownMenuGroup>

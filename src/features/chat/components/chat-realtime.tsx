@@ -24,16 +24,24 @@ export function ChatRealtime() {
   useEffect(() => {
     if (!userId) return;
 
+    const refreshChats = () => {
+      void queryClient.invalidateQueries({ queryKey: queryKeys.chat.inbox });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.chat.unreadCount });
+    };
+    const refreshNotifications = () =>
+      void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
+
     const leaveInbox = joinChannel(`user:${userId}`, (channel) =>
       channel
-        .on("broadcast", { event: "inbox" }, () => {
-          void queryClient.invalidateQueries({ queryKey: queryKeys.chat.inbox });
-          void queryClient.invalidateQueries({ queryKey: queryKeys.chat.unreadCount });
-        })
-        .on("broadcast", { event: "notification" }, () => {
-          void queryClient.invalidateQueries({ queryKey: queryKeys.notifications.all });
-        })
-        .subscribe(),
+        .on("broadcast", { event: "inbox" }, refreshChats)
+        .on("broadcast", { event: "notification" }, refreshNotifications)
+        // Pings sent before the channel joined (or while reconnecting) were
+        // missed: catch up on every (re)subscribe.
+        .subscribe((status) => {
+          if (status !== "SUBSCRIBED") return;
+          refreshChats();
+          refreshNotifications();
+        }),
     );
     const leavePresence = joinChannel(
       "online",

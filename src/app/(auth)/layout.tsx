@@ -27,9 +27,6 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         >
           <div className="w-full max-w-sm">{children}</div>
         </main>
-        <footer className="text-xs text-muted-foreground">
-          Built with Next.js and Supabase as a learning project.
-        </footer>
       </div>
       <BrandPanel />
     </div>

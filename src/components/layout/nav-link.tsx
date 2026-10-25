@@ -38,7 +38,7 @@ export function SideNavLinkView({ href, label, icon, active }: NavLinkViewProps)
             className={cn(
               "group flex h-12 items-center gap-4 rounded-2xl px-3 text-[0.95rem] text-foreground/80 transition-colors",
               "hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/40 focus-visible:outline-none",
-              "aria-[current=page]:font-semibold aria-[current=page]:text-foreground",
+              "aria-[current=page]:bg-primary/10 aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:hover:bg-primary/15 dark:aria-[current=page]:bg-primary/30 dark:aria-[current=page]:hover:bg-primary/35",
               "max-xl:justify-center max-xl:px-0",
               "[&_svg]:size-6 [&_svg]:shrink-0 [&_svg]:transition-transform hover:[&_svg]:scale-105 active:[&_svg]:scale-95",
               activeIcon,

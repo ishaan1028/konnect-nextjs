@@ -9,10 +9,10 @@ import { type ChatPerson, DELETED_USER } from "../queries";
 type OnlineAvatarProps = {
   /** null: a deleted account. */
   person: ChatPerson | null;
-  size: 40 | 48;
+  size: 40 | 48 | 56;
 };
 
-const SIZE_CLASS = { 40: "size-10", 48: "size-12" } as const;
+const SIZE_CLASS = { 40: "size-10", 48: "size-12", 56: "size-14" } as const;
 
 /** An avatar with a green dot while the person is online (Realtime Presence). */
 export function OnlineAvatar({ person, size }: OnlineAvatarProps) {

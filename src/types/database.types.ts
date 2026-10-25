@@ -555,6 +555,17 @@ export type Database = {
         }[];
       };
       get_or_create_dm: { Args: { other_user_id: string }; Returns: string };
+      get_people_rail: {
+        Args: { max_results?: number };
+        Returns: {
+          avatar_path: string;
+          following: boolean;
+          full_name: string;
+          id: string;
+          posted_recently: boolean;
+          username: string;
+        }[];
+      };
       get_post_comments: {
         Args: {
           cursor_created_at?: string;
