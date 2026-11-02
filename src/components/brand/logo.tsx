@@ -2,7 +2,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * The Konnect mark: a "k" on a gradient tile. The gradient uses the theme's
- * chart tokens, so it follows the active accent (green or violet) automatically.
+ * chart tokens, so it follows the active accent (sunset, indigo or graphite) automatically.
  */
 export function LogoMark({ className }: { className?: string }) {
   return (

@@ -5,8 +5,8 @@ export const THEME_MODES = ["light", "dark", "system"] as const;
 export type ThemeMode = (typeof THEME_MODES)[number];
 export type ResolvedThemeMode = Exclude<ThemeMode, "system">;
 
-// Each accent is a shadcn theme preset; its CSS variables live in globals.css.
-export const ACCENTS = ["green", "violet"] as const;
+// Each accent is a set of CSS variables in globals.css (Sunset is the base palette).
+export const ACCENTS = ["sunset", "indigo", "graphite"] as const;
 export type Accent = (typeof ACCENTS)[number];
 
 export const MODE_LABELS: Record<ThemeMode, string> = {
@@ -17,8 +17,12 @@ export const MODE_LABELS: Record<ThemeMode, string> = {
 
 // Swatch colors are fixed (not theme variables) so each one previews its own preset.
 export const ACCENT_META: Record<Accent, { label: string; swatch: string }> = {
-  green: { label: "Green", swatch: "oklch(0.627 0.194 149.214)" },
-  violet: { label: "Violet", swatch: "oklch(0.541 0.281 293.009)" },
+  sunset: {
+    label: "Sunset",
+    swatch: "linear-gradient(135deg, oklch(0.553 0.195 38.402), oklch(0.592 0.249 0.584))",
+  },
+  indigo: { label: "Indigo", swatch: "oklch(0.511 0.262 276.966)" },
+  graphite: { label: "Graphite", swatch: "oklch(0.21 0.006 285.885)" },
 };
 
 export const isThemeMode = (value: unknown): value is ThemeMode =>
@@ -27,7 +31,7 @@ export const isAccent = (value: unknown): value is Accent =>
   ACCENTS.some((accent) => accent === value);
 
 export const DEFAULT_MODE: ThemeMode = "system";
-export const DEFAULT_ACCENT: Accent = "green";
+export const DEFAULT_ACCENT: Accent = "sunset";
 
 export const MODE_STORAGE_KEY = "konnect:theme-mode";
 export const ACCENT_STORAGE_KEY = "konnect:theme-accent";

@@ -24,6 +24,8 @@ const DeletePostDialog = dynamic(() =>
 
 type PostOwnerMenuProps = {
   postId: string;
+  /** Rendered in the post's modal (deleting then stays on the page underneath). */
+  inModal?: boolean;
   authorId: string;
   details: PostDetailsInput;
 };
@@ -33,7 +35,7 @@ type PostOwnerMenuProps = {
  * a CurrentUserBoundary. The database enforces the same rule: this menu is
  * convenience, not security.
  */
-export function PostOwnerMenu({ postId, authorId, details }: PostOwnerMenuProps) {
+export function PostOwnerMenu({ postId, authorId, details, inModal }: PostOwnerMenuProps) {
   const user = useCurrentUser();
   const [dialog, setDialog] = useState<"edit" | "delete" | null>(null);
   // Each dialog mounts on its first opening and stays (so it can animate out).
@@ -78,7 +80,12 @@ export function PostOwnerMenu({ postId, authorId, details }: PostOwnerMenuProps)
         />
       )}
       {opened.delete && (
-        <DeletePostDialog postId={postId} open={dialog === "delete"} onOpenChange={onOpenChange} />
+        <DeletePostDialog
+          postId={postId}
+          inModal={inModal}
+          open={dialog === "delete"}
+          onOpenChange={onOpenChange}
+        />
       )}
     </>
   );

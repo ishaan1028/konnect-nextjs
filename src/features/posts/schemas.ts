@@ -38,5 +38,8 @@ export const postIdSchema = z.uuid();
 /** Actions on one post (delete, like, unlike). */
 export const postTargetSchema = z.object({ postId: postIdSchema });
 
+/** Deleting from the post's modal leaves you on the page underneath it. */
+export const deletePostSchema = postTargetSchema.extend({ fromModal: z.boolean().default(false) });
+
 export type PostDetailsInput = z.input<typeof postDetailsSchema>;
 export type CreatePostInput = z.input<typeof createPostSchema>;

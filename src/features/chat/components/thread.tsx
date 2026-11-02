@@ -163,7 +163,7 @@ function OpenThread({ conversationId, userId, chat }: OpenThreadProps) {
     // Phones: full screen over the app (like Instagram); wider: the right pane.
     <section
       aria-label={`Chat with ${other ? `@${other.username}` : DELETED_USER}`}
-      className="fixed inset-0 z-50 flex flex-col bg-background md:static md:z-auto md:h-full"
+      className="fixed inset-0 z-50 flex flex-col bg-background md:static md:z-auto md:h-full md:bg-card"
     >
       <header className="flex items-center gap-3 border-b px-3 py-2.5">
         <Link

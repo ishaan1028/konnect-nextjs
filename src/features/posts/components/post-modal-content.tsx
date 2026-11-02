@@ -40,6 +40,7 @@ export function PostModalContent() {
       ownerMenu={
         <PostOwnerMenu
           postId={post.id}
+          inModal
           authorId={post.author.id}
           details={{ caption: post.caption, altText: post.altText, location: post.location }}
         />

@@ -9,8 +9,9 @@ export const alt = "Konnect profile";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-const GREEN_700 = "#15803d";
-const GREEN_900 = "#14532d";
+// The default (Sunset) brand gradient: orange-700 → pink-600.
+const BRAND_FROM = "#c2410c";
+const BRAND_TO = "#db2777";
 
 /**
  * Generated on demand with next/og (JSX → PNG, flexbox only) from the same
@@ -34,7 +35,7 @@ export default async function ProfileOpenGraphImage({ params }: PageProps<"/[use
         justifyContent: "space-between",
         padding: 72,
         color: "white",
-        backgroundImage: `linear-gradient(135deg, ${GREEN_700}, ${GREEN_900})`,
+        backgroundImage: `linear-gradient(135deg, ${BRAND_FROM}, ${BRAND_TO})`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: 56 }}>
@@ -44,7 +45,7 @@ export default async function ProfileOpenGraphImage({ params }: PageProps<"/[use
             height: 220,
             borderRadius: 9999,
             background: "white",
-            color: GREEN_700,
+            color: BRAND_FROM,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

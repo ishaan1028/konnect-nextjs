@@ -40,8 +40,16 @@ test.describe("posts", () => {
     await page.getByLabel("Alt text").fill("A green to violet gradient");
     await page.getByRole("button", { name: "Share", exact: true }).click();
 
-    // The new post opens, replacing /create in the history.
-    await expect(page).toHaveURL(/\/p\/[0-9a-f-]{36}$/);
+    // Back on the home feed (replacing /create in the history), the new post first.
+    await expect(page).toHaveURL("/");
+    const card = page.getByRole("article").first();
+    await expect(card).toHaveAccessibleName(`Post by @${user.username}`);
+    await expect(card.getByText("First light over the hills")).toBeVisible();
+
+    // Its own page.
+    const href = await card.getByRole("link", { name: "Open post" }).getAttribute("href");
+    expect(href).toMatch(/^\/p\/[0-9a-f-]{36}$/);
+    await page.goto(href!);
     const post = page.getByRole("article", { name: `Post by @${user.username}` });
     await expect(post.getByText("First light over the hills")).toBeVisible();
     await expect(post.getByText("Lisbon")).toBeVisible();
@@ -74,6 +82,40 @@ test.describe("posts", () => {
     await expect(page.getByText("Post deleted")).toBeVisible();
     await expect(page.getByRole("list", { name: "Profile stats" })).toContainText("0 posts");
     await expect(page.getByText("Share your first photo")).toBeVisible();
+  });
+
+  test("deleting from a post's modal stays on the page underneath", async ({ page }) => {
+    const user = await signUpAndLogIn(page);
+    await createPostFor(page, user.username, "Delete me from the feed");
+    await createPostFor(page, user.username, "Delete me from my grid");
+
+    const remove = async () => {
+      const modal = page.getByRole("dialog");
+      await modal.getByRole("button", { name: "Post options" }).click();
+      await page.getByRole("menuitem", { name: "Delete" }).click();
+      await page.getByRole("alertdialog").getByRole("button", { name: "Delete" }).click();
+      await expect(page.getByText("Post deleted")).toBeVisible();
+      await expect(modal).toHaveCount(0);
+    };
+
+    // From the home feed: back on the feed, without the post.
+    await page.goto("/");
+    await page
+      .getByRole("article")
+      .filter({ hasText: "Delete me from the feed" })
+      .getByRole("link", { name: "Open post" })
+      .click();
+    await remove();
+    await expect(page).toHaveURL("/");
+    await expect(page.getByText("Delete me from the feed")).toHaveCount(0);
+
+    // From a tile on the profile: back on the profile, one post fewer.
+    await page.goto(`/${user.username}`);
+    await expect(page.getByRole("list", { name: "Profile stats" })).toContainText("1 post");
+    await page.getByRole("link", { name: "A green to violet gradient" }).click();
+    await remove();
+    await expect(page).toHaveURL(`/${user.username}`);
+    await expect(page.getByRole("list", { name: "Profile stats" })).toContainText("0 posts");
   });
 
   test("rejects files that aren't photos", async ({ page }) => {

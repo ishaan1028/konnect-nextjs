@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
-import { StickySidebar } from "@/components/layout/sticky-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChatBoundary } from "@/features/chat/components/chat-boundaries";
 import { SuggestionsBoundary } from "@/features/follows/components/suggestions-boundary";
@@ -56,8 +55,16 @@ export default function HomePage() {
         </section>
       </div>
 
-      {/* Scrolls with the feed, but always keeps its top or bottom in view. */}
-      <StickySidebar className="hidden min-w-0 space-y-4 lg:block">
+      {/* Pinned beside the feed, window-tall: scrolling the page moves only the
+          feed, and the widgets scroll on their own when the pointer is over
+          them (without handing the scroll on to the page at either end).
+          The 4px padding keeps focus rings from being clipped by the scroll
+          area; the negative margins and top-5 cancel it, so the first card
+          still lines up 24px from the top. */}
+      <div
+        data-slot="side-column"
+        className="sticky top-5 -mx-1.5 -my-1 hidden max-h-[calc(100dvh-2.5rem)] min-w-0 [scrollbar-width:none] space-y-4 self-start overflow-y-auto overscroll-contain px-1.5 py-1 lg:block"
+      >
         <Suspense fallback={<ProfileSummarySkeleton />}>
           <ProfileSummary />
         </Suspense>
@@ -108,7 +115,7 @@ export default function HomePage() {
             </LoadErrorBoundary>
           </div>
         </RailCard>
-      </StickySidebar>
+      </div>
     </div>
   );
 }

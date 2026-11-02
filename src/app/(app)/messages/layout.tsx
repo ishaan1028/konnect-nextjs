@@ -11,7 +11,7 @@ import { Inbox, InboxSkeleton } from "@/features/chat/components/inbox";
  */
 export default function MessagesLayout({ children }: LayoutProps<"/messages">) {
   return (
-    <div className="mx-auto max-w-5xl md:grid md:h-[calc(100dvh-5.5rem)] md:grid-cols-[20rem_minmax(0,1fr)] md:overflow-hidden md:rounded-2xl md:border">
+    <div className="mx-auto max-w-5xl md:grid md:h-[calc(100dvh-5.5rem)] md:grid-cols-[20rem_minmax(0,1fr)] md:overflow-hidden md:rounded-2xl md:border md:bg-card">
       <h1 className="sr-only">Messages</h1>
       <aside aria-label="Inbox" className="md:min-h-0 md:border-r">
         <LoadErrorBoundary what="your chats">

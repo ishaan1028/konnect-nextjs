@@ -16,14 +16,15 @@ import { CurrentUserBoundary } from "@/features/profiles/components/current-user
  */
 export default function AppLayout({ children, modal }: LayoutProps<"/">) {
   return (
-    <div className="min-h-dvh md:pl-19 xl:pl-61">
+    <div className="min-h-dvh bg-app md:pl-19 xl:pl-61">
       <SideNav />
       <MobileHeader />
       <main
         id={MAIN_CONTENT_ID}
         // Lets the skip link move focus here; no outline because it's a container.
         tabIndex={-1}
-        className="w-full px-4 pt-6 pb-28 outline-none md:px-8 md:pt-10 md:pb-12"
+        // pt-6 matches the sidebar's py-6, so every page starts level with the logo.
+        className="w-full px-4 pt-6 pb-28 outline-none md:px-8 md:pb-12"
       >
         {children}
       </main>

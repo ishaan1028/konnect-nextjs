@@ -27,7 +27,7 @@ import { SideNavLink } from "./nav-link";
  */
 export function SideNav() {
   return (
-    <header className="fixed inset-y-0 left-0 z-40 hidden w-19 flex-col border-r bg-background/80 px-3 py-6 backdrop-blur-xl md:flex xl:w-61">
+    <header className="fixed inset-y-0 left-0 z-40 hidden w-19 flex-col border-r bg-app px-3 py-6 md:flex xl:w-61">
       <Link
         href="/"
         aria-label="Konnect home"
@@ -67,6 +67,9 @@ export function SideNav() {
         </ul>
       </nav>
 
+      <p className="text-center text-xs text-muted-foreground max-xl:hidden">
+        Made with ❤️ by Ishan!
+      </p>
       <Separator className="my-3" />
       <MoreMenu
         variant="rail"

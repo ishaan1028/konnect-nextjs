@@ -40,13 +40,13 @@ describe("inline theme script", () => {
   // referenced an import or outer variable, the inlined copy would break.
   it("runs standalone, exactly as the browser executes it", () => {
     localStorage.setItem(MODE_STORAGE_KEY, "dark");
-    localStorage.setItem(ACCENT_STORAGE_KEY, "violet");
+    localStorage.setItem(ACCENT_STORAGE_KEY, "indigo");
 
     const script = `(${syncThemeToDom.toString()})(${JSON.stringify(themeDomConfig)})`;
     new Function(script)();
 
     expect(root()).toHaveClass("dark");
-    expect(root().dataset.accent).toBe("violet");
+    expect(root().dataset.accent).toBe("indigo");
     expect(root().style.colorScheme).toBe("dark");
   });
 
@@ -55,7 +55,7 @@ describe("inline theme script", () => {
     syncThemeToDom(themeDomConfig);
 
     expect(root()).toHaveClass("dark");
-    expect(root().dataset.accent).toBe("green");
+    expect(root().dataset.accent).toBe("sunset");
   });
 
   it("ignores tampered or unknown stored values", () => {
@@ -64,7 +64,7 @@ describe("inline theme script", () => {
     syncThemeToDom(themeDomConfig);
 
     expect(root()).not.toHaveClass("dark");
-    expect(root().dataset.accent).toBe("green");
+    expect(root().dataset.accent).toBe("sunset");
   });
 });
 
@@ -78,11 +78,11 @@ describe("theme store", () => {
   });
 
   it("persists and applies an accent change", () => {
-    setAccent("violet");
+    setAccent("indigo");
 
-    expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBe("violet");
-    expect(root().dataset.accent).toBe("violet");
-    expect(getSnapshot().accent).toBe("violet");
+    expect(localStorage.getItem(ACCENT_STORAGE_KEY)).toBe("indigo");
+    expect(root().dataset.accent).toBe("indigo");
+    expect(getSnapshot().accent).toBe("indigo");
   });
 
   it("returns the same snapshot object while nothing changes", () => {

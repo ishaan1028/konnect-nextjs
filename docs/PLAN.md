@@ -70,7 +70,7 @@ Each fix below is a concrete before/after worth walking a reviewer through.
 | Forms         | **React Hook Form** + `@hookform/resolvers` + **Zod 4**                                                                 | One schema validates on both the client and the server                                                             |
 | Mutations     | **next-safe-action 8**                                                                                                  | Typed Server Actions with Zod input, an auth middleware and consistent error shapes                                |
 | UI kit        | **shadcn/ui** (CLI v4, `base-luma` style) + **Base UI** + Tailwind CSS v4 + `tw-animate-css` + **lucide-react**         | Accessible Base UI primitives (shadcn's current default) that you own as source code                               |
-| Theming       | Custom pre-paint theme script + `useSyncExternalStore` store (light/dark/system × `green`/`violet` accents)             | Follows the Next 16 "preventing flash" guide; avoids next-themes' client `<script>` warning. See Phase 2           |
+| Theming       | Custom pre-paint theme script + `useSyncExternalStore` store (light/dark/system × `sunset`/`indigo`/`graphite` accents) | Follows the Next 16 "preventing flash" guide; avoids next-themes' client `<script>` warning. See Phase 2           |
 | Toasts        | **sonner** (shadcn's toast)                                                                                             |                                                                                                                    |
 | Motion        | **motion** (`LazyMotion` + `m`)                                                                                         | Like-heart burst, page transitions; respects `prefers-reduced-motion`                                              |
 | URL state     | **nuqs**                                                                                                                | Typed search params (`/explore?q=`, profile tabs)                                                                  |
@@ -284,7 +284,7 @@ Each phase lands as a reviewed commit with its tests.
   - `shadcn init --preset b2pjIZz7o --base base`: Base UI, **Luma** style ("fluid, luminous and soft"), neutral base, Green theme, Geist, Lucide, large radius. Components are added as each phase needs them.
   - **Theme system** (`src/components/theme/`), built per the Next 16 "Preventing flash before hydration" guide instead of `next-themes`:
     - One self-contained `syncThemeToDom()` function is inlined into `<head>` (via `.toString()`) and also called by the client store, so the pre-paint path and the click path can't diverge.
-    - **Accent presets:** shadcn's **Green** (default, in `:root`/`.dark`) and **Violet** (`:root[data-accent="violet"]`, `:root.dark[data-accent="violet"]`). Only `--primary(-foreground)`, `--chart-*` and `--sidebar-primary(-foreground)` change. Adding a preset is two CSS blocks plus one entry in `ACCENTS`.
+    - **Accent presets:** first shadcn's Green (default) and Violet; replaced after a side-by-side comparison of eight candidates by **Sunset** (default, in `:root`/`.dark`: rose buttons, an orange → pink brand gradient), **Indigo** and **Graphite** (monochrome; buttons invert in dark mode), as `:root[data-accent="…"]` / `:root.dark[data-accent="…"]` blocks. Only `--primary(-foreground)`, `--chart-*` and `--sidebar-primary(-foreground)` change; every `--primary`, and the `bg-brand` gradient under white text, passes WCAG AA. Adding a preset is two CSS blocks plus one entry in `ACCENTS`.
     - The store is read with `useSyncExternalStore` (server snapshot = defaults, so there's no hydration mismatch). It syncs across tabs (`storage` event) and follows OS changes in System mode.
     - `ThemeSync` re-applies the theme after React's dev-mode remount resets `<html>`.
     - Controls live in the "More" menu and on `/settings/appearance` (radio groups with previews).
@@ -299,7 +299,7 @@ Each phase lands as a reviewed commit with its tests.
     - `xl`: right rail for suggestions
     - Skip-to-content link and proper landmarks
   - Static placeholder pages for every route in §3.2; branded `not-found`, `error` and `global-error`.
-- **Done when:** you can click every route, light/dark/system × green/violet all work with no flash on reload, and Lighthouse a11y is 100 on the shell.
+- **Done when:** you can click every route, light/dark/system × every accent all work with no flash on reload, and Lighthouse a11y is 100 on the shell.
 
 ### Phase 3: Supabase foundation
 

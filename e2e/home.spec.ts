@@ -1,23 +1,17 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
-const GAP = 24;
+/** Rolls the mouse wheel over the middle of `target`. */
+async function wheelOver(page: Page, target: Locator, distance: number) {
+  const box = await target.boundingBox();
+  if (!box) throw new Error("target isn't on screen");
+  await page.mouse.move(box.x + box.width / 2, box.y + Math.min(box.height, 600) / 2);
+  await page.mouse.wheel(0, distance);
+}
 
-/** The side column's top and bottom on screen, and the window's height. */
-const sidebar = (page: Page) =>
-  page.locator('[data-slot="sticky-sidebar"]').evaluate((element) => {
-    const { top, bottom, height } = element.getBoundingClientRect();
-    return { top: Math.round(top), bottom: Math.round(bottom), height, viewport: innerHeight };
-  });
-
-/** Polls a position until it's within a pixel of `target` (layout rounds sub-pixels). */
-const settlesAt = (read: () => Promise<number>, target: number) =>
-  expect.poll(async () => Math.abs((await read()) - target)).toBeLessThanOrEqual(1);
-
-const scrollBy = (page: Page, distance: number) =>
-  page.evaluate((y) => window.scrollBy(0, y), distance);
+const pageScroll = (page: Page) => page.evaluate(() => window.scrollY);
 
 test.describe("home page side column", () => {
-  test("scrolls with the feed but always keeps its top or bottom in view", async ({ page }) => {
+  test("stays put while the feed scrolls, and scrolls on its own", async ({ page }) => {
     await page.goto("/login");
     await page.getByRole("button", { name: "Continue as demo user" }).click();
     await expect(page).toHaveURL("/");
@@ -25,24 +19,37 @@ test.describe("home page side column", () => {
     await expect(
       page.getByRole("region", { name: "Recent chats" }).getByRole("listitem").first(),
     ).toBeVisible();
-    const start = await sidebar(page);
-    expect(start.height).toBeGreaterThan(start.viewport); // taller than the window
 
-    // At the end of the feed, the column's bottom is in view (not blank space).
-    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
-    await settlesAt(async () => (await sidebar(page)).bottom, start.viewport - GAP);
+    const column = page.locator('[data-slot="side-column"]');
+    const columnScroll = () => column.evaluate((element) => element.scrollTop);
+    const firstCardTop = () =>
+      column.evaluate((element) =>
+        Math.round(element.firstElementChild!.getBoundingClientRect().top),
+      );
+    // Taller than the window, so it has something to scroll.
+    expect(await column.evaluate((element) => element.scrollHeight > element.clientHeight)).toBe(
+      true,
+    );
+    expect(await firstCardTop()).toBe(24);
 
-    // Scrolling up, it comes back down with the page instead of staying frozen...
-    await scrollBy(page, -200);
-    await settlesAt(async () => (await sidebar(page)).bottom, start.viewport - GAP + 200);
+    // Scrolling over the feed moves the page, not the column.
+    await wheelOver(page, page.getByRole("region", { name: "Feed" }), 800);
+    await expect.poll(() => pageScroll(page)).toBeGreaterThan(0);
+    const scrolled = await pageScroll(page);
+    expect(await firstCardTop()).toBe(24);
+    expect(await columnScroll()).toBe(0);
 
-    // ...until its top shows, mid-page, where it stays.
-    await scrollBy(page, -start.height);
-    await settlesAt(async () => (await sidebar(page)).top, GAP);
-    expect(await page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
-
-    // And scrolling down again, it moves with the page.
-    await scrollBy(page, 100);
-    await settlesAt(async () => (await sidebar(page)).top, GAP - 100);
+    // Scrolling over the column moves only the column, even past its end.
+    await wheelOver(page, column, 300);
+    await expect.poll(columnScroll).toBeGreaterThan(0);
+    await wheelOver(page, column, 5000);
+    await expect
+      .poll(() =>
+        column.evaluate(
+          (element) => element.scrollHeight - element.clientHeight - element.scrollTop,
+        ),
+      )
+      .toBeLessThanOrEqual(1);
+    expect(await pageScroll(page)).toBe(scrolled);
   });
 });

@@ -9,7 +9,13 @@ import { authActionClient } from "@/lib/safe-action";
 import { POSTS_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
-import { createPostSchema, postDetailsSchema, postIdSchema, postTargetSchema } from "./schemas";
+import {
+  createPostSchema,
+  deletePostSchema,
+  postDetailsSchema,
+  postIdSchema,
+  postTargetSchema,
+} from "./schemas";
 import { postTag } from "./server/get-post";
 
 /**
@@ -56,7 +62,8 @@ export const createPostAction = authActionClient
 
     // The cached profile shows the posts count.
     updateTag(profileTag(post.author.username));
-    redirect(`/p/${post.id}`, RedirectType.replace);
+    // To the feed, where the new post is first (replacing /create in history).
+    redirect("/", RedirectType.replace);
   });
 
 /**
@@ -91,11 +98,15 @@ export const updatePostAction = authActionClient
     },
   );
 
-/** Delete the post, then its photo, then go back to the author's profile. */
+/**
+ * Delete the post, then its photo. From the post's own page, go to the
+ * author's profile (the page no longer makes sense); from its modal, stay on
+ * the page underneath (the client closes the modal).
+ */
 export const deletePostAction = authActionClient
   .metadata({ actionName: "deletePost" })
-  .inputSchema(postTargetSchema)
-  .action(async ({ parsedInput: { postId }, ctx: { user } }) => {
+  .inputSchema(deletePostSchema)
+  .action(async ({ parsedInput: { postId, fromModal }, ctx: { user } }) => {
     const supabase = await createClient();
 
     const { data: post, error } = await supabase
@@ -118,6 +129,7 @@ export const deletePostAction = authActionClient
 
     updateTag(postTag(postId));
     updateTag(profileTag(post.author.username));
+    if (fromModal) return { deleted: true };
     // Redirect from the server: re-rendering the deleted post's page first
     // would flash a "not found" before the client could navigate away.
     redirect(`/${post.author.username}`, RedirectType.replace);

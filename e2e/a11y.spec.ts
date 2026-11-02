@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 
 /**
- * axe on every main route, in all four themes (light/dark × green/violet), so
+ * axe on every main route, in all six themes (light/dark × sunset/indigo/graphite), so
  * a color that only fails contrast in one combination can't slip through.
  */
 
@@ -29,10 +29,12 @@ const SIGNED_IN = [
 ];
 
 const THEMES = [
-  { mode: "light", accent: "green" },
-  { mode: "dark", accent: "green" },
-  { mode: "light", accent: "violet" },
-  { mode: "dark", accent: "violet" },
+  { mode: "light", accent: "sunset" },
+  { mode: "dark", accent: "sunset" },
+  { mode: "light", accent: "indigo" },
+  { mode: "dark", accent: "indigo" },
+  { mode: "light", accent: "graphite" },
+  { mode: "dark", accent: "graphite" },
 ] as const;
 
 /** Runs axe on each route once its content has streamed in; returns every violation. */

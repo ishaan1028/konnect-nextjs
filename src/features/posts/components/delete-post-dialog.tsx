@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
@@ -21,18 +22,41 @@ import { deletePostAction } from "../actions";
 
 type DeletePostDialogProps = {
   postId: string;
+  /** In the post's modal: stay on the page underneath instead of going to the profile. */
+  inModal?: boolean;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 };
 
-/** Destructive, so it asks first. On success the action redirects to the profile. */
-export function DeletePostDialog({ postId, open, onOpenChange }: DeletePostDialogProps) {
+/**
+ * Destructive, so it asks first. On the post's page the action redirects to
+ * the profile; in its modal, the modal closes onto the page underneath.
+ */
+export function DeletePostDialog({
+  postId,
+  inModal = false,
+  open,
+  onOpenChange,
+}: DeletePostDialogProps) {
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const deleted = () => {
+    // The post leaves the feed, Explore, its author's grid and its modal.
+    void queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    toast.success("Post deleted");
+  };
   const remove = useAction(deletePostAction, {
-    onNavigation() {
-      // The post leaves the feed, Explore, its author's grid and its modal.
-      void queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
-      toast.success("Post deleted");
+    onNavigation: deleted,
+    onSuccess() {
+      deleted();
+      onOpenChange(false);
+      // Close the modal, then reload the page underneath from the server: going
+      // back restores its old copy (e.g. a profile still counting the post).
+      // (A tick later, so Next has finished going back before the refresh.)
+      window.addEventListener("popstate", () => setTimeout(() => router.refresh()), {
+        once: true,
+      });
+      router.back();
     },
     onError: ({ error }) => toast.error(error.serverError ?? "Couldn't delete the post."),
   });
@@ -56,7 +80,7 @@ export function DeletePostDialog({ postId, open, onOpenChange }: DeletePostDialo
           <Button
             variant="destructive"
             disabled={remove.isPending}
-            onClick={() => remove.execute({ postId })}
+            onClick={() => remove.execute({ postId, fromModal: inModal })}
           >
             {remove.isPending && <Spinner aria-hidden data-icon="inline-start" />}
             {remove.isPending ? "Deleting…" : "Delete"}
