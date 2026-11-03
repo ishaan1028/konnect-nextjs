@@ -9,7 +9,9 @@ import { AuthHeader } from "../auth-header";
 
 export const metadata: Metadata = { title: "Forgot password" };
 
-export default function ForgotPasswordPage({ searchParams }: PageProps<"/forgot-password">) {
+// Parked (not routed, see login-form.tsx): /login's props have the same shape.
+// Back to PageProps<"/forgot-password"> when the route is restored.
+export default function ForgotPasswordPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="space-y-8">
       <AuthHeader

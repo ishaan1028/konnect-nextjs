@@ -28,11 +28,12 @@ function authErrorCode(error: unknown): string | undefined {
 }
 
 /**
- * Sign-up. Supabase emails a confirmation link; nothing is signed in yet.
+ * Sign-up. Email confirmation is off (production sends no email), so Supabase
+ * signs the new user in and they land on the feed. With confirmation on, there
+ * is no session yet and the form shows "Check your inbox" instead.
  *
- * If the email is already registered, Supabase deliberately returns success
- * without sending anything, so this form can't be used to discover who has an
- * account (the old app answered "this email is already registered").
+ * Without confirmation, a taken email has to be reported (there's no email to
+ * send instead), so this form can tell whether an address has an account.
  */
 export const signUpAction = actionClient
   .metadata({ actionName: "signUp" })
@@ -52,7 +53,7 @@ export const signUpAction = actionClient
       });
     }
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { username, full_name: fullName } },
@@ -67,6 +68,11 @@ export const signUpAction = actionClient
         case "over_email_send_rate_limit":
         case "over_request_rate_limit":
           returnServerError(RATE_LIMITED);
+        case "user_already_exists":
+        case "email_exists":
+          returnValidationErrors(signUpSchema, {
+            email: { _errors: ["An account with this email already exists. Log in instead."] },
+          });
         case "signup_disabled":
           returnServerError("Sign-ups are currently closed.");
         default:
@@ -79,6 +85,10 @@ export const signUpAction = actionClient
     // could hide the new profile; expire it.
     updateTag(profileTag(username));
 
+    if (data.session) {
+      revalidatePath("/", "layout");
+      redirect("/");
+    }
     return { email };
   });
 

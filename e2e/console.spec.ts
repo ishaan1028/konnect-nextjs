@@ -27,7 +27,7 @@ async function expectCleanLoad(page: Page, path: string, errors: string[]) {
 }
 
 test.describe("signed out", () => {
-  for (const path of ["/login", "/signup", "/forgot-password", "/reset-password", "/alex.demo"]) {
+  for (const path of ["/login", "/signup", "/alex.demo"]) {
     test(`${path} renders and hydrates without console errors`, async ({ page }) => {
       const errors = collectErrors(page);
       await expectCleanLoad(page, path, errors);

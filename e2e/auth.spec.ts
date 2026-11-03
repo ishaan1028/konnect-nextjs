@@ -6,7 +6,7 @@ import { getEmailLink } from "./support/mailpit";
 import { createConfirmedUser, demoUser, uniqueUser } from "./support/users";
 
 test.describe("sign up", () => {
-  test("creates an account, confirms it by email and lands on the feed", async ({ page }) => {
+  test("creates an account and lands on the feed, signed in", async ({ page }) => {
     const user = uniqueUser();
     await page.goto("/signup");
 
@@ -17,19 +17,24 @@ test.describe("sign up", () => {
     await page.getByLabel("Password", { exact: true }).fill(user.password);
     await page.getByRole("button", { name: "Create account" }).click();
 
-    await expect(page.getByRole("heading", { name: "Check your inbox" })).toBeFocused();
-
-    // Not confirmed yet: logging in is refused, with an offer to resend.
-    await page.goto("/login");
-    await logIn(page, user.email, user.password);
-    await expect(page.getByText("Confirm your email first")).toBeVisible();
-
-    // Clicking the email link verifies the token on our server and signs in.
-    await page.goto(await getEmailLink(user.email, "Confirm your Konnect account"));
+    // Email confirmation is off (production sends no email): straight in.
     await expect(page).toHaveURL("/");
     await expect(page.getByRole("heading", { name: "Home feed" })).toBeAttached();
 
     await logOut(page);
+  });
+
+  test("says when the email already has an account", async ({ page }) => {
+    const user = uniqueUser();
+    await page.goto("/signup");
+    await page.getByLabel("Full name").fill(user.fullName);
+    await page.getByLabel("Username").fill(user.username);
+    await page.getByLabel("Email").fill(demoUser.email);
+    await page.getByLabel("Password", { exact: true }).fill(user.password);
+    await page.getByRole("button", { name: "Create account" }).click();
+
+    await expect(page.getByText("An account with this email already exists")).toBeVisible();
+    await expect(page).toHaveURL("/signup");
   });
 
   test("flags a username that's already taken", async ({ page }) => {
@@ -95,7 +100,8 @@ test.describe("log in", () => {
   });
 });
 
-test.describe("password reset", () => {
+// Off with email: production sends none (see the note in login-form.tsx).
+test.describe.skip("password reset", () => {
   test("emails a link that lets the user choose a new password", async ({ page }) => {
     const user = await createConfirmedUser();
     const newPassword = "brand-new-pass-42";
@@ -125,7 +131,7 @@ test.describe("password reset", () => {
 });
 
 test.describe("accessibility", () => {
-  for (const path of ["/login", "/signup", "/forgot-password"]) {
+  for (const path of ["/login", "/signup"]) {
     test(`${path} has no detectable WCAG 2.2 AA violations`, async ({ page }) => {
       await page.goto(path);
       const results = await new AxeBuilder({ page })

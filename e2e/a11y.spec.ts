@@ -10,7 +10,7 @@ const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-prac
 const POST = "/p/5eed1000-0000-4000-8000-000000000012";
 const CHAT = "/messages/5eed3000-0000-4000-8000-000000000001";
 
-const SIGNED_OUT = ["/login", "/signup", "/forgot-password", POST, "/maya.k", "/no-such-page-404"];
+const SIGNED_OUT = ["/login", "/signup", POST, "/maya.k", "/no-such-page-404"];
 const SIGNED_IN = [
   "/",
   "/explore",

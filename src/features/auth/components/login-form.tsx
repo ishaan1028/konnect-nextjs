@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import Link from "next/link";
+// import Link from "next/link"; (for the Forgot password link, off below)
 import type { FormEvent } from "react";
 
 import { FormAlert } from "@/components/forms/form-alert";
@@ -62,6 +62,9 @@ export function LoginForm() {
           renderInput={(props) => <PasswordInput {...props} />}
         />
       </FieldGroup>
+      {/* Password reset is off: production sends no email. To bring it back, set
+          up SMTP in Supabase, rename app/(auth)/_forgot-password and
+          _reset-password back (a "_" folder isn't routed) and restore this link.
       <div className="flex justify-end text-sm">
         <Link
           href="/forgot-password"
@@ -70,6 +73,7 @@ export function LoginForm() {
           Forgot password?
         </Link>
       </div>
+      */}
       <SubmitButton pending={action.isPending} pendingLabel="Logging in…">
         Log in
       </SubmitButton>
