@@ -131,33 +131,33 @@ test.describe("followers and following lists", () => {
     page,
   }) => {
     await signUpAndLogIn(page);
-    await page.goto("/alex.demo");
+    await page.goto("/dario.altman");
 
     // Soft navigation: intercepted route → modal, URL updates.
     await stat(page, "followers").getByRole("link").click();
     const modal = page.getByRole("dialog", { name: "Followers" });
     await expect(modal).toBeVisible();
-    await expect(page).toHaveURL("/alex.demo/followers");
+    await expect(page).toHaveURL("/dario.altman/followers");
     await expect(modal.getByRole("link", { name: /maya\.k/ })).toBeVisible();
     // The profile is still rendered underneath, but the open dialog makes it
     // inert, so assistive tech only sees the dialog (correct modal behaviour).
-    await expect(page.locator("h1", { hasText: "@alex.demo" })).toBeAttached();
-    await expect(page.getByRole("heading", { name: "@alex.demo" })).toHaveCount(0);
+    await expect(page.locator("h1", { hasText: "@dario.altman" })).toBeAttached();
+    await expect(page.getByRole("heading", { name: "@dario.altman" })).toHaveCount(0);
 
     // Closing goes back in history.
     await page.keyboard.press("Escape");
     await expect(modal).toBeHidden();
-    await expect(page).toHaveURL("/alex.demo");
+    await expect(page).toHaveURL("/dario.altman");
 
     // Hard load: the same URL renders the full page.
-    await page.goto("/alex.demo/followers");
+    await page.goto("/dario.altman/followers");
     await expect(page.getByRole("heading", { level: 1, name: "Followers" })).toBeVisible();
     await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
   test("the modal opens every time, including reopening the same list", async ({ page }) => {
     await signUpAndLogIn(page);
-    await page.goto("/alex.demo");
+    await page.goto("/dario.altman");
 
     // Regression: with Cache Components, a revisited route is restored with its
     // old state, so a dialog that remembered "closed" stayed shut on reopen.
@@ -169,13 +169,13 @@ test.describe("followers and following lists", () => {
       await expect(modal).toBeVisible();
       await page.keyboard.press("Escape");
       await expect(modal).toBeHidden();
-      await expect(page).toHaveURL("/alex.demo");
+      await expect(page).toHaveURL("/dario.altman");
     }
   });
 
   test("reopening a list shows the cached people at once, without a skeleton", async ({ page }) => {
     await signUpAndLogIn(page);
-    await page.goto("/alex.demo");
+    await page.goto("/dario.altman");
     const modal = page.getByRole("dialog", { name: "Followers" });
 
     await stat(page, "followers").getByRole("link").click();
@@ -226,7 +226,7 @@ test.describe("followers and following lists", () => {
     page,
   }) => {
     await signUpAndLogIn(page);
-    await page.goto("/alex.demo");
+    await page.goto("/dario.altman");
     await stat(page, "followers").getByRole("link").click();
     await page
       .getByRole("dialog", { name: "Followers" })

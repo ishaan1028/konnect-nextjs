@@ -106,9 +106,9 @@ for (const post of posts) {
 // The demo account starts with a few saved posts, so /saved isn't empty.
 const { error: savedError } = await admin.from("saved_posts").upsert(
   posts
-    .filter((post) => post.author !== "alex.demo")
+    .filter((post) => post.author !== "dario.altman")
     .slice(0, 3)
-    .map((post) => ({ user_id: idOf("alex.demo"), post_id: post.id })),
+    .map((post) => ({ user_id: idOf("dario.altman"), post_id: post.id })),
   { onConflict: "user_id,post_id", ignoreDuplicates: true },
 );
 if (savedError) throw savedError;

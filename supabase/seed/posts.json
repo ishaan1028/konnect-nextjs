@@ -7,7 +7,7 @@
     "caption": "Sunset number 214. Still not tired of them 🌅",
     "location": "Big Sur, California",
     "altText": "An orange sun setting over the sea behind dark rocky islets",
-    "likedBy": ["maya.k", "leo.bakes", "sana.draws", "alex.demo"],
+    "likedBy": ["maya.k", "leo.bakes", "sana.draws", "dario.altman"],
     "comments": [
       {
         "id": "5eed2000-0000-4000-8000-000000000001",
@@ -37,7 +37,7 @@
     "caption": "Brown butter cookies, lemon on the side. Don't skip the flaky salt.",
     "location": "Leo's Bakery",
     "altText": "Golden cookies on a dark plate next to lemon slices and yellow daffodils",
-    "likedBy": ["sana.draws", "maya.k", "alex.demo"],
+    "likedBy": ["sana.draws", "maya.k", "dario.altman"],
     "comments": [
       {
         "id": "5eed2000-0000-4000-8000-000000000004",
@@ -47,7 +47,7 @@
       },
       {
         "id": "5eed2000-0000-4000-8000-000000000005",
-        "by": "alex.demo",
+        "by": "dario.altman",
         "body": "Saving this for the weekend 🍪",
         "minutesAfter": 30
       }
@@ -129,7 +129,7 @@
     "caption": "White walls, blue domes, zero regrets.",
     "location": "Oia, Santorini",
     "altText": "White houses and a windmill on a hillside in Santorini under a clear sky",
-    "likedBy": ["maya.k", "sana.draws", "alex.demo"],
+    "likedBy": ["maya.k", "sana.draws", "dario.altman"],
     "comments": [
       {
         "id": "5eed2000-0000-4000-8000-000000000010",

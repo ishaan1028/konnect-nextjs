@@ -14,7 +14,7 @@ import {
 } from "@/features/profiles/components/profile-header";
 import { getPublicProfile } from "@/features/profiles/server/get-public-profile";
 
-/** Usernames are stored lowercase; /Alex.Demo and /alex.demo are the same person. */
+/** Usernames are stored lowercase; /Dario.Altman and /dario.altman are the same person. */
 const normalize = (raw: string) => decodeURIComponent(raw).toLowerCase();
 
 /**

@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { ComposerAvatar, ComposerGreeting } from "./composer-greeting";
 
 /**
- * "What's new, Alex?" above the feed: a shortcut to Create. The bar is in the
+ * "What's new, Dario?" above the feed: a shortcut to Create. The bar is in the
  * static shell; only the avatar and name stream in, in the same space.
  */
 export function ComposerBar() {

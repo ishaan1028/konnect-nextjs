@@ -39,8 +39,8 @@ test.describe("sign up", () => {
 
   test("flags a username that's already taken", async ({ page }) => {
     await page.goto("/signup");
-    await page.getByLabel("Username").fill("Alex.Demo");
-    await expect(page.getByText("@alex.demo isn't available")).toBeVisible();
+    await page.getByLabel("Username").fill("Dario.Altman");
+    await expect(page.getByText("@dario.altman isn't available")).toBeVisible();
   });
 
   test("validates fields before calling the server", async ({ page }) => {

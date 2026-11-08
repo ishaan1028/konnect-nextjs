@@ -3,7 +3,7 @@
 -- the production demo account is created separately with a secret password.
 
 -- -----------------------------------------------------------------------------
--- Demo account: demo@konnect.dev / konnect-demo-2026  (@alex.demo)
+-- Demo account: demo@konnect.dev / konnect-demo-2026  (@dario.altman)
 -- Inserted the way Supabase Auth would create a confirmed email user. GoTrue
 -- expects empty strings (not NULL) in its token columns, and email sign-in
 -- needs a matching row in auth.identities. The on_auth_user_created trigger
@@ -25,7 +25,7 @@ insert into auth.users (
   -- app_metadata.demo marks the shared demo account: its profile is read-only
   -- (enforced by RLS, see the lock_demo_account migration).
   '{"provider": "email", "providers": ["email"], "demo": true}',
-  '{"username": "alex.demo", "full_name": "Alex Rivera"}',
+  '{"username": "dario.altman", "full_name": "Dario Altman"}',
   now(),
   now(),
   '', '', '', '', '', '', '', ''
@@ -113,7 +113,7 @@ insert into public.conversation_participants (conversation_id, user_id, last_rea
   ('5eed3000-0000-4000-8000-000000000001', 'd3e0a000-0000-4000-8000-000000000001', now() - interval '2 hours'),
   ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', now());
 insert into public.messages (conversation_id, sender_id, body, created_at) values
-  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Hey Alex! Welcome to Konnect 👋', now() - interval '1 day 2 hours'),
+  ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Hey Dario! Welcome to Konnect 👋', now() - interval '1 day 2 hours'),
   ('5eed3000-0000-4000-8000-000000000001', 'd3e0a000-0000-4000-8000-000000000001', 'Thanks Maya! Loving the film shots.', now() - interval '1 day 1 hour'),
   ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Portra 400, always 😄', now() - interval '1 day 50 minutes'),
   ('5eed3000-0000-4000-8000-000000000001', '5eed0000-0000-4000-8000-000000000001', 'Coffee at Leo''s this weekend?', now() - interval '1 hour');

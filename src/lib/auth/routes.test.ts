@@ -8,7 +8,7 @@ describe("isProtectedPath", () => {
     (path) => expect(isProtectedPath(path)).toBe(true),
   );
 
-  it.each(["/alex.demo", "/alex.demo/followers", "/p/123", "/login", "/auth/confirm"])(
+  it.each(["/dario.altman", "/dario.altman/followers", "/p/123", "/login", "/auth/confirm"])(
     "leaves %s public",
     (path) => expect(isProtectedPath(path)).toBe(false),
   );

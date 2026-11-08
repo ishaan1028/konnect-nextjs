@@ -7,21 +7,21 @@ import { createConfirmedUser, demoUser, uniqueUser } from "./support/users";
 
 test.describe("public profile", () => {
   test("shows the profile with its own title and canonical URL", async ({ page }) => {
-    await page.goto("/alex.demo");
+    await page.goto("/dario.altman");
 
-    await expect(page.getByRole("heading", { level: 1, name: "@alex.demo" })).toBeVisible();
+    await expect(page.getByRole("heading", { level: 1, name: "@dario.altman" })).toBeVisible();
     // Scoped to <main>: Next streams the <title> (which also contains the name)
     // into <body> when metadata depends on request-time data.
     const main = page.getByRole("main");
-    await expect(main.getByText("Alex Rivera")).toBeVisible();
+    await expect(main.getByText("Dario Altman")).toBeVisible();
     await expect(main.getByText("Just here to show you around Konnect")).toBeVisible();
-    await expect(page).toHaveTitle("Alex Rivera (@alex.demo) · Konnect");
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/alex\.demo$/);
+    await expect(page).toHaveTitle("Dario Altman (@dario.altman) · Konnect");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute("href", /\/dario\.altman$/);
   });
 
   test("redirects mixed-case usernames to the canonical URL", async ({ page }) => {
-    await page.goto("/Alex.Demo");
-    await expect(page).toHaveURL("/alex.demo");
+    await page.goto("/Dario.Altman");
+    await expect(page).toHaveURL("/dario.altman");
   });
 
   test("shows the not-found page for unknown usernames", async ({ page }) => {
@@ -38,8 +38,8 @@ test.describe("public profile", () => {
     await page.goto(`/${user.username}`);
     await expect(page.getByRole("link", { name: "Edit profile" })).toBeVisible();
 
-    await page.goto("/alex.demo");
-    await expect(page.getByRole("heading", { name: "@alex.demo" })).toBeVisible();
+    await page.goto("/dario.altman");
+    await expect(page.getByRole("heading", { name: "@dario.altman" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Edit profile" })).toHaveCount(0);
   });
 });
@@ -104,8 +104,8 @@ test.describe("edit profile", () => {
     await expect(page).toHaveURL("/");
 
     await page.goto("/settings/profile");
-    await page.getByLabel("Username").fill("alex.demo");
-    await expect(page.getByText("@alex.demo isn't available")).toBeVisible();
+    await page.getByLabel("Username").fill("dario.altman");
+    await expect(page.getByText("@dario.altman isn't available")).toBeVisible();
     await page.getByRole("button", { name: "Save changes" }).click();
     await expect(page.getByText("That username isn't available")).toBeVisible();
   });
@@ -171,8 +171,8 @@ test.describe("accessibility", () => {
   const WCAG = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa", "best-practice"];
 
   test("the public profile has no detectable WCAG 2.2 AA violations", async ({ page }) => {
-    await page.goto("/alex.demo");
-    await expect(page.getByRole("heading", { name: "@alex.demo" })).toBeVisible();
+    await page.goto("/dario.altman");
+    await expect(page.getByRole("heading", { name: "@dario.altman" })).toBeVisible();
     const { violations } = await new AxeBuilder({ page }).withTags(WCAG).analyze();
     expect(violations).toEqual([]);
   });

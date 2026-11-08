@@ -4,7 +4,7 @@ import { getInitials } from "./initials";
 
 describe("getInitials", () => {
   it.each([
-    ["Alex Rivera", "AR"],
+    ["Dario Altman", "DA"],
     ["maya", "M"],
     ["  Ana  María   López ", "AL"],
     ["", "?"],
