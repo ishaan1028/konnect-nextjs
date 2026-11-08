@@ -265,22 +265,43 @@ class Job {
   /** Removes the job's own comments and messages once they're a few days old. */
   async cleanUp() {
     const before = new Date(this.now - KEEP_FOR).toISOString();
+    // The texts are matched here, not in the query: dozens of them in a
+    // filter make the request URL too long.
+    const jobComments = new Set(JOB_COMMENTS);
+    const jobMessages = new Set(JOB_MESSAGES);
     const [comments, messages] = await Promise.all([
       this.admin
         .from("comments")
-        .delete()
+        .select("id, body")
         .in("author_id", this.peopleIds)
-        .in("body", JOB_COMMENTS)
         .lt("created_at", before),
       this.admin
         .from("messages")
-        .delete()
+        .select("id, body")
         .in("sender_id", this.peopleIds)
-        .in("body", JOB_MESSAGES)
         .lt("created_at", before),
     ]);
     if (comments.error) throw comments.error;
     if (messages.error) throw messages.error;
+    await this.deleteByIds(
+      "comments",
+      comments.data.filter((row) => jobComments.has(row.body)).map((row) => row.id),
+    );
+    await this.deleteByIds(
+      "messages",
+      messages.data.filter((row) => jobMessages.has(row.body)).map((row) => row.id),
+    );
+  }
+
+  /** Deletes rows by id, in batches that keep the request URL short. */
+  private async deleteByIds(table: "comments" | "messages", ids: string[]) {
+    for (let start = 0; start < ids.length; start += 100) {
+      const { error } = await this.admin
+        .from(table)
+        .delete()
+        .in("id", ids.slice(start, start + 100));
+      if (error) throw error;
+    }
   }
 
   /** Post pages cache their like and comment counts. */

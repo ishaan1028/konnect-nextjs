@@ -6,7 +6,7 @@
  */
 
 /** About how many of each a day. */
-export const DAILY_TARGETS = { like: 8, comment: 4, message: 5, follow: 1 } as const;
+export const DAILY_TARGETS = { like: 16, comment: 8, message: 10, follow: 2 } as const;
 
 const RUNS_PER_HOUR = 4;
 

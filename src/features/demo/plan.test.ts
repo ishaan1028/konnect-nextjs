@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { JOB_COMMENTS, JOB_MESSAGES } from "./lines";
+import {
+  COMMENTS_BY_POST,
+  GENERAL_COMMENTS,
+  JOB_COMMENTS,
+  JOB_MESSAGES,
+  MESSAGES_BY_PERSON,
+  REPLIES,
+} from "./lines";
 import { actionChance, DAILY_TARGETS, istHour, pickFresh } from "./plan";
 
 /** A run at `hh:mm` IST on some day. */
@@ -41,5 +48,31 @@ describe("demo activity plan", () => {
     const seeded = new Set(seed.flatMap((post) => post.comments ?? []).map((c) => c.body));
     expect(JOB_COMMENTS.filter((text) => seeded.has(text))).toEqual([]);
     expect(JOB_MESSAGES.length).toBeGreaterThan(40);
+  });
+
+  it("gives everyone enough messages for a week without repeats", () => {
+    const perPersonPerWeek = Math.ceil((DAILY_TARGETS.message / 5) * 7);
+    for (const lines of Object.values(MESSAGES_BY_PERSON)) {
+      expect(new Set(lines).size).toBeGreaterThanOrEqual(perPersonPerWeek);
+    }
+  });
+
+  it("has plenty of distinct texts in every list", () => {
+    const lists: [string, readonly string[], number][] = [
+      ["replies", REPLIES, 40],
+      ["general comments", GENERAL_COMMENTS, 40],
+      ...Object.entries(COMMENTS_BY_POST).map(
+        ([post, lines]) =>
+          [`comments on ${post}`, lines, 10] as [string, readonly string[], number],
+      ),
+      ...Object.entries(MESSAGES_BY_PERSON).map(
+        ([person, lines]) =>
+          [`${person}'s messages`, lines, 24] as [string, readonly string[], number],
+      ),
+    ];
+    for (const [name, lines, atLeast] of lists) {
+      expect(new Set(lines).size, `${name} has a duplicate`).toBe(lines.length);
+      expect(lines.length, name).toBeGreaterThanOrEqual(atLeast);
+    }
   });
 });
