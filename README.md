@@ -49,22 +49,26 @@ The seed photos in `supabase/seed/photos/` are from [Unsplash](https://unsplash.
 [Unsplash License](https://unsplash.com/license), cropped and re-encoded by
 `scripts/prepare-seed-photos.mjs`. Thanks to the photographers:
 
-| Photo                                                  | Photographer        |
-| ------------------------------------------------------ | ------------------- |
-| [film-camera](https://unsplash.com/photos/baRYCsjO6z4) | Jennifer Trovato    |
-| [city-street](https://unsplash.com/photos/SyBYM8R6VU4) | Nicholas Swanson    |
-| [quiet-alley](https://unsplash.com/photos/bIQiMWxX_WU) | sergee bee          |
-| [sea-sunset](https://unsplash.com/photos/Bm0Ja6LZWl4)  | Jenna Beekhuis      |
-| [santorini](https://unsplash.com/photos/Qo51KwK1dKg)   | Margaret Barley     |
-| [fjord](https://unsplash.com/photos/-oWyJoSqBRM)       | Alexey Topolyanskiy |
-| [cookies](https://unsplash.com/photos/eqsEZNCm4-c)     | Olenka Kotyk        |
-| [pour-over](https://unsplash.com/photos/TYIzeCiZ_60)   | Karl Fredrickson    |
-| [cappuccino](https://unsplash.com/photos/UWRqlJcDCXA)  | Carli Jean          |
-| [sketchbook](https://unsplash.com/photos/nJdwUHmaY8A)  | Aleks Dorohovich    |
-| [coffee-red](https://unsplash.com/photos/ZJsseAxEcqM)  | Justin Leibow       |
-| [design-desk](https://unsplash.com/photos/9SyOKYrq-rE) | Jeff Sheldon        |
-| [laptop-desk](https://unsplash.com/photos/yC-Yzbqy7PY) | Alejandro Escamilla |
-| [window-desk](https://unsplash.com/photos/mCg0ZgD7BgU) | Aleksi Tappura      |
+| Photo                                                   | Photographer        |
+| ------------------------------------------------------- | ------------------- |
+| [film-camera](https://unsplash.com/photos/baRYCsjO6z4)  | Jennifer Trovato    |
+| [city-street](https://unsplash.com/photos/SyBYM8R6VU4)  | Nicholas Swanson    |
+| [quiet-alley](https://unsplash.com/photos/bIQiMWxX_WU)  | sergee bee          |
+| [sea-sunset](https://unsplash.com/photos/Bm0Ja6LZWl4)   | Jenna Beekhuis      |
+| [santorini](https://unsplash.com/photos/Qo51KwK1dKg)    | Margaret Barley     |
+| [fjord](https://unsplash.com/photos/-oWyJoSqBRM)        | Alexey Topolyanskiy |
+| [cookies](https://unsplash.com/photos/eqsEZNCm4-c)      | Olenka Kotyk        |
+| [pour-over](https://unsplash.com/photos/TYIzeCiZ_60)    | Karl Fredrickson    |
+| [cappuccino](https://unsplash.com/photos/UWRqlJcDCXA)   | Carli Jean          |
+| [sketchbook](https://unsplash.com/photos/nJdwUHmaY8A)   | Aleks Dorohovich    |
+| [coffee-red](https://unsplash.com/photos/ZJsseAxEcqM)   | Justin Leibow       |
+| [design-desk](https://unsplash.com/photos/9SyOKYrq-rE)  | Jeff Sheldon        |
+| [laptop-desk](https://unsplash.com/photos/yC-Yzbqy7PY)  | Alejandro Escamilla |
+| [window-desk](https://unsplash.com/photos/mCg0ZgD7BgU)  | Aleksi Tappura      |
+| [yosemite](https://unsplash.com/photos/mWRR1xj95hg)     | Christian Joudrey   |
+| [black-puppy](https://unsplash.com/photos/8wTPqxlnKM4)  | André Spieker       |
+| [city-taxis](https://unsplash.com/photos/bI2j1olMXUA)   | Andrew Ruiz         |
+| [strawberries](https://unsplash.com/photos/OJJIaFZOeX4) | veeterzy            |
 
 ## Troubleshooting
 

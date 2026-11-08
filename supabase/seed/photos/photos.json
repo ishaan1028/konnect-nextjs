@@ -68,5 +68,25 @@
     "width": 1080,
     "height": 1350,
     "thumbhash": "ZBgWDgB2h/h4eJeId4h4hYeHqXCGCmg="
+  },
+  "yosemite": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "WggOLgRnh/h5d6iXeHmIaod3o2BTCGY="
+  },
+  "black-puppy": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "UhgKDwLnmJdldoqPh7WZqVeKWV/29WQP"
+  },
+  "city-taxis": {
+    "width": 1080,
+    "height": 1350,
+    "thumbhash": "XAgKHgRO6vdYmIh4eVeJiJeI2lCKDKY="
+  },
+  "strawberries": {
+    "width": 1080,
+    "height": 1080,
+    "thumbhash": "18gGBwJXa/V8pkeQdsdYVmaNR/gl11wA"
   }
 }

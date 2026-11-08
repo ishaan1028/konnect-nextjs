@@ -8,8 +8,9 @@
  * crop to the post's shape, WebP at most 1080px wide, and a ThumbHash. The
  * crop/encode runs in Chromium (via Playwright), so no image library is needed.
  * Writes <name>.webp files and photos.json (sizes + ThumbHashes) next to them.
+ * Photos already in photos.json are skipped, so adding one downloads only it.
  */
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 
 import { chromium } from "@playwright/test";
 import { rgbaToThumbHash } from "thumbhash";
@@ -33,13 +34,19 @@ const PHOTOS = [
   ["design-desk", 526, "1.91:1"],
   ["laptop-desk", 0, "1:1"],
   ["window-desk", 445, "4:5"],
+  // Dario's (the demo account's) posts.
+  ["yosemite", 1043, "4:5"],
+  ["black-puppy", 237, "1:1"],
+  ["city-taxis", 376, "4:5"],
+  ["strawberries", 1080, "1:1"],
 ];
 
 const browser = await chromium.launch();
 const page = await browser.newPage();
-const manifest = {};
+const manifest = JSON.parse(await readFile(new URL("photos.json", OUT), "utf8").catch(() => "{}"));
 
 for (const [name, id, shape] of PHOTOS) {
+  if (manifest[name]) continue;
   const source = await fetch(`https://picsum.photos/id/${id}/1600`);
   if (!source.ok) throw new Error(`Picsum ${id}: ${source.status}`);
   const bytes = Buffer.from(await source.arrayBuffer()).toString("base64");

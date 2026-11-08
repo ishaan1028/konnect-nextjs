@@ -238,5 +238,83 @@
     "location": "Lisbon, Portugal",
     "altText": "A narrow brick alley with a bright opening at the far end",
     "likedBy": ["sana.draws", "zoe.travels"]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000015",
+    "author": "dario.altman",
+    "photo": "yosemite",
+    "hoursAgo": 30,
+    "caption": "Golden hour in the valley. Worth every switchback 🏞️",
+    "location": "Yosemite, California",
+    "altText": "A wooded valley between tall granite cliffs, with a river in the foreground",
+    "likedBy": ["maya.k", "zoe.travels", "arjun.codes"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000015",
+        "by": "zoe.travels",
+        "body": "Adding this to my list! Which trail was it?",
+        "minutesAfter": 25
+      }
+    ]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000016",
+    "author": "dario.altman",
+    "photo": "black-puppy",
+    "hoursAgo": 75,
+    "caption": "Meet Pixel, the newest member of the family 🐾",
+    "location": "",
+    "altText": "A black puppy sitting on a wooden deck, looking up at the camera",
+    "likedBy": ["maya.k", "arjun.codes", "zoe.travels", "leo.bakes", "sana.draws"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000016",
+        "by": "maya.k",
+        "body": "PIXEL 😍 I need to meet him",
+        "minutesAfter": 8
+      },
+      {
+        "id": "5eed2000-0000-4000-8000-000000000017",
+        "by": "leo.bakes",
+        "body": "Bringing dog treats next time I visit.",
+        "minutesAfter": 40
+      }
+    ]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000017",
+    "author": "dario.altman",
+    "photo": "city-taxis",
+    "hoursAgo": 140,
+    "caption": "New York never really sleeps 🚕",
+    "location": "Manhattan, New York",
+    "altText": "Yellow taxis on a busy street between tall buildings",
+    "likedBy": ["sana.draws", "leo.bakes"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000018",
+        "by": "arjun.codes",
+        "body": "Miss this city.",
+        "minutesAfter": 60
+      }
+    ]
+  },
+  {
+    "id": "5eed1000-0000-4000-8000-000000000018",
+    "author": "dario.altman",
+    "photo": "strawberries",
+    "hoursAgo": 220,
+    "caption": "Farmers' market haul. Smoothie season is back 🍓",
+    "location": "Saturday market",
+    "altText": "A pile of bright red strawberries",
+    "likedBy": ["leo.bakes", "maya.k"],
+    "comments": [
+      {
+        "id": "5eed2000-0000-4000-8000-000000000019",
+        "by": "leo.bakes",
+        "body": "These would make an amazing tart.",
+        "minutesAfter": 15
+      }
+    ]
   }
 ]

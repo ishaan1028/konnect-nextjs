@@ -97,6 +97,8 @@ jobs:
       # The local seed creates this account (see supabase/seed.sql).
       DEMO_USER_EMAIL: demo@konnect.dev
       DEMO_USER_PASSWORD: konnect-demo-2026
+      # Lets the e2e test call the daily demo-activity job.
+      CRON_SECRET: ci-cron-secret-0123456789
     steps:
       - uses: actions/checkout@v7
 

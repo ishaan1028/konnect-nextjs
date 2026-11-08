@@ -18,6 +18,9 @@ export const env = createEnv({
     // Credentials stay on the server; the button is hidden when they're unset.
     DEMO_USER_EMAIL: z.email().optional(),
     DEMO_USER_PASSWORD: z.string().min(8).optional(),
+    // Vercel Cron sends it as "Authorization: Bearer …"; the daily demo
+    // activity job (/api/cron/demo-activity) refuses requests without it.
+    CRON_SECRET: z.string().min(16).optional(),
   },
   client: {
     NEXT_PUBLIC_SITE_URL: z.url().default("http://localhost:3000"),

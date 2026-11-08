@@ -5,6 +5,7 @@ import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { returnServerError, returnValidationErrors } from "next-safe-action";
 
+import { findUserByEmail } from "@/features/auth/server/find-user-by-email";
 import { profileTag } from "@/features/profiles/server/get-public-profile";
 import { safeNextPath } from "@/lib/auth/redirect";
 import { env } from "@/lib/env";
@@ -148,18 +149,10 @@ export const demoSignInAction = actionClient
 /** Sets the demo account's password back to the one in the server env. */
 async function resetDemoPassword({ email, password }: { email: string; password: string }) {
   const admin = createAdminClient();
-  // shortcut: pages through all users (the Auth admin API can't look up by email); it only runs after the password was changed.
-  for (let page = 1; ; page++) {
-    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
-    if (error) throw error;
-    const demo = data.users.find((user) => user.email === email);
-    if (demo) {
-      const { error: updateError } = await admin.auth.admin.updateUserById(demo.id, { password });
-      if (updateError) throw updateError;
-      return;
-    }
-    if (data.users.length < 1000) throw new Error("The demo account doesn't exist");
-  }
+  const demo = await findUserByEmail(admin, email);
+  if (!demo) throw new Error("The demo account doesn't exist");
+  const { error } = await admin.auth.admin.updateUserById(demo.id, { password });
+  if (error) throw error;
 }
 
 export const signOutAction = actionClient.metadata({ actionName: "signOut" }).action(async () => {
