@@ -52,6 +52,12 @@ export const signInSchema = z.object({
   next: z.string().optional(),
 });
 
+/** "Continue with Google / GitHub": `next` is sanitized on the server. */
+export const oauthSignInSchema = z.object({
+  provider: z.enum(["google", "github"]),
+  next: z.string().optional(),
+});
+
 export const emailOnlySchema = z.object({
   email: emailSchema,
 });

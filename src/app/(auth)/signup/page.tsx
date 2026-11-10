@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { LoginOptions } from "@/features/auth/components/login-options";
 import { SignupForm } from "@/features/auth/components/signup-form";
 
 import { AuthHeader } from "../auth-header";
@@ -12,6 +13,7 @@ export default function SignupPage() {
     <div className="space-y-8">
       <AuthHeader title="Join Konnect" description="Share moments and keep up with your people." />
       <SignupForm />
+      <LoginOptions />
       <p className="text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link

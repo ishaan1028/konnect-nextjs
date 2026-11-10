@@ -4,6 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MESSAGES: Record<string, string> = {
   "link-expired": "That link has expired or was already used. Links work once, for 1 hour.",
+  oauth: "Couldn't sign you in with that account. Try again, or log in another way.",
 };
 
 /**

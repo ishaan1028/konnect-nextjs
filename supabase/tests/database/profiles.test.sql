@@ -96,11 +96,11 @@ select throws_ok(
 );
 
 select throws_ok(
-  $$ insert into auth.users (id, email, aud, role)
-     values (gen_random_uuid(), 'nometa@example.com', 'authenticated', 'authenticated') $$,
+  $$ insert into auth.users (id, email, raw_user_meta_data, aud, role)
+     values (gen_random_uuid(), 'nometa@example.com', '{"username":"nometa"}', 'authenticated', 'authenticated') $$,
   '23502',
   null,
-  'sign-up without a username fails instead of creating a half-made account'
+  'sign-up without a full name fails instead of creating a half-made account'
 );
 
 -- -----------------------------------------------------------------------------

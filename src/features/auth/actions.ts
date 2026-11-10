@@ -1,6 +1,7 @@
 "use server";
 
 import { isAuthApiError } from "@supabase/supabase-js";
+import type { Route } from "next";
 import { revalidatePath, updateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { returnServerError, returnValidationErrors } from "next-safe-action";
@@ -16,6 +17,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   changePasswordSchema,
   emailOnlySchema,
+  oauthSignInSchema,
   resetPasswordSchema,
   signInSchema,
   signUpSchema,
@@ -120,6 +122,29 @@ export const signInAction = actionClient
     // Signing in changes what every page renders: drop all cached RSC output.
     revalidatePath("/", "layout");
     redirect(safeNextPath(next));
+  });
+
+/**
+ * Google / GitHub sign-in. Runs on the server so the server client stores the
+ * PKCE code verifier in a cookie; /auth/callback needs it to finish sign-in.
+ * New accounts get a username from the sign-up trigger.
+ */
+export const oauthSignInAction = actionClient
+  .metadata({ actionName: "oauthSignIn" })
+  .inputSchema(oauthSignInSchema)
+  .action(async ({ parsedInput: { provider, next } }) => {
+    const callback = new URL("/auth/callback", env.NEXT_PUBLIC_SITE_URL);
+    callback.searchParams.set("next", safeNextPath(next));
+
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: callback.toString() },
+    });
+    if (error) throw error;
+
+    // An external URL (Supabase Auth's /authorize), outside typed routes.
+    redirect(data.url as Route);
   });
 
 /** One-click sign-in to the shared demo account, for reviewers and recruiters. */

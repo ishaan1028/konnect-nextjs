@@ -3,8 +3,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 import { AuthNotice } from "@/features/auth/components/auth-notice";
-import { DemoLogin } from "@/features/auth/components/demo-login";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { LoginOptions } from "@/features/auth/components/login-options";
 
 import { AuthHeader } from "../auth-header";
 
@@ -19,7 +19,7 @@ export default function LoginPage({ searchParams }: PageProps<"/login">) {
         <AuthNotice searchParams={searchParams} />
       </Suspense>
       <LoginForm />
-      <DemoLogin />
+      <LoginOptions demo />
       <p className="text-sm text-muted-foreground">
         New to Konnect?{" "}
         <Link
