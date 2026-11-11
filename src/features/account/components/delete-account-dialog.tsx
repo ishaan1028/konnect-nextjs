@@ -1,12 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { TextField } from "@/components/forms/text-field";
 import {
@@ -22,7 +22,8 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { deleteAccountAction } from "../actions";
-import { deleteAccountSchema } from "../schemas";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.deleteAccountSchema));
 
 /**
  * "Delete account", confirmed by typing your username (a click alone is too
@@ -32,7 +33,7 @@ export function DeleteAccountDialog({ username }: { username: string }) {
   const queryClient = useQueryClient();
   const { form, action, handleSubmitWithAction } = useHookFormAction(
     deleteAccountAction,
-    zodResolver(deleteAccountSchema),
+    resolver,
     {
       actionProps: {
         // The action signs out and redirects to /login. Drop every cached

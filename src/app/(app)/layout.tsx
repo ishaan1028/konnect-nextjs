@@ -3,8 +3,10 @@ import { Suspense } from "react";
 import { BottomTabBar, MobileHeader } from "@/components/layout/mobile-nav";
 import { SideNav } from "@/components/layout/side-nav";
 import { MAIN_CONTENT_ID } from "@/components/layout/skip-link";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { ChatRealtime } from "@/features/chat/components/chat-realtime";
 import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
+import { QueryProvider } from "@/lib/query/provider";
 
 /**
  * Shell for every signed-in screen. "(app)" is a route group: the parentheses
@@ -13,31 +15,38 @@ import { CurrentUserBoundary } from "@/features/profiles/components/current-user
  *
  * Layouts persist across navigations: moving between pages re-renders only
  * {children}, so the nav keeps its state and never re-mounts.
+ *
+ * The query and tooltip providers live here, not in the root layout: the
+ * sign-in pages use neither, so they don't load TanStack Query or the popup code.
  */
 export default function AppLayout({ children, modal }: LayoutProps<"/">) {
   return (
-    <div className="min-h-dvh bg-app md:pl-19 xl:pl-61">
-      <SideNav />
-      <MobileHeader />
-      <main
-        id={MAIN_CONTENT_ID}
-        // Lets the skip link move focus here; no outline because it's a container.
-        tabIndex={-1}
-        // pt-6 matches the sidebar's py-6, so every page starts level with the logo.
-        className="w-full px-4 pt-6 pb-28 outline-none md:px-8 md:pb-12"
-      >
-        {children}
-      </main>
-      <BottomTabBar />
-      {/* Parallel route slot: intercepted routes (e.g. a followers list opened
-          from a profile) render here as modals over the current page. */}
-      {modal}
-      {/* Live chat pings and online presence for the whole signed-in app. */}
-      <Suspense fallback={null}>
-        <CurrentUserBoundary>
-          <ChatRealtime />
-        </CurrentUserBoundary>
-      </Suspense>
-    </div>
+    <QueryProvider>
+      <TooltipProvider>
+        <div className="min-h-dvh bg-app md:pl-19 xl:pl-61">
+          <SideNav />
+          <MobileHeader />
+          <main
+            id={MAIN_CONTENT_ID}
+            // Lets the skip link move focus here; no outline because it's a container.
+            tabIndex={-1}
+            // pt-6 matches the sidebar's py-6, so every page starts level with the logo.
+            className="w-full px-4 pt-6 pb-28 outline-none md:px-8 md:pb-12"
+          >
+            {children}
+          </main>
+          <BottomTabBar />
+          {/* Parallel route slot: intercepted routes (e.g. a followers list
+              opened from a profile) render here as modals over the current page. */}
+          {modal}
+          {/* Live chat pings and online presence for the whole signed-in app. */}
+          <Suspense fallback={null}>
+            <CurrentUserBoundary>
+              <ChatRealtime />
+            </CurrentUserBoundary>
+          </Suspense>
+        </div>
+      </TooltipProvider>
+    </QueryProvider>
   );
 }

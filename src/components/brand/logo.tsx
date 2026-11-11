@@ -35,11 +35,11 @@ export function Wordmark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className, compact }: { className?: string; compact?: boolean }) {
+export function Logo({ className }: { className?: string }) {
   return (
     <span className={cn("inline-flex items-center gap-2.5", className)}>
       <LogoMark />
-      {compact ? <span className="sr-only">Konnect</span> : <Wordmark />}
+      <Wordmark />
     </span>
   );
 }

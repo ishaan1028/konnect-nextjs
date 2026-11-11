@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { useFormState } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,8 +21,10 @@ import {
 import { queryKeys } from "@/lib/query/keys";
 
 import { updatePostAction } from "../actions";
-import { type PostDetailsInput, postDetailsSchema } from "../schemas";
+import type { PostDetailsInput } from "../schemas";
 import { PostDetailsFields } from "./post-details-fields";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.postDetailsSchema));
 
 type EditPostDialogProps = {
   postId: string;
@@ -60,7 +62,7 @@ function EditPostForm({
   const { form, action, handleSubmitWithAction } = useHookFormAction(
     // The post id travels as a bound argument, validated on the server.
     updatePostAction.bind(null, postId),
-    zodResolver(postDetailsSchema),
+    resolver,
     {
       formProps: { mode: "onTouched", defaultValues: initial },
       actionProps: {

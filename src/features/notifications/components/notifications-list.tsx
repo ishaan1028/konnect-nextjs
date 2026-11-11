@@ -5,7 +5,7 @@ import { Heart } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useEffectEvent } from "react";
+import { useEffect, useEffectEvent, useState } from "react";
 import { useInView } from "react-intersection-observer";
 
 import { LoadMoreError } from "@/components/shared/load-more-error";
@@ -52,6 +52,13 @@ export function NotificationsList() {
   });
 
   const notifications = data.pages.flatMap((page) => page.items);
+  // Marking them read pings this page, which refetches them as read: remember
+  // what was unread, so it stays highlighted for the whole visit.
+  const [unreadThisVisit, setUnreadThisVisit] = useState<ReadonlySet<string>>(() => new Set());
+  const newlyUnread = notifications.filter((n) => !n.read && !unreadThisVisit.has(n.id));
+  if (newlyUnread.length > 0) {
+    setUnreadThisVisit(new Set([...unreadThisVisit, ...newlyUnread.map((n) => n.id)]));
+  }
   const newestId = notifications[0]?.id;
   const readIfVisible = useEffectEvent(() => {
     if (document.visibilityState === "visible") void markRead();
@@ -61,7 +68,9 @@ export function NotificationsList() {
   }, [newestId]);
 
   if (notifications.length === 0) return <NoNotifications />;
-  const groups = groupNotifications(notifications);
+  const groups = groupNotifications(
+    notifications.map((n) => (unreadThisVisit.has(n.id) ? { ...n, read: false } : n)),
+  );
 
   return (
     <div>

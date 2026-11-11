@@ -21,10 +21,40 @@ export type PostThumbnail = {
   createdAt: string;
 };
 
-export type PostThumbnailPage = {
-  items: PostThumbnail[];
-  nextCursor: { createdAt: string; id: string } | null;
+/** The tile's columns, as every post query returns them. */
+type PostThumbnailRow = {
+  id: string;
+  image_path: string;
+  image_width: number;
+  image_height: number;
+  thumbhash: string | null;
+  alt_text: string;
+  created_at: string;
 };
+
+export const toPostThumbnail = (row: PostThumbnailRow): PostThumbnail => ({
+  id: row.id,
+  imagePath: row.image_path,
+  width: row.image_width,
+  height: row.image_height,
+  // Function return types don't carry nullability; normalize explicitly.
+  thumbhash: row.thumbhash ?? null,
+  altText: row.alt_text,
+  createdAt: row.created_at,
+});
+
+/** Keyset cursor shared by every newest-first list (posts, comments). */
+export type PostCursor = { createdAt: string; id: string } | null;
+
+export const nextCursor = <T extends { id: string; createdAt: string }>(
+  items: T[],
+  pageSize: number,
+): PostCursor => {
+  const last = items.at(-1);
+  return items.length === pageSize && last ? { createdAt: last.createdAt, id: last.id } : null;
+};
+
+export type PostThumbnailPage = { items: PostThumbnail[]; nextCursor: PostCursor };
 
 /** Divisible by 3, so full pages fill whole rows of the grid. */
 export const PROFILE_POSTS_PAGE_SIZE = 24;
@@ -42,37 +72,12 @@ export const profilePostsQueryOptions = (supabase: Supabase, profileId: string) 
       });
       if (error) throw error;
 
-      const items = data.map((row) => ({
-        id: row.id,
-        imagePath: row.image_path,
-        width: row.image_width,
-        height: row.image_height,
-        // Function return types don't carry nullability; normalize explicitly.
-        thumbhash: row.thumbhash ?? null,
-        altText: row.alt_text,
-        createdAt: row.created_at,
-      }));
-      const last = items.at(-1);
-
-      return {
-        items,
-        nextCursor:
-          items.length === PROFILE_POSTS_PAGE_SIZE && last
-            ? { createdAt: last.createdAt, id: last.id }
-            : null,
-      };
+      const items = data.map(toPostThumbnail);
+      return { items, nextCursor: nextCursor(items, PROFILE_POSTS_PAGE_SIZE) };
     },
-    initialPageParam: null as PostThumbnailPage["nextCursor"],
+    initialPageParam: null as PostCursor,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
-
-/** Keyset cursor shared by every newest-first list of posts. */
-type PostCursor = { createdAt: string; id: string } | null;
-
-const nextCursor = <T extends { id: string; createdAt: string }>(items: T[], pageSize: number) => {
-  const last = items.at(-1);
-  return items.length === pageSize && last ? { createdAt: last.createdAt, id: last.id } : null;
-};
 
 // -----------------------------------------------------------------------------
 // Home feed
@@ -122,15 +127,9 @@ export const feedQueryOptions = (supabase: Supabase) =>
       if (error) throw error;
 
       const items = data.map((row) => ({
-        id: row.id,
-        imagePath: row.image_path,
-        width: row.image_width,
-        height: row.image_height,
-        thumbhash: row.thumbhash ?? null,
-        altText: row.alt_text,
+        ...toPostThumbnail(row),
         caption: row.caption,
         location: row.location,
-        createdAt: row.created_at,
         commentsCount: row.comments_count,
         latestComments: toFeedComments(row.latest_comments),
         likes: { liked: row.liked_by_viewer, count: row.likes_count },
@@ -173,13 +172,7 @@ export const exploreQueryOptions = (supabase: Supabase) =>
       if (error) throw error;
 
       const items = data.map((row) => ({
-        id: row.id,
-        imagePath: row.image_path,
-        width: row.image_width,
-        height: row.image_height,
-        thumbhash: row.thumbhash ?? null,
-        altText: row.alt_text,
-        createdAt: row.created_at,
+        ...toPostThumbnail(row),
         likesCount: row.likes_count,
         commentsCount: row.comments_count,
         authorUsername: row.author_username,

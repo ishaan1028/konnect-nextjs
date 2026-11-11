@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-export const CAPTION_MAX_LENGTH = 2200;
-export const ALT_TEXT_MAX_LENGTH = 250;
-export const LOCATION_MAX_LENGTH = 100;
-/** Smallest photo width we accept (Instagram's minimum too). */
-export const MIN_PHOTO_WIDTH = 320;
+import {
+  ALT_TEXT_MAX_LENGTH,
+  CAPTION_MAX_LENGTH,
+  LOCATION_MAX_LENGTH,
+  MIN_PHOTO_WIDTH,
+} from "./constants";
 
 const maxLength = (max: number) => `Use ${max} characters or fewer`;
 
@@ -42,4 +43,3 @@ export const postTargetSchema = z.object({ postId: postIdSchema });
 export const deletePostSchema = postTargetSchema.extend({ fromModal: z.boolean().default(false) });
 
 export type PostDetailsInput = z.input<typeof postDetailsSchema>;
-export type CreatePostInput = z.input<typeof createPostSchema>;

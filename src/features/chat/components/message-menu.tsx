@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
-import { REACTIONS } from "../queries";
+import { type Reaction, REACTIONS } from "../queries";
 
 type MessageMenuProps = {
   mine: boolean;
@@ -111,13 +111,7 @@ export function MessageMenu({ mine, myReaction, onReact, onUnsend }: MessageMenu
 }
 
 /** The reactions under a message: each emoji once, with a count when shared. */
-export function MessageReactions({
-  reactions,
-  userId,
-}: {
-  reactions: { userId: string; emoji: string }[];
-  userId: string;
-}) {
+export function MessageReactions({ reactions, userId }: { reactions: Reaction[]; userId: string }) {
   const counts = new Map<string, number>();
   for (const { emoji } of reactions) counts.set(emoji, (counts.get(emoji) ?? 0) + 1);
   const mine = reactions.find((reaction) => reaction.userId === userId)?.emoji;

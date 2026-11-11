@@ -97,12 +97,12 @@ export const followListQueryOptions = (
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });
 
-export const followSuggestionsQueryOptions = (supabase: Supabase, limit = 2) =>
+export const followSuggestionsQueryOptions = (supabase: Supabase) =>
   queryOptions({
     queryKey: queryKeys.follows.suggestions(),
     queryFn: async (): Promise<Suggestion[]> => {
       const { data, error } = await supabase.rpc("get_follow_suggestions", {
-        max_results: limit,
+        max_results: 2,
       });
       if (error) throw error;
       return data.map((row) => ({

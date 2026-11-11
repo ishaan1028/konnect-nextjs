@@ -58,7 +58,7 @@ export function PostModalContent() {
       commentForm={<CommentForm postId={post.id} inputId={`modal-comment-input-${post.id}`} />}
       comments={
         <LoadErrorBoundary what="comments">
-          <Suspense fallback={<CommentThreadSkeleton />}>
+          <Suspense fallback={<CommentThreadSkeleton count={post.commentsCount} />}>
             <CommentThread postId={post.id} />
           </Suspense>
         </LoadErrorBoundary>

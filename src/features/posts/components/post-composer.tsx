@@ -5,12 +5,8 @@ import { toast } from "sonner";
 
 import type { PixelArea } from "@/lib/canvas-image";
 
-import {
-  ACCEPTED_PHOTO_TYPES,
-  MAX_SOURCE_BYTES,
-  type ProcessedPhoto,
-  processPhoto,
-} from "../lib/process-photo";
+import { ACCEPTED_PHOTO_TYPES } from "../constants";
+import { MAX_SOURCE_BYTES, type ProcessedPhoto, processPhoto } from "../lib/process-photo";
 import { PhotoCropStep } from "./photo-crop-step";
 import { PhotoDropzone } from "./photo-dropzone";
 import { PostDetailsStep } from "./post-details-step";

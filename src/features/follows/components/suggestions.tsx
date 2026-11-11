@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { Compass } from "lucide-react";
 import Link from "next/link";
 
+import { pluralize } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
 import { followSuggestionsQueryOptions } from "../queries";
@@ -22,7 +23,7 @@ export function SuggestionsList() {
             person={person}
             subtitle={
               person.mutualCount > 0
-                ? `Followed by ${person.mutualCount} ${person.mutualCount === 1 ? "person" : "people"} you follow`
+                ? `Followed by ${person.mutualCount} ${pluralize(person.mutualCount, "person", "people")} you follow`
                 : person.fullName
             }
             action={

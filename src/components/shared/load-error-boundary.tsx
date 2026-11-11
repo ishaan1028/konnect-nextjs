@@ -5,12 +5,10 @@ import { RotateCcw, TriangleAlert } from "lucide-react";
 import { catchError, type ErrorInfo } from "next/error";
 
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type LoadErrorProps = {
   /** What failed to load, e.g. "posts" → "Couldn't load posts." */
   what: string;
-  className?: string;
 };
 
 function TryAgain({ retry }: { retry: () => void }) {
@@ -31,14 +29,11 @@ function TryAgain({ retry }: { retry: () => void }) {
   );
 }
 
-function LoadErrorFallback({ what, className }: LoadErrorProps, { retry }: ErrorInfo) {
+function LoadErrorFallback({ what }: LoadErrorProps, { retry }: ErrorInfo) {
   return (
     <div
       role="alert"
-      className={cn(
-        "flex flex-col items-center justify-center gap-3 p-6 text-center text-sm",
-        className,
-      )}
+      className="flex flex-col items-center justify-center gap-3 p-6 text-center text-sm"
     >
       <TriangleAlert aria-hidden className="size-5 text-destructive" />
       <p>Couldn&apos;t load {what}.</p>

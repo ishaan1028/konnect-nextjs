@@ -86,9 +86,3 @@ export const changePasswordSchema = z
     error: "Choose a different password from your current one",
     path: ["password"],
   });
-
-export type SignUpInput = z.input<typeof signUpSchema>;
-export type SignInInput = z.input<typeof signInSchema>;
-export type EmailOnlyInput = z.input<typeof emailOnlySchema>;
-export type ResetPasswordInput = z.input<typeof resetPasswordSchema>;
-export type ChangePasswordInput = z.input<typeof changePasswordSchema>;

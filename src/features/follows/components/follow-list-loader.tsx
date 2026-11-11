@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import { currentUserQueryOptions } from "@/features/profiles/queries";
 import { getPublicProfile } from "@/features/profiles/server/get-public-profile";
 import { getServerQueryClient } from "@/lib/query/server";
+import { usernameFromSegment } from "@/features/profiles/username-segment";
 import { createClient } from "@/lib/supabase/server";
 
 import { type FollowListKind, followListQueryOptions } from "../queries";
@@ -23,7 +24,7 @@ type FollowListLoaderProps = {
  * (FollowListModalContent). Render inside <Suspense>.
  */
 export async function FollowListLoader({ params, kind }: FollowListLoaderProps) {
-  const username = decodeURIComponent((await params).username).toLowerCase();
+  const username = usernameFromSegment((await params).username);
   const profile = await getPublicProfile(username);
   if (!profile) notFound();
 

@@ -7,6 +7,7 @@ import {
   signUpSchema,
   usernameSchema,
 } from "./schemas";
+import { toValidUsername } from "./username";
 
 const firstError = (result: { success: boolean; error?: { issues: { message: string }[] } }) =>
   result.error?.issues[0]?.message;
@@ -25,6 +26,24 @@ describe("usernameSchema", () => {
     ["ma..ya", "Periods can't be at the start, the end, or next to each other"],
   ])("rejects %j", (value, message) => {
     expect(firstError(usernameSchema.safeParse(value))).toBe(message);
+  });
+});
+
+describe("toValidUsername", () => {
+  it.each([
+    "  Maya_K ",
+    "maya.k",
+    "ab",
+    "a".repeat(20),
+    "a".repeat(21),
+    "has space",
+    ".maya",
+    "maya.",
+    "ma..ya",
+    "é_maya",
+  ])("agrees with usernameSchema on %j", (value) => {
+    const parsed = usernameSchema.safeParse(value);
+    expect(toValidUsername(value)).toBe(parsed.success ? parsed.data : null);
   });
 });
 

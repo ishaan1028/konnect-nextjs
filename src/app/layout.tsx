@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Geist, Geist_Mono } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 
 import { NavigationProgress } from "@/components/layout/navigation-progress";
@@ -8,9 +7,7 @@ import { SkipLink } from "@/components/layout/skip-link";
 import { ThemeScript } from "@/components/theme/theme-script";
 import { ThemeSync } from "@/components/theme/theme-sync";
 import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { env } from "@/lib/env";
-import { QueryProvider } from "@/lib/query/provider";
 
 import "./globals.css";
 
@@ -66,12 +63,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
-        {/* URL query state (?q= on Explore), shared through the app router. */}
-        <NuqsAdapter>
-          <QueryProvider>
-            <TooltipProvider>{children}</TooltipProvider>
-          </QueryProvider>
-        </NuqsAdapter>
+        {children}
         <Toaster position="top-center" />
         <ThemeSync />
       </body>

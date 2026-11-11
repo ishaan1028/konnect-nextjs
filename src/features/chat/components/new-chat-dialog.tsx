@@ -4,7 +4,7 @@ import { useQueryClient, useSuspenseInfiniteQuery } from "@tanstack/react-query"
 import { Search, SquarePen } from "lucide-react";
 import type { Route } from "next";
 import { useRouter } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { toast } from "sonner";
 
@@ -90,7 +90,11 @@ function People({ filter, onDone }: { filter: string; onDone: () => void }) {
     },
   });
 
-  // shortcut: filters the people loaded so far; a server-side search would be needed for huge follow lists.
+  // shortcut: a search loads the whole follow list and filters it here; huge follow lists would need a server-side search.
+  useEffect(() => {
+    if (filter && hasNextPage && !isFetchingNextPage && !isFetchNextPageError) void fetchNextPage();
+  }, [filter, hasNextPage, isFetchingNextPage, isFetchNextPageError, fetchNextPage]);
+
   const people = data.pages
     .flatMap((page) => page.items)
     .filter(
@@ -115,7 +119,7 @@ function People({ filter, onDone }: { filter: string; onDone: () => void }) {
     router.push(`/messages/${conversationId}` as Route);
   };
 
-  if (people.length === 0) {
+  if (people.length === 0 && !hasNextPage) {
     return (
       <p className="py-10 text-center text-muted-foreground">
         {filter ? "Nobody you follow matches." : "Follow people to message them."}
@@ -150,6 +154,11 @@ function People({ filter, onDone }: { filter: string; onDone: () => void }) {
         </li>
       ))}
       <li ref={sentinelRef} aria-hidden />
+      {isFetchingNextPage && (
+        <li className="flex justify-center py-4">
+          <Spinner aria-label="Loading more people" />
+        </li>
+      )}
       {isFetchNextPageError && (
         <li>
           <LoadMoreError onRetry={() => void fetchNextPage()} />

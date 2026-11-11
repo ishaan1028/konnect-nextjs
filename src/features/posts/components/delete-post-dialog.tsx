@@ -41,8 +41,9 @@ export function DeletePostDialog({
   const queryClient = useQueryClient();
   const router = useRouter();
   const deleted = () => {
-    // The post leaves the feed, Explore, its author's grid and its modal.
+    // The post leaves the feed, Explore, its author's grid, its modal and Saved.
     void queryClient.invalidateQueries({ queryKey: queryKeys.posts.all });
+    void queryClient.invalidateQueries({ queryKey: queryKeys.saved.list() });
     toast.success("Post deleted");
   };
   const remove = useAction(deletePostAction, {

@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { infiniteQueryOptions } from "@tanstack/react-query";
 
+import { nextCursor, type PostCursor } from "@/features/posts/queries";
 import { queryKeys } from "@/lib/query/keys";
 import type { Database } from "@/types/database.types";
 
@@ -17,12 +18,9 @@ export type Comment = {
   pending?: boolean;
 };
 
-export type CommentsPage = {
-  items: Comment[];
-  nextCursor: { createdAt: string; id: string } | null;
-};
+export type CommentsPage = { items: Comment[]; nextCursor: PostCursor };
 
-const PAGE_SIZE = 20;
+export const COMMENTS_PAGE_SIZE = 20;
 
 /** A post's comments, newest first, a page at a time ("View older comments"). */
 export const commentsQueryOptions = (supabase: Supabase, postId: string) =>
@@ -33,7 +31,7 @@ export const commentsQueryOptions = (supabase: Supabase, postId: string) =>
         post_id: postId,
         cursor_created_at: pageParam?.createdAt,
         cursor_id: pageParam?.id,
-        max_results: PAGE_SIZE,
+        max_results: COMMENTS_PAGE_SIZE,
       });
       if (error) throw error;
 
@@ -49,13 +47,8 @@ export const commentsQueryOptions = (supabase: Supabase, postId: string) =>
           avatarPath: row.author_avatar_path ?? null,
         },
       }));
-      const last = items.at(-1);
-      return {
-        items,
-        nextCursor:
-          items.length === PAGE_SIZE && last ? { createdAt: last.createdAt, id: last.id } : null,
-      };
+      return { items, nextCursor: nextCursor(items, COMMENTS_PAGE_SIZE) };
     },
-    initialPageParam: null as CommentsPage["nextCursor"],
+    initialPageParam: null as PostCursor,
     getNextPageParam: (lastPage) => lastPage.nextCursor,
   });

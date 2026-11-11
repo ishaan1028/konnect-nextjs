@@ -45,11 +45,17 @@ async function AccountSettings() {
           </h3>
           <p className="text-sm text-muted-foreground">Signed in as {user.email}</p>
         </div>
-        {/* Disabled for the demo; the actions refuse it too. */}
-        <fieldset disabled={user.isDemo} className="min-w-0">
-          <legend className="sr-only">Change password</legend>
-          <ChangePasswordForm />
-        </fieldset>
+        {user.hasPassword ? (
+          // Disabled for the demo; the actions refuse it too.
+          <fieldset disabled={user.isDemo} className="min-w-0">
+            <legend className="sr-only">Change password</legend>
+            <ChangePasswordForm />
+          </fieldset>
+        ) : (
+          <p className="text-sm">
+            You sign in with Google or GitHub, so there&apos;s no password to change.
+          </p>
+        )}
       </section>
 
       <section

@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { createClient } from "@/lib/supabase/client";
 
 import { useDeleteComment } from "../hooks";
-import { commentsQueryOptions } from "../queries";
+import { COMMENTS_PAGE_SIZE, commentsQueryOptions } from "../queries";
 import { CommentItem } from "./comment-item";
 
 /**
@@ -76,19 +76,26 @@ export function CommentThread({ postId }: { postId: string }) {
   );
 }
 
-/** Two placeholder comments while the thread loads. */
-export function CommentThreadSkeleton() {
+/**
+ * The thread's shape while it loads: a row the size of a one-line comment for
+ * each comment on the first page (and the "View older" button), so on phones,
+ * where the thread isn't a fixed-height scroll box, nothing below it shifts.
+ */
+export function CommentThreadSkeleton({ count = 2 }: { count?: number }) {
+  // "No comments yet." is one padded line.
+  if (count === 0) return <div aria-hidden className="h-10" />;
   return (
-    <div aria-hidden className="space-y-3 py-2">
-      {[0, 1].map((row) => (
-        <div key={row} className="flex gap-3">
+    <div aria-hidden className="space-y-1 pt-1">
+      {Array.from({ length: Math.min(count, COMMENTS_PAGE_SIZE) }, (_, row) => (
+        <div key={row} className="flex h-[3.375rem] gap-3 py-2">
           <Skeleton className="size-8 rounded-full" />
-          <div className="flex-1 space-y-1.5">
+          <div className="flex-1 space-y-2 pt-1">
             <Skeleton className="h-3.5 w-3/4" />
             <Skeleton className="h-3 w-16" />
           </div>
         </div>
       ))}
+      {count > COMMENTS_PAGE_SIZE && <Skeleton className="h-8 w-40" />}
     </div>
   );
 }

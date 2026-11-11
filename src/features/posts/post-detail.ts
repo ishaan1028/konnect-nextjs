@@ -14,11 +14,13 @@ export type PostDetail = {
   caption: string;
   location: string;
   createdAt: string;
+  /** For the thread's placeholder rows; it may lag a little behind in the cache. */
+  commentsCount: number;
   author: { id: string; username: string; fullName: string; avatarPath: string | null };
 };
 
 export const POST_DETAIL_COLUMNS =
-  "id, image_path, image_width, image_height, thumbhash, alt_text, caption, location, created_at, author:profiles!posts_author_id_fkey!inner(id, username, full_name, avatar_path)" as const;
+  "id, image_path, image_width, image_height, thumbhash, alt_text, caption, location, created_at, comments_count, author:profiles!posts_author_id_fkey!inner(id, username, full_name, avatar_path)" as const;
 
 type PostDetailRow = {
   id: string;
@@ -30,6 +32,7 @@ type PostDetailRow = {
   caption: string;
   location: string;
   created_at: string;
+  comments_count: number;
   author: { id: string; username: string; full_name: string; avatar_path: string | null };
 };
 
@@ -44,6 +47,7 @@ export function toPostDetail(row: PostDetailRow): PostDetail {
     caption: row.caption,
     location: row.location,
     createdAt: row.created_at,
+    commentsCount: row.comments_count,
     author: {
       id: row.author.id,
       username: row.author.username,

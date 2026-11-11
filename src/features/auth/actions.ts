@@ -24,6 +24,7 @@ import {
 } from "./schemas";
 
 const RATE_LIMITED = "Too many attempts. Please wait a minute and try again.";
+const WEAK_PASSWORD = "That password is too weak. Try a longer one.";
 
 /** Supabase error code, if this is an error returned by the Auth API. */
 function authErrorCode(error: unknown): string | undefined {
@@ -66,7 +67,7 @@ export const signUpAction = actionClient
       switch (authErrorCode(error)) {
         case "weak_password":
           returnValidationErrors(signUpSchema, {
-            password: { _errors: ["That password is too weak. Try a longer one."] },
+            password: { _errors: [WEAK_PASSWORD] },
           });
         case "over_email_send_rate_limit":
         case "over_request_rate_limit":
@@ -245,7 +246,7 @@ export const updatePasswordAction = ownAccountActionClient
           });
         case "weak_password":
           returnValidationErrors(resetPasswordSchema, {
-            password: { _errors: ["That password is too weak. Try a longer one."] },
+            password: { _errors: [WEAK_PASSWORD] },
           });
         case "reauthentication_needed":
           returnServerError("For your security, request a new reset link and try again.");
@@ -289,7 +290,7 @@ export const changePasswordAction = ownAccountActionClient
     if (error) {
       if (authErrorCode(error) === "weak_password") {
         returnValidationErrors(changePasswordSchema, {
-          password: { _errors: ["That password is too weak. Try a longer one."] },
+          password: { _errors: [WEAK_PASSWORD] },
         });
       }
       throw error;

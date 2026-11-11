@@ -21,6 +21,8 @@ export type SessionUser = {
   email: string | null;
   /** The shared demo account: its profile is read-only. */
   isDemo: boolean;
+  /** Has a password; Google/GitHub-only accounts don't, so there's none to change. */
+  hasPassword: boolean;
 };
 
 /**
@@ -46,6 +48,7 @@ export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
     id: data.claims.sub,
     email: typeof data.claims.email === "string" ? data.claims.email : null,
     isDemo: isDemoClaims(data.claims),
+    hasPassword: data.claims.app_metadata?.providers?.includes("email") ?? true,
   };
 });
 

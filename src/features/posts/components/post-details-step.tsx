@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAction } from "next-safe-action/hooks";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
@@ -18,8 +18,10 @@ import { createClient } from "@/lib/supabase/client";
 
 import { createPostAction } from "../actions";
 import type { ProcessedPhoto } from "../lib/process-photo";
-import { type PostDetailsInput, postDetailsSchema } from "../schemas";
+import type { PostDetailsInput } from "../schemas";
 import { PostDetailsFields } from "./post-details-fields";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.postDetailsSchema));
 
 type PostDetailsStepProps = {
   photo: ProcessedPhoto;
@@ -40,7 +42,7 @@ type PostDetailsStepProps = {
 export function PostDetailsStep({ photo, preview, onBack }: PostDetailsStepProps) {
   const queryClient = useQueryClient();
   const form = useForm<PostDetailsInput>({
-    resolver: zodResolver(postDetailsSchema),
+    resolver,
     mode: "onTouched",
   });
   /** Upload progress (0–1) while sharing; null when idle. */

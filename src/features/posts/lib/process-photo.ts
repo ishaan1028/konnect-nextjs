@@ -3,7 +3,7 @@ import { rgbaToThumbHash } from "thumbhash";
 import { drawArea, encodeCanvas, loadImage, type PixelArea } from "@/lib/canvas-image";
 import { bytesToBase64 } from "@/lib/thumbhash";
 
-import { MIN_PHOTO_WIDTH } from "../schemas";
+import { MIN_PHOTO_WIDTH } from "../constants";
 
 /** Instagram's three shapes. The database accepts exactly this range. */
 export const ASPECT_RATIOS = [
@@ -14,8 +14,6 @@ export const ASPECT_RATIOS = [
 
 export type AspectRatioId = (typeof ASPECT_RATIOS)[number]["id"];
 
-// No HEIC: most browsers can't decode it (iOS converts to JPEG when picking for upload).
-export const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export const MAX_SOURCE_BYTES = 20 * 1024 * 1024;
 
 /** Photos are stored at most this wide (Instagram's size): sharp, yet small. */

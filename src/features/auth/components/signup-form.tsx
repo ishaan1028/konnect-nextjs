@@ -1,10 +1,10 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useWatch } from "react-hook-form";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { PasswordChecklist } from "@/components/forms/password-checklist";
 import { PasswordInput } from "@/components/forms/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -18,23 +18,20 @@ import {
 } from "@/components/ui/input-group";
 
 import { signUpAction } from "../actions";
-import { signUpSchema } from "../schemas";
 import { CheckEmail } from "./check-email";
 import { useUsernameAvailability } from "./use-username-availability";
 import { UsernameStatus } from "./username-status";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.signUpSchema));
 
 export function SignupForm() {
   // One hook wires React Hook Form to the Server Action: the same Zod schema
   // validates in the browser, and server-side field errors (e.g. "username
   // taken") are mapped back onto the matching inputs automatically.
-  const { form, action, handleSubmitWithAction } = useHookFormAction(
-    signUpAction,
-    zodResolver(signUpSchema),
-    {
-      // No defaultValues: inputs are uncontrolled and RHF reads them from the DOM.
-      formProps: { mode: "onTouched" },
-    },
-  );
+  const { form, action, handleSubmitWithAction } = useHookFormAction(signUpAction, resolver, {
+    // No defaultValues: inputs are uncontrolled and RHF reads them from the DOM.
+    formProps: { mode: "onTouched" },
+  });
 
   // useWatch (not form.watch) re-renders only this component and plays well
   // with the React Compiler.
@@ -47,7 +44,7 @@ export function SignupForm() {
 
   if (action.result.data) {
     return (
-      <CheckEmail email={action.result.data.email} title="Check your inbox" resend>
+      <CheckEmail email={action.result.data.email} resend>
         We sent a confirmation link to
       </CheckEmail>
     );

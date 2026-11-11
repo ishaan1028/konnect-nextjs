@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense } from "react";
 
 import { PageHeader } from "@/components/shared/page-header";
@@ -16,15 +17,19 @@ export default function ExplorePage() {
     <div className="mx-auto max-w-4xl space-y-8">
       <PageHeader title="Explore" description="Find people and see what everyone is sharing." />
       {/* The search box reads ?q= from the URL, so it renders per request;
-          the grid it shows (when not searching) is prefetched on the server. */}
+          the grid it shows (when not searching) is prefetched on the server.
+          The nuqs adapter is here, not in the root layout: only Explore keeps
+          state in the URL, so other pages don't load it. */}
       <Suspense fallback={<ExploreSkeleton />}>
-        <ExploreSearch>
-          <LoadErrorBoundary what="posts">
-            <Suspense fallback={<ProfilePostsSkeleton count={PROFILE_POSTS_PAGE_SIZE} />}>
-              <ExploreBoundary />
-            </Suspense>
-          </LoadErrorBoundary>
-        </ExploreSearch>
+        <NuqsAdapter>
+          <ExploreSearch>
+            <LoadErrorBoundary what="posts">
+              <Suspense fallback={<ProfilePostsSkeleton count={PROFILE_POSTS_PAGE_SIZE} />}>
+                <ExploreBoundary />
+              </Suspense>
+            </LoadErrorBoundary>
+          </ExploreSearch>
+        </NuqsAdapter>
       </Suspense>
     </div>
   );

@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { createClient } from "@/lib/supabase/client";
-
-import { usernameSchema } from "../schemas";
+import { toValidUsername } from "../username";
 
 export type UsernameStatus =
   | { state: "idle" }
@@ -19,7 +17,7 @@ const DEBOUNCE_MS = 400;
 /**
  * Live "is this username free?" check while typing.
  *
- * - Only well-formed usernames are checked (the schema runs first, locally).
+ * - Only well-formed usernames are checked (the schema's rules run first, locally).
  * - Debounced, and each new keystroke aborts the previous request, so a slow
  *   response for "may" can never overwrite the result for "maya".
  * - The status is *derived*: we store the last result with the username it
@@ -32,8 +30,7 @@ export function useUsernameAvailability(
   /** The signed-in user's own username: unchanged, so no need to check it. */
   currentUsername?: string,
 ): UsernameStatus {
-  const parsed = usernameSchema.safeParse(rawUsername);
-  const normalized = parsed.success ? parsed.data : null;
+  const normalized = toValidUsername(rawUsername);
   const isCurrent = normalized !== null && normalized === currentUsername;
   const username = isCurrent ? null : normalized;
   const [result, setResult] = useState<Result | null>(null);
@@ -43,6 +40,8 @@ export function useUsernameAvailability(
 
     const controller = new AbortController();
     const timer = setTimeout(async () => {
+      // Loaded on first check, so the sign-up page doesn't ship supabase-js with its first paint.
+      const { createClient } = await import("@/lib/supabase/client");
       const { data, error } = await createClient()
         .rpc("is_username_available", { username })
         .abortSignal(controller.signal);

@@ -4,6 +4,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 
 import { profileIdQueryOptions } from "@/features/profiles/queries";
+import { usernameFromSegment } from "@/features/profiles/username-segment";
 import { createClient } from "@/lib/supabase/client";
 
 import type { FollowListKind } from "../queries";
@@ -20,7 +21,7 @@ import { FollowList } from "./follow-list";
  */
 export function FollowListModalContent({ kind }: { kind: FollowListKind }) {
   const params = useParams<{ username: string }>();
-  const username = decodeURIComponent(params.username).toLowerCase();
+  const username = usernameFromSegment(params.username);
   const { data: profileId } = useSuspenseQuery(profileIdQueryOptions(createClient(), username));
 
   if (!profileId) {

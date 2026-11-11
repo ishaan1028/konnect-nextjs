@@ -11,7 +11,7 @@ import {
 import { ViewerCommentsBoundary } from "@/features/comments/components/viewer-comments-boundary";
 import { PostActions, PostActionsSkeleton } from "@/features/posts/components/post-actions";
 import { PostOwnerMenu } from "@/features/posts/components/post-owner-menu";
-import { PostView, PostViewSkeleton } from "@/features/posts/components/post-view";
+import { PostView } from "@/features/posts/components/post-view";
 import { ViewerLikeBoundary } from "@/features/posts/components/viewer-like-boundary";
 import { getPost } from "@/features/posts/server/get-post";
 import { CurrentUserBoundary } from "@/features/profiles/components/current-user-boundary";
@@ -26,10 +26,9 @@ const excerpt = (caption: string, max = 80) => {
 /**
  * ISR for posts. Real post ids aren't known at build time (and the build never
  * talks to the database), so this lists one placeholder, which renders "not
- * found" without a query. Every real post is served the App Shell on its
- * first visit, then rendered in the background and cached: from then on its
- * HTML arrives complete, photo included, instead of streaming in. The
- * viewer's like and owner menu still stream (they read cookies).
+ * found" without a query. A real post is rendered on its first visit and then
+ * cached: its HTML arrives complete, photo included. The viewer's like, owner
+ * menu and comments still stream (they read cookies).
  */
 export function generateStaticParams() {
   return [{ postId: "__placeholder__" }];
@@ -60,15 +59,18 @@ export async function generateMetadata({ params }: PageProps<"/p/[postId]">): Pr
   };
 }
 
-export default function PostPage({ params }: PageProps<"/p/[postId]">) {
-  return (
-    <Suspense fallback={<PostViewSkeleton />}>
-      <Post params={params} />
-    </Suspense>
-  );
-}
+/**
+ * The post is awaited outside any <Suspense> on purpose: React streams a
+ * finished boundary out of line (fallback first, swapped in by a script) once
+ * the page above it passes ~12 KB, so a boundary here painted the skeleton
+ * first and the photo, the page's LCP, a frame later. Without one, the cached
+ * page paints the photo in its first frame. The cost: the very first visit to
+ * a post waits for its render instead of showing a skeleton. In-app links open
+ * the modal route instead, so only direct visits and refreshes land here.
+ */
+export const instant = false;
 
-async function Post({ params }: Pick<PageProps<"/p/[postId]">, "params">) {
+export default async function PostPage({ params }: PageProps<"/p/[postId]">) {
   const post = await getPost((await params).postId);
   if (!post) notFound();
 
@@ -109,7 +111,7 @@ async function Post({ params }: Pick<PageProps<"/p/[postId]">, "params">) {
         }
         comments={
           <LoadErrorBoundary what="comments">
-            <Suspense fallback={<CommentThreadSkeleton />}>
+            <Suspense fallback={<CommentThreadSkeleton count={post.commentsCount} />}>
               <ViewerCommentsBoundary postId={post.id}>
                 <CommentThread postId={post.id} />
               </ViewerCommentsBoundary>

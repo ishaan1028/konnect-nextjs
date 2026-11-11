@@ -13,9 +13,7 @@ import {
   ProfileHeaderSkeleton,
 } from "@/features/profiles/components/profile-header";
 import { getPublicProfile } from "@/features/profiles/server/get-public-profile";
-
-/** Usernames are stored lowercase; /Dario.Altman and /dario.altman are the same person. */
-const normalize = (raw: string) => decodeURIComponent(raw).toLowerCase();
+import { decodeSegment, usernameFromSegment } from "@/features/profiles/username-segment";
 
 /**
  * Reuses the cached profile fetch, so the <title> and the page share one
@@ -23,7 +21,7 @@ const normalize = (raw: string) => decodeURIComponent(raw).toLowerCase();
  * viewer's buttons), the metadata streams in with them.
  */
 export async function generateMetadata({ params }: PageProps<"/[username]">): Promise<Metadata> {
-  const profile = await getPublicProfile(normalize((await params).username));
+  const profile = await getPublicProfile(usernameFromSegment((await params).username));
   if (!profile) return { title: "Profile not found" };
 
   const title = `${profile.fullName} (@${profile.username})`;
@@ -50,9 +48,10 @@ export default function ProfilePage({ params }: PageProps<"/[username]">) {
 }
 
 async function Profile({ params }: Pick<PageProps<"/[username]">, "params">) {
-  const raw = decodeURIComponent((await params).username);
-  const username = normalize(raw);
-  if (raw !== username) permanentRedirect(`/${username}`);
+  const segment = (await params).username;
+  const username = usernameFromSegment(segment);
+  // Usernames are stored lowercase: /Dario.Altman sends you to /dario.altman.
+  if (decodeSegment(segment) !== username) permanentRedirect(`/${username}`);
 
   const profile = await getPublicProfile(username);
   if (!profile) notFound();

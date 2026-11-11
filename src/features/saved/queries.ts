@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 
-import type { PostThumbnail } from "@/features/posts/queries";
+import { type PostThumbnail, toPostThumbnail } from "@/features/posts/queries";
 import { queryKeys } from "@/lib/query/keys";
 import type { Database } from "@/types/database.types";
 
@@ -50,13 +50,7 @@ export const savedPostsQueryOptions = (supabase: Supabase) =>
       if (error) throw error;
 
       const items = data.map((row) => ({
-        id: row.id,
-        imagePath: row.image_path,
-        width: row.image_width,
-        height: row.image_height,
-        thumbhash: row.thumbhash ?? null,
-        altText: row.alt_text,
-        createdAt: row.created_at,
+        ...toPostThumbnail(row),
         authorUsername: row.author_username,
         savedAt: row.saved_at,
       }));

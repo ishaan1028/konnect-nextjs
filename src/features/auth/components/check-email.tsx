@@ -7,14 +7,13 @@ import { ResendConfirmation } from "./resend-confirmation";
 
 type CheckEmailProps = {
   email: string;
-  title: string;
   children: React.ReactNode;
   /** Offer to resend the sign-up confirmation (not for password resets). */
   resend?: boolean;
 };
 
 /** Shown after sign-up / reset requests: "We sent you a link". */
-export function CheckEmail({ email, title, children, resend = false }: CheckEmailProps) {
+export function CheckEmail({ email, children, resend = false }: CheckEmailProps) {
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   // The form was just replaced by this panel; move focus to its heading so
@@ -30,7 +29,7 @@ export function CheckEmail({ email, title, children, resend = false }: CheckEmai
       </span>
       <div className="space-y-2">
         <h1 ref={headingRef} tabIndex={-1} className="text-4xl font-extrabold outline-none">
-          {title}
+          Check your inbox
         </h1>
         <p className="text-muted-foreground">
           {children} <span className="font-medium break-all text-foreground">{email}</span>.

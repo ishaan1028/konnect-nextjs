@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { fullNameSchema, usernameSchema } from "@/features/auth/schemas";
 
-export const BIO_MAX_LENGTH = 150;
+import { BIO_MAX_LENGTH } from "./constants";
 
 export const updateProfileSchema = z.object({
   fullName: fullNameSchema,

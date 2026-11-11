@@ -7,24 +7,9 @@ import { ownAccountActionClient } from "@/lib/safe-action";
 import { AVATARS_BUCKET } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 
-import type { CurrentUser } from "./queries";
+import { CURRENT_USER_COLUMNS, toCurrentUser } from "./queries";
 import { avatarPathSchema, updateProfileSchema } from "./schemas";
 import { profileTag } from "./server/get-public-profile";
-
-const PROFILE_COLUMNS = "id, username, full_name, avatar_path" as const;
-
-function toCurrentUser(
-  row: { id: string; username: string; full_name: string; avatar_path: string | null },
-  isDemo: boolean,
-): CurrentUser {
-  return {
-    id: row.id,
-    username: row.username,
-    fullName: row.full_name,
-    avatarPath: row.avatar_path,
-    isDemo,
-  };
-}
 
 /** Postgres unique_violation: someone else got the username first. */
 const UNIQUE_VIOLATION = "23505";
@@ -62,7 +47,7 @@ export const updateProfileAction = ownAccountActionClient
       .from("profiles")
       .update({ full_name: fullName, username, bio })
       .eq("id", user.id)
-      .select(PROFILE_COLUMNS)
+      .select(CURRENT_USER_COLUMNS)
       .single();
 
     if (error) {
@@ -111,7 +96,7 @@ export const updateAvatarAction = ownAccountActionClient
       .from("profiles")
       .update({ avatar_path: path })
       .eq("id", user.id)
-      .select(PROFILE_COLUMNS)
+      .select(CURRENT_USER_COLUMNS)
       .single();
     if (error) throw error;
 
@@ -141,7 +126,7 @@ export const removeAvatarAction = ownAccountActionClient
       .from("profiles")
       .update({ avatar_path: null })
       .eq("id", user.id)
-      .select(PROFILE_COLUMNS)
+      .select(CURRENT_USER_COLUMNS)
       .single();
     if (error) throw error;
 

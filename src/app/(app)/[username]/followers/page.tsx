@@ -1,48 +1,13 @@
-import { ArrowLeft } from "lucide-react";
-import type { Metadata, Route } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
+import type { Metadata } from "next";
 
-import { buttonVariants } from "@/components/ui/button";
-import { LoadErrorBoundary } from "@/components/shared/load-error-boundary";
-import { FollowListSkeleton } from "@/features/follows/components/follow-list";
-import { FollowListLoader } from "@/features/follows/components/follow-list-loader";
+import { FollowListPage, followListMetadata } from "@/features/follows/components/follow-list-page";
 
-export async function generateMetadata({
+export function generateMetadata({
   params,
 }: PageProps<"/[username]/followers">): Promise<Metadata> {
-  const { username } = await params;
-  return { title: `Followers · @${decodeURIComponent(username).toLowerCase()}` };
+  return followListMetadata(params, "followers");
 }
 
-/** The full-page version, for direct visits, refreshes and shared links. */
 export default function FollowersPage({ params }: PageProps<"/[username]/followers">) {
-  return (
-    <div className="mx-auto max-w-xl space-y-6">
-      <div className="flex items-center gap-3">
-        <Suspense fallback={<span className="size-9" />}>
-          <BackToProfile params={params} />
-        </Suspense>
-        <h1 className="text-2xl font-bold">Followers</h1>
-      </div>
-      <LoadErrorBoundary what="followers">
-        <Suspense fallback={<FollowListSkeleton />}>
-          <FollowListLoader params={params} kind="followers" />
-        </Suspense>
-      </LoadErrorBoundary>
-    </div>
-  );
-}
-
-async function BackToProfile({ params }: Pick<PageProps<"/[username]/followers">, "params">) {
-  const username = decodeURIComponent((await params).username).toLowerCase();
-  return (
-    <Link
-      href={`/${username}` as Route}
-      aria-label={`Back to @${username}`}
-      className={buttonVariants({ variant: "ghost", size: "icon" })}
-    >
-      <ArrowLeft aria-hidden />
-    </Link>
-  );
+  return <FollowListPage params={params} kind="followers" />;
 }

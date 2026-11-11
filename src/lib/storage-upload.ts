@@ -7,7 +7,6 @@ type UploadOptions = {
   file: Blob;
   /** 0–1 as bytes are sent. */
   onProgress?: (fraction: number) => void;
-  signal?: AbortSignal;
 };
 
 /**
@@ -25,7 +24,6 @@ export async function uploadWithProgress({
   path,
   file,
   onProgress,
-  signal,
 }: UploadOptions): Promise<void> {
   const { data } = await createClient().auth.getSession();
   const accessToken = data.session?.access_token;
@@ -57,8 +55,6 @@ export async function uploadWithProgress({
       }
     };
     request.onerror = () => reject(new Error("Upload failed. Check your connection."));
-    request.onabort = () => reject(new DOMException("Upload cancelled.", "AbortError"));
-    signal?.addEventListener("abort", () => request.abort(), { once: true });
 
     request.send(file);
   });

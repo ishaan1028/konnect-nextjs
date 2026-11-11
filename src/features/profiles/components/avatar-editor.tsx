@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { UserAvatar } from "@/components/shared/user-avatar";
 import { Button } from "@/components/ui/button";
+import { ACCEPTED_PHOTO_TYPES } from "@/features/posts/constants";
 import { queryKeys } from "@/lib/query/keys";
 import { AVATARS_BUCKET, avatarUrl } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/client";
@@ -18,8 +19,6 @@ import type { CurrentUser } from "../queries";
 import { AvatarCropDialog } from "./avatar-crop-dialog";
 
 const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
-// No HEIC: most browsers can't decode it (iOS converts to JPEG when picking for upload).
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 
 type AvatarEditorProps = {
   userId: string;
@@ -75,7 +74,7 @@ export function AvatarEditor({ userId, fullName, avatarPath: initialPath }: Avat
     event.target.value = ""; // allow picking the same file again later
     if (!file) return;
 
-    if (!ACCEPTED_TYPES.includes(file.type)) {
+    if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) {
       toast.error("Please choose a JPEG, PNG, WebP or GIF image.");
       return;
     }
@@ -142,7 +141,7 @@ export function AvatarEditor({ userId, fullName, avatarPath: initialPath }: Avat
         <input
           ref={fileInput}
           type="file"
-          accept={ACCEPTED_TYPES.join(",")}
+          accept={ACCEPTED_PHOTO_TYPES.join(",")}
           className="sr-only"
           tabIndex={-1}
           aria-label="Choose a profile photo"

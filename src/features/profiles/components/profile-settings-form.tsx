@@ -1,6 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -8,6 +7,7 @@ import { useFormState, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { TextField } from "@/components/forms/text-field";
 import { FieldGroup } from "@/components/ui/field";
@@ -22,7 +22,10 @@ import { UsernameStatus } from "@/features/auth/components/username-status";
 import { queryKeys } from "@/lib/query/keys";
 
 import { updateProfileAction } from "../actions";
-import { BIO_MAX_LENGTH, type UpdateProfileInput, updateProfileSchema } from "../schemas";
+import { BIO_MAX_LENGTH } from "../constants";
+import type { UpdateProfileInput } from "../schemas";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.updateProfileSchema));
 
 export function ProfileSettingsForm({ initial }: { initial: UpdateProfileInput }) {
   const queryClient = useQueryClient();
@@ -35,7 +38,7 @@ export function ProfileSettingsForm({ initial }: { initial: UpdateProfileInput }
 
   const { form, action, handleSubmitWithAction } = useHookFormAction(
     updateProfileAction,
-    zodResolver(updateProfileSchema),
+    resolver,
     {
       formProps: { mode: "onTouched", defaultValues: startingValues },
       actionProps: {

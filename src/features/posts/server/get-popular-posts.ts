@@ -4,7 +4,7 @@ import { cacheLife, cacheTag } from "next/cache";
 
 import { createPublicClient } from "@/lib/supabase/public";
 
-import type { PostThumbnail } from "../queries";
+import { type PostThumbnail, toPostThumbnail } from "../queries";
 import { postTag } from "./get-post";
 
 export type PopularPost = PostThumbnail & {
@@ -34,13 +34,7 @@ export async function getPopularPosts(): Promise<PopularPost[]> {
 
   for (const post of data) cacheTag(postTag(post.id));
   return data.map((post) => ({
-    id: post.id,
-    imagePath: post.image_path,
-    width: post.image_width,
-    height: post.image_height,
-    thumbhash: post.thumbhash,
-    altText: post.alt_text,
-    createdAt: post.created_at,
+    ...toPostThumbnail(post),
     authorUsername: post.author.username,
     likesCount: post.likes_count,
     commentsCount: post.comments_count,

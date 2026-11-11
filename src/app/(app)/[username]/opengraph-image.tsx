@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 
 import { getPublicProfile } from "@/features/profiles/server/get-public-profile";
+import { usernameFromSegment } from "@/features/profiles/username-segment";
 import { formatCount } from "@/lib/format";
 import { getInitials } from "@/lib/initials";
 
@@ -18,7 +19,7 @@ const BRAND_TO = "#db2777";
  * cached profile fetch the page uses, so sharing a link costs no extra query.
  */
 export default async function ProfileOpenGraphImage({ params }: PageProps<"/[username]">) {
-  const username = decodeURIComponent((await params).username).toLowerCase();
+  const username = usernameFromSegment((await params).username);
   const profile = await getPublicProfile(username);
 
   const name = profile?.fullName ?? "Konnect";

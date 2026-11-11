@@ -1,12 +1,12 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { useRouter } from "next/navigation";
 import { useWatch } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { PasswordChecklist } from "@/components/forms/password-checklist";
 import { PasswordInput } from "@/components/forms/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
@@ -14,13 +14,14 @@ import { TextField } from "@/components/forms/text-field";
 import { FieldGroup } from "@/components/ui/field";
 
 import { updatePasswordAction } from "../actions";
-import { resetPasswordSchema } from "../schemas";
+
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.resetPasswordSchema));
 
 export function ResetPasswordForm() {
   const router = useRouter();
   const { form, action, handleSubmitWithAction } = useHookFormAction(
     updatePasswordAction,
-    zodResolver(resetPasswordSchema),
+    resolver,
     {
       formProps: { mode: "onTouched" },
       actionProps: {

@@ -6,7 +6,7 @@ import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-import { ACCEPTED_PHOTO_TYPES } from "../lib/process-photo";
+import { ACCEPTED_PHOTO_TYPES } from "../constants";
 
 /**
  * Step 1: drop a photo anywhere on the zone, or pick one with the button

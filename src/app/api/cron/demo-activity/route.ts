@@ -1,7 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
 
-import { headers } from "next/headers";
-
 import { runDemoActivity } from "@/features/demo/server/demo-activity";
 import { env } from "@/lib/env";
 
@@ -12,7 +10,7 @@ import { env } from "@/lib/env";
  * happen at once, for tests and manual checks.
  */
 export async function GET(request: Request) {
-  const authorization = (await headers()).get("authorization") ?? "";
+  const authorization = request.headers.get("authorization") ?? "";
   if (!env.CRON_SECRET || !sameText(authorization, `Bearer ${env.CRON_SECRET}`)) {
     return new Response("Unauthorized", { status: 401 });
   }

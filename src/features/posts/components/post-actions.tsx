@@ -30,7 +30,7 @@ type PostActionsProps = {
   /** Known saved state (a feed card's row), the same way. */
   initialSaved?: boolean;
   /** The comment box's id: the comment button moves focus there. */
-  commentInputId?: string;
+  commentInputId: string;
 };
 
 /**
@@ -51,6 +51,8 @@ export function PostActions({
     ...(initial ? { initialData: initial } : {}),
   });
   const toggle = useToggleLike(postId);
+  // Signed out, each action is a link to log in and come straight back.
+  const loginHref = `/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route;
   const [likersOpen, setLikersOpen] = useState(false);
   const [likersOpened, setLikersOpened] = useState(false);
 
@@ -64,7 +66,8 @@ export function PostActions({
   );
 
   return (
-    <div className="space-y-1">
+    // text-sm: the like count's line box is then 20px, the skeleton's height.
+    <div className="space-y-1 text-sm">
       <div className="-ml-2 flex items-center">
         {user ? (
           // A toggle: the name stays "Like", aria-pressed says whether it's on.
@@ -79,39 +82,38 @@ export function PostActions({
           </Button>
         ) : (
           <Link
-            href={`/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route}
+            href={loginHref}
             aria-label="Log in to like"
             className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
           >
             {heart}
           </Link>
         )}
-        {commentInputId &&
-          (user ? (
-            <Button
-              variant="ghost"
-              size="icon-lg"
-              aria-label="Comment"
-              onClick={() => document.getElementById(commentInputId)?.focus()}
-            >
-              <MessageCircle aria-hidden className="size-6" />
-            </Button>
-          ) : (
-            <Link
-              href={`/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route}
-              aria-label="Log in to comment"
-              className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
-            >
-              <MessageCircle aria-hidden className="size-6" />
-            </Link>
-          ))}
+        {user ? (
+          <Button
+            variant="ghost"
+            size="icon-lg"
+            aria-label="Comment"
+            onClick={() => document.getElementById(commentInputId)?.focus()}
+          >
+            <MessageCircle aria-hidden className="size-6" />
+          </Button>
+        ) : (
+          <Link
+            href={loginHref}
+            aria-label="Log in to comment"
+            className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
+          >
+            <MessageCircle aria-hidden className="size-6" />
+          </Link>
+        )}
         <SharePostButton postId={postId} authorUsername={authorUsername} />
         <div className="-mr-2 ml-auto">
           {user ? (
             <SaveButton postId={postId} initial={initialSaved} />
           ) : (
             <Link
-              href={`/login?${new URLSearchParams({ next: `/p/${postId}` })}` as Route}
+              href={loginHref}
               aria-label="Log in to save"
               className={buttonVariants({ variant: "ghost", size: "icon-lg" })}
             >
@@ -146,7 +148,8 @@ export function PostActions({
 export function PostActionsSkeleton() {
   return (
     <div aria-hidden className="space-y-1">
-      <div className="flex h-10 items-center gap-3">
+      {/* The icon buttons grow to 44px on touch screens. */}
+      <div className="flex h-10 items-center gap-3 pointer-coarse:h-11">
         <Skeleton className="size-7 rounded-full" />
         <Skeleton className="size-7 rounded-full" />
       </div>

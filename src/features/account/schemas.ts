@@ -4,5 +4,3 @@ import { z } from "zod";
 export const deleteAccountSchema = z.object({
   username: z.string().trim().toLowerCase().min(1, "Type your username to confirm"),
 });
-
-export type DeleteAccountInput = z.input<typeof deleteAccountSchema>;

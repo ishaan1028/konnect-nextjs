@@ -1,11 +1,11 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 // import Link from "next/link"; (for the Forgot password link, off below)
 import type { FormEvent } from "react";
 
 import { FormAlert } from "@/components/forms/form-alert";
+import { lazyZodResolver } from "@/components/forms/lazy-zod-resolver";
 import { PasswordInput } from "@/components/forms/password-input";
 import { SubmitButton } from "@/components/forms/submit-button";
 import { TextField } from "@/components/forms/text-field";
@@ -13,15 +13,14 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { FieldGroup } from "@/components/ui/field";
 
 import { signInAction } from "../actions";
-import { signInSchema } from "../schemas";
 import { ResendConfirmation } from "./resend-confirmation";
 
+const resolver = lazyZodResolver(() => import("../schemas").then((m) => m.signInSchema));
+
 export function LoginForm() {
-  const { form, action, handleSubmitWithAction } = useHookFormAction(
-    signInAction,
-    zodResolver(signInSchema),
-    { formProps: { mode: "onTouched" } },
-  );
+  const { form, action, handleSubmitWithAction } = useHookFormAction(signInAction, resolver, {
+    formProps: { mode: "onTouched" },
+  });
 
   // Read ?next= at submit time instead of with useSearchParams(): the form then
   // needs no <Suspense> boundary and stays in the prerendered static shell.

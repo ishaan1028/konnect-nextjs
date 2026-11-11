@@ -25,6 +25,22 @@ export type CurrentUser = {
   isDemo: boolean;
 };
 
+/** The profile columns behind a CurrentUser (the actions return it after edits, too). */
+export const CURRENT_USER_COLUMNS = "id, username, full_name, avatar_path" as const;
+
+export function toCurrentUser(
+  row: { id: string; username: string; full_name: string; avatar_path: string | null },
+  isDemo: boolean,
+): CurrentUser {
+  return {
+    id: row.id,
+    username: row.username,
+    fullName: row.full_name,
+    avatarPath: row.avatar_path,
+    isDemo,
+  };
+}
+
 export async function fetchCurrentUser(supabase: Supabase): Promise<CurrentUser | null> {
   // getClaims() verifies the JWT; a signed-out visitor is a normal state (null),
   // but a failure is thrown, so it's retried rather than shown as "signed out".
@@ -35,18 +51,12 @@ export async function fetchCurrentUser(supabase: Supabase): Promise<CurrentUser 
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, username, full_name, avatar_path")
+    .select(CURRENT_USER_COLUMNS)
     .eq("id", userId)
     .single();
   if (error) throw error;
 
-  return {
-    id: data.id,
-    username: data.username,
-    fullName: data.full_name,
-    avatarPath: data.avatar_path,
-    isDemo: isDemoClaims(auth.claims),
-  };
+  return toCurrentUser(data, isDemoClaims(auth.claims));
 }
 
 export const currentUserQueryOptions = (supabase: Supabase) =>

@@ -5,12 +5,8 @@ import { type UseFormReturn, useWatch } from "react-hook-form";
 import { TextField } from "@/components/forms/text-field";
 import { FieldGroup } from "@/components/ui/field";
 
-import {
-  ALT_TEXT_MAX_LENGTH,
-  CAPTION_MAX_LENGTH,
-  LOCATION_MAX_LENGTH,
-  type PostDetailsInput,
-} from "../schemas";
+import { ALT_TEXT_MAX_LENGTH, CAPTION_MAX_LENGTH, LOCATION_MAX_LENGTH } from "../constants";
+import type { PostDetailsInput } from "../schemas";
 
 type PostDetailsFieldsProps = {
   form: UseFormReturn<PostDetailsInput>;
